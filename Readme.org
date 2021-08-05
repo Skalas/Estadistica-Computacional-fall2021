@@ -24,16 +24,6 @@ Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga 
 - Practicar es la única manera de volverse bueno en esto. Lo más probable es que pases de 8 a 12 horas por semana (además del tiempo de la clase) escribiendo y *debugeando* código.
 - Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO** esperes a que sea demasiado tarde para tomar tu destino en tus manos.
 
-* Evaluación
-
-La calificación final está compuesta de la manera siguiente:
-
-| Entregable          | Porcentaje |
-|---------------------+------------|
-| Tareas              |        20% |
-| Proyecto intermedio |        30% |
-| Proyecto Final      |        50% |
-
 * Temario
 
 - Git + Github
@@ -55,6 +45,15 @@ La calificación final está compuesta de la manera siguiente:
 - Docker
 - Aws
 
+* Evaluación
+
+La calificación final está compuesta de la manera siguiente:
+
+| Entregable          | Porcentaje |
+|---------------------+------------|
+| Tareas              |        20% |
+| Proyecto intermedio |        30% |
+| Proyecto Final      |        50% |
 
 * Calificación
 
@@ -86,14 +85,11 @@ El proyecto se evaluará promediando las siguientes categorías. Se usará la es
 ** Demostración del proyecto
 
 Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. Se calificará por mí y por tus compañeros.
-
-
 * Aclaraciones
 
 -  El código **NO** es la respuesta.
 -  La gráfica **NO** es la respuesta.
 - Debes de **mostrar que entendiste la solución y el problema**.
-
 
 * Código de conducta académica
 
@@ -132,8 +128,6 @@ Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. S
 - [[http://www.greenteapress.com/thinkpython/][Think Python]]
 - [[http://git-scm.com/book][Libro de Git]]
 - [[https://r4ds.had.co.nz/][R for Data Science]]
-
-
 
 * Finalmente...
 Primer tarea!!
