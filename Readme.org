@@ -1,0 +1,9 @@
+#+Author: Miguel Angel Escalante Serrato
+#+title: Estadística Computacional
+
+** El Curso
+
+*** Objetivos:
+ - El alumno se sentirá cómodo interactuando con línea de comandos.
+ - El alumno podrá mantener un repositorio de código versionado de sus archivos y programas.
+ -
