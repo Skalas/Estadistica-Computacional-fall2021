@@ -1,9 +1,9 @@
 #+Author: Miguel Angel Escalante Serrato
 #+title: Estadística Computacional
 
-** El Curso
+* El Curso
 
-*** Objetivos:
+** Objetivos:
  - El alumno se sentirá cómodo interactuando con línea de comandos.
  - El alumno podrá mantener un repositorio de código versionado de sus archivos y programas.
  - El alumno se sentirá cómodo con herramientas del cli.
@@ -12,11 +12,11 @@
  - El alumno se familiarizará con los conceptos base de la nube
  - El alumno se familiarizará con Docker y herramientas de contenedores.
  - El alumno estará cómodo generando consultas complejas de SQL.
-** Comunicación
-*** Correo
+* Comunicación
+** Correo
 Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga ~[Estadística Computacional 2021]~.
 
-** ¿Cómo será el curso?
+* ¿Cómo será el curso?
 
 - Pasaremos el tiempo de la clase aprendiendo a codificar para resolver problemas de ingeniería o ciencia.
 - Algunas actividades requerirán que se haga [*programación por pares*](http://es.wikipedia.org/wiki/Programaci%C3%B3n_en_pareja).
@@ -24,7 +24,7 @@ Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga 
 - Practicar es la única manera de volverse bueno en esto. Lo más probable es que pases de 8 a 12 horas por semana (además del tiempo de la clase) escribiendo y *debugeando* código.
 - Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO** esperes a que sea demasiado tarde para tomar tu destino en tus manos.
 
-** Evaluación
+* Evaluación
 
 La calificación final está compuesta de la manera siguiente:
 
@@ -34,14 +34,9 @@ La calificación final está compuesta de la manera siguiente:
 | Proyecto intermedio |        30% |
 | Proyecto Final      |        50% |
 
-** Temario
+* Temario
+
 - Git + Github
-- Cli
-  - SED
-  - Awk
-  - cat
-  - grep
-  - pipe
 - R
   - Basics
   - Rproj
@@ -49,7 +44,111 @@ La calificación final está compuesta de la manera siguiente:
   - Rmarkdown
   - Shiny
   - Visualización
+- Cli
+  - SED
+  - Awk
+  - cat
+  - grep
+  - pipe
 - Python
 - SQL
 - Docker
 - Aws
+
+
+* Calificación
+
+Se usará la siguiente escala para las tareas
+
+| Puntos | Descripción                                                                                                      |
+|--------+------------------------------------------------------------------------------------------------------------------|
+|      5 | Excelente. Código limpio, conciso, documentado y exploró los conceptos en profundidad.                           |
+|      4 | Completo y correcto. Incluye el análisis, el programa, el caso de pruebas y responde a las preguntas planteadas. |
+|      3 | Contiene unos cuentos errores menores.                                                                           |
+|      2 | Entrega parcial o tiene errores mayores.                                                                         |
+|      1 | Le faltó mucho.                                                                                                  |
+|      0 | Ni lo intentó :(                                                                                                 |
+
+
+** Calificación de los proyectos
+
+El proyecto se evaluará promediando las siguientes categorías. Se usará la escala recién mostrada en cada una de ellas.
+
+| Categoría     | Descripción                                                                                                                                                                                     |
+|---------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Diseño        | El proyecto está bien organizado, fácil de seguir y se especifica claramente el problema a resolver.                                                                                            |
+| Documentación | Instrucciones de como ejecutar el código. Nombres de las variables y funciones son descriptivas. Incluye comentarios para que el lector pueda seguir el algoritmo. Se incluyen casos de prueba. |
+| Completez     | Todos los elementos del proyecto están incluidos.                                                                                                                                               |
+| Correcto      | La lógica del código es correcta y produce resultados con sentido.                                                                                                                              |
+| Análisis      | Todas las preguntas de análisis en la descripción del proyecto fueron resueltas. La interpretación del resultado está incluida.                                                                 |
+
+
+** Demostración del proyecto
+
+Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. Se calificará por mí y por tus compañeros.
+
+
+* Aclaraciones
+
+-  El código **NO** es la respuesta.
+-  La gráfica **NO** es la respuesta.
+- Debes de **mostrar que entendiste la solución y el problema**.
+
+
+* Código de conducta académica
+
+*Adaptado del departamento de ciencias de la computación de Grand Valley State University y de  George Washington University)*
+
+- Se espera que tú...
+
+    - Crees / desarrolles tus tareas (incluyendo el código fuente).
+    - Entiendas tus soluciones
+    - Reconozcas la ayuda de otros en la escritura.
+    - Cites la fuente en la tarea.
+    - Te protejas de sospecha al no permitir que otros vean tu tarea antes de que sea enviada.
+    - Contactes al profesor para aclarar los requerimientos de las tareas.
+    - Uses extensivamente Github para *socializar* el conocimiento, soluciones, dudas, etc.
+
+- Se prefiere que tú...
+
+    - Discutas diversos caminos para alcanzar la solución.
+    - Compartas tu conociemiento con otros estudiantes acerca de errores de sintáxis, trucos de código, etc.
+    - Proveas y recibas ayuda respecto a errores de ejecución.
+    - Proveas y recibas ayuda usando el ambiente de computación.
+    - Participes, junto con otros estudiantes, en discuiones hacer de las tareas, requerimientos, estrategais de solución, etc.
+
+
+- Eres culpable de romper el código de conducta si ...
+    - Le das tu código fuente a cualquiera en formato electrónico o analógico.
+    - Recibes de otro estudiante la solución en formato electrónico o analógico.
+    - Subes al repositorio como tuyos otros archivos, soluciones o documentos.
+    - Subes tareas sin indicar que colaboraste con alguien.
+    - Realizas modificaciones al código en un esfuerzo de ocultar un engaño.
+    - Usas material no permitido en examen o te comunicas con alguien de manera no autorizada durante el examen.
+
+* Ligas de interes
+
+- [[https://r-graphics.org/][R Graphics]]
+- [[http://www.greenteapress.com/thinkpython/][Think Python]]
+- [[http://git-scm.com/book][Libro de Git]]
+- [[https://r4ds.had.co.nz/][R for Data Science]]
+
+
+
+* Finalmente...
+Primer tarea!!
+
+1. Instalar `git`
+   1. Si estás en una distro de  `GNU/Linux` tipo `Debian`: `sudo apt-get install git`.
+   2. Si estás en una MacOS sigue las instrucciones de [aquí](http://git-scm.com/download/mac) y sigue las instrucciones.
+1. Crea una cuenta en github
+2. Crear una [llave `ssh`](https://help.github.com/articles/generating-ssh-keys) y conectarla a **Github**.
+2. *Forkear* este repositorio
+3. Instalar [`docker`](https://docs.docker.com/installation/#installation)
+4. Instalar **un editor de textos**
+   1. `GNU/Emacs`
+   2. `VsCode`
+
+* Emacs.
+
+Después de tener converso al director de la Maestría, estoy convencido del valor que provee tener una herramienta como Emacs disponible, tanto para temas de escritura científica, como para programación, durante el curso verán que uso esta herramienta. Denle una oportunidad aunque su curva de aprendizaje sea un poco inclinada. :)
