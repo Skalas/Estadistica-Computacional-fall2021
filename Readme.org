@@ -6,4 +6,50 @@
 *** Objetivos:
  - El alumno se sentirá cómodo interactuando con línea de comandos.
  - El alumno podrá mantener un repositorio de código versionado de sus archivos y programas.
- -
+ - El alumno se sentirá cómodo con herramientas del cli.
+ - El alumno se sentirá familiarizado con los lenguajes de programación: ~R~ y ~Python~
+ - El alumno analizará problemas y encontrará la mejor manera de resolverlos con herramientas programáticas.
+ - El alumno se familiarizará con los conceptos base de la nube
+ - El alumno se familiarizará con Docker y herramientas de contenedores.
+ - El alumno estará cómodo generando consultas complejas de SQL.
+** Comunicación
+*** Correo
+Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga ~[Estadística Computacional 2021]~.
+
+** ¿Cómo será el curso?
+
+- Pasaremos el tiempo de la clase aprendiendo a codificar para resolver problemas de ingeniería o ciencia.
+- Algunas actividades requerirán que se haga [*programación por pares*](http://es.wikipedia.org/wiki/Programaci%C3%B3n_en_pareja).
+- Las tareas estarán basadas en las habilidades que desarrolles en clase ¡Trata de no faltar!
+- Practicar es la única manera de volverse bueno en esto. Lo más probable es que pases de 8 a 12 horas por semana (además del tiempo de la clase) escribiendo y *debugeando* código.
+- Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO** esperes a que sea demasiado tarde para tomar tu destino en tus manos.
+
+** Evaluación
+
+La calificación final está compuesta de la manera siguiente:
+
+| Entregable          | Porcentaje |
+|---------------------+------------|
+| Tareas              |        20% |
+| Proyecto intermedio |        30% |
+| Proyecto Final      |        50% |
+
+** Temario
+- Git + Github
+- Cli
+  - SED
+  - Awk
+  - cat
+  - grep
+  - pipe
+- R
+  - Basics
+  - Rproj
+  - Dplyr
+  - Rmarkdown
+  - Shiny
+  - Visualización
+- Python
+- SQL
+- Docker
+- Aws
