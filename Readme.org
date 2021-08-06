@@ -15,6 +15,8 @@
 * Comunicación
 ** Correo
 Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga ~[Estadística Computacional 2021]~.
+** Discord
+
 
 * ¿Cómo será el curso?
 
@@ -96,7 +98,6 @@ Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. S
 *Adaptado del departamento de ciencias de la computación de Grand Valley State University y de  George Washington University)*
 
 - Se espera que tú...
-
     - Crees / desarrolles tus tareas (incluyendo el código fuente).
     - Entiendas tus soluciones
     - Reconozcas la ayuda de otros en la escritura.
@@ -106,13 +107,11 @@ Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. S
     - Uses extensivamente Github para *socializar* el conocimiento, soluciones, dudas, etc.
 
 - Se prefiere que tú...
-
     - Discutas diversos caminos para alcanzar la solución.
     - Compartas tu conociemiento con otros estudiantes acerca de errores de sintáxis, trucos de código, etc.
     - Proveas y recibas ayuda respecto a errores de ejecución.
     - Proveas y recibas ayuda usando el ambiente de computación.
     - Participes, junto con otros estudiantes, en discuiones hacer de las tareas, requerimientos, estrategais de solución, etc.
-
 
 - Eres culpable de romper el código de conducta si ...
     - Le das tu código fuente a cualquiera en formato electrónico o analógico.
@@ -130,15 +129,16 @@ Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. S
 - [[https://r4ds.had.co.nz/][R for Data Science]]
 
 * Finalmente...
+
 Primer tarea!!
 
 1. Instalar ~git~
    1. Si estás en una distro de  ~GNU/Linux~ tipo ~Debian~: ~sudo apt-get install git~.
-   2. Si estás en una MacOS sigue las instrucciones de [aquí](http://git-scm.com/download/mac) y sigue las instrucciones.
+   2. Si estás en una MacOS sigue las instrucciones de [[http://git-scm.com/download/mac][aquí]] y sigue las instrucciones.
 1. Crea una cuenta en github
-2. Crear una [[https://help.github.com/articles/generating-ssh-keys][*llave ssh*]] y conectarla a *Github*.
+2. Crear una [[https://help.github.com/articles/generating-ssh-keys][llave ssh]] y conectarla a *Github*.
 2. *Forkear* este repositorio
-3. Instalar [[https://docs.docker.com/installation/#installation][~docker~]]
+3. Instalar [[https://docs.docker.com/installation/#installation][docker]]
 4. Instalar *un editor de textos*
    1. ~GNU/Emacs~
    2. ~VsCode~
