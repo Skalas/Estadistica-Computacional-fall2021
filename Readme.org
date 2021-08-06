@@ -19,10 +19,10 @@ Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga 
 * ¿Cómo será el curso?
 
 - Pasaremos el tiempo de la clase aprendiendo a codificar para resolver problemas de ingeniería o ciencia.
-- Algunas actividades requerirán que se haga [*programación por pares*](http://es.wikipedia.org/wiki/Programaci%C3%B3n_en_pareja).
+- Algunas actividades requerirán que se haga [[http://es.wikipedia.org/wiki/Programaci%C3%B3n_en_pareja][Programación en pares]]
 - Las tareas estarán basadas en las habilidades que desarrolles en clase ¡Trata de no faltar!
 - Practicar es la única manera de volverse bueno en esto. Lo más probable es que pases de 8 a 12 horas por semana (además del tiempo de la clase) escribiendo y *debugeando* código.
-- Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO** esperes a que sea demasiado tarde para tomar tu destino en tus manos.
+- Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO* esperes a que sea demasiado tarde para tomar tu destino en tus manos.
 
 * Temario
 
@@ -87,9 +87,9 @@ El proyecto se evaluará promediando las siguientes categorías. Se usará la es
 Al final del curso, tendrás que mostrar tu proyecto en 40 minutos a la clase. Se calificará por mí y por tus compañeros.
 * Aclaraciones
 
--  El código **NO** es la respuesta.
--  La gráfica **NO** es la respuesta.
-- Debes de **mostrar que entendiste la solución y el problema**.
+-  El código *NO* es la respuesta.
+-  La gráfica *NO* es la respuesta.
+- Debes de *mostrar que entendiste la solución y el problema*.
 
 * Código de conducta académica
 
@@ -136,10 +136,10 @@ Primer tarea!!
    1. Si estás en una distro de  ~GNU/Linux~ tipo ~Debian~: ~sudo apt-get install git~.
    2. Si estás en una MacOS sigue las instrucciones de [aquí](http://git-scm.com/download/mac) y sigue las instrucciones.
 1. Crea una cuenta en github
-2. Crear una [llave ~ssh~](https://help.github.com/articles/generating-ssh-keys) y conectarla a **Github**.
+2. Crear una [[https://help.github.com/articles/generating-ssh-keys][*llave ssh*]] y conectarla a *Github*.
 2. *Forkear* este repositorio
-3. Instalar [~docker~](https://docs.docker.com/installation/#installation)
-4. Instalar **un editor de textos**
+3. Instalar [[https://docs.docker.com/installation/#installation][~docker~]]
+4. Instalar *un editor de textos*
    1. ~GNU/Emacs~
    2. ~VsCode~
 
