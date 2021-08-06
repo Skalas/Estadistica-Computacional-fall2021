@@ -22,7 +22,7 @@ Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga 
 - Algunas actividades requerirán que se haga [[http://es.wikipedia.org/wiki/Programaci%C3%B3n_en_pareja][Programación en pares]]
 - Las tareas estarán basadas en las habilidades que desarrolles en clase ¡Trata de no faltar!
 - Practicar es la única manera de volverse bueno en esto. Lo más probable es que pases de 8 a 12 horas por semana (además del tiempo de la clase) escribiendo y *debugeando* código.
-- Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. **NO* esperes a que sea demasiado tarde para tomar tu destino en tus manos.
+- Si tienes problemas con la tarea, pregúntame, o busca ayuda de tus compañeros. *NO* esperes a que sea demasiado tarde para tomar tu destino en tus manos.
 
 * Temario
 
