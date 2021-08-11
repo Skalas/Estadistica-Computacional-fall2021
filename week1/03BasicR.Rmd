@@ -37,12 +37,12 @@ Para especificar el directorio de trabajo, se utiliza el comando `setwd()` en
 la consola. Y volvemos a 
 
 ```{r, eval=F}
-setwd("/home/skalas/github/aacd")
+setwd("/Users/miguel.escalante/github/Estadistica-Computacional-fall2021/week1/")
 getwd()
 ```
 
 Con lo que acabamos de hacer, R buscará archivos o guardará archivos en el 
-folder `/home/skalas/github/aacd`. En R también es posible navegar a partir de 
+folder `/Users/miguel.escalante/github/Estadistica-Computacional-fall2021/week1/`. En R también es posible navegar a partir de
 el directorio de trabajo. Como siempre, 
 
 - "../un\_archivo.R" le indica a R que busque un folder arriba del actual 
