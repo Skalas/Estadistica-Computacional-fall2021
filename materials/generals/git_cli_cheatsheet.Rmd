@@ -1,6 +1,6 @@
 ---
 title: "Introducción a Línea de Comandos"
-date: "23/4/2021"
+
 output:
   html_document:
     toc: yes
@@ -11,7 +11,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 ```
 
 
