@@ -123,7 +123,7 @@ filter(df, x > 1)
 Arrange es un verbo que nos ayuda a ordenar los renglones del `data.frame`, si se le agregan más de una columna ordena con respecto a esos valores.
 
 ```{r}
-arrange(flights, year, month, day)
+arrange(flights, year, month, desc(day))
 ```
 
 ### Desc
@@ -252,8 +252,8 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
 Ejemplo con pipe:
 
 ```{r}
-flights %>%
-    group_by(dest) %>%
+flights |>
+    group_by(dest) |>
     summarise(
         count = n(),
         dist = mean(distance, na.rm = TRUE),
