@@ -130,3 +130,11 @@ dmypy.json
 .Rproj.user
 
 *.html
+**/*_cache/**
+**/*_files/**
+*.pdf
+.DS_Store
+.Rhistory
+*.tsv
+*.csv
+*.psv
