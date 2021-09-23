@@ -1,0 +1,31 @@
+---
+title: "Introducción a Rmarkdown"
+author: "Miguel Escalante"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, cache=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nycflights13)
+library(ggplot2)
+
+```
+## Rmarkdown
+
+Análisis por aerolínea y aeropuerto de origen en NYC
+
+```{R}
+flights %>%
+    filter(carrier==Sys.getenv('carrier'), month == as.integer(Sys.getenv('month'))) %>%
+    group_by(hour, origin) %>%
+    summarise(dep_delay = mean(dep_delay, na.rm=TRUE)) %>%
+    ggplot(aes(x=hour, y=dep_delay, fill=origin)) +
+    geom_bar(stat="identity")
+
+```
+
+
+```{R, results='asis', echo =FALSE}
+cat('Hola este es el reporte del mes: ', Sys.getenv('month'), ' con la aerolínea: ', Sys.getenv('carrier'))
+```
