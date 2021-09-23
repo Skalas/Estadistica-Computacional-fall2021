@@ -1,10 +1,8 @@
 ---
 title: "Visualización con R"
 author: "Miguel Angel Escalante Serrato"
-date: "December 9, 2016"
 output:
   html_document:
-    css: estilos.css
     theme: spacelab
     toc: yes
     toc_depth: 3
@@ -41,7 +39,7 @@ GeoJson es un formato que es un poco más explícito para guardar la informació
 
 Ejemplo:
 
-```{json]
+```{json}
 {
   "type": "Feature",
   "geometry": {
@@ -76,9 +74,10 @@ leaflet()%>%
 ## Mapa de México
 
 
-```{bash cache=TRUE}
-curl -o estados.zip https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463171829_s.zip
+```{bash cache=TRUE, eval=FALSE}
+curl -o estados.zip https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marc_geo/702825292812_s.zip
 unzip estados.zip
+unzip mge2010v5_0.zip
 mkdir estados
 mv Entidades* estados
 #sudo apt-get install gdal-bin
@@ -201,7 +200,3 @@ leaflet(data = map) %>%
              popup="AquiTa!")
 
 ```
-
-## Ejercicio
-
-Base de datos de refugios: https://drive.google.com/open?id=0Bw4a10rhk2QqaTZkUmQwaXU4aEE
