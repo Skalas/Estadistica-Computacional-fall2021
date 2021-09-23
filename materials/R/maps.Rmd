@@ -1,0 +1,207 @@
+---
+title: "Visualización con R"
+author: "Miguel Angel Escalante Serrato"
+date: "December 9, 2016"
+output:
+  html_document:
+    css: estilos.css
+    theme: spacelab
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, error = F, message = F)
+library(leaflet)
+library(rgdal)
+```
+
+# Visualizacion de información geográfica
+
+Cuando tenemos información ligada a una geografía usualmente nos gusta verla en algún estilo de mapa, nos ayuda a ver relaciones entre áreas, agrupaciones y se busca encontrar algún tipo de patrón. Usualmente el análisis geográfico se reduce a tres tipos de visualizaciones: 
+
+- Puntos
+- Líneas
+- Áreas
+
+## ShapeFiles 
+
+El shapefiles es un formato muy popular para almacenar información geográfica, es usado por la mayoría de paqueterías estadísticas para leer información geográfica, está compuesto de un conjunto de archivos. Tres archivos son obligatorios para que el shapefile pueda funcionar: 
+
+- **filename.shp**: Es donde se encuentra la información geográfica en si. 
+- **filename.shx**: Es el archivo donde se indexan las posiciones geofráficas. 
+- **filename.dbf**: Tabla de atributos, están en formato tabular y contiene la información que se pintará en el mapa. 
+
+Además de estos archivos se pueden agregar más archivos para dar más información. Pero no son fundamentales para el mapeo. 
+
+## GeoJson
+
+GeoJson es un formato que es un poco más explícito para guardar la información geográfica, es un archivo en texto plano donde se tiene explícita toda la información. 
+
+Ejemplo:
+
+```{json]
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [125.6, 10.1]
+  },
+  "properties": {
+    "name": "Dinagat Islands"
+  }
+}
+```
+El GeoJson soporta  los siguientes tipos de geometrías:
+
+- Point
+- LineString
+- Multipoint
+- Multilinestring
+- Multipolygon
+## Visualización de México. 
+
+Para el siguiente ejemplo hay que bajar la información de los estados del INEGI: 
+
+## Leaflet
+
+Cargaremos un mapa base para comenzar a usar leaflet: 
+
+```{r}
+leaflet()%>%
+  addTiles()
+```
+
+## Mapa de México
+
+
+```{bash cache=TRUE}
+curl -o estados.zip https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463171829_s.zip
+unzip estados.zip
+mkdir estados
+mv Entidades* estados
+#sudo apt-get install gdal-bin
+cd estados
+ogr2ogr states.shp Entidades_2010_5.shp -t_srs "+proj=longlat +ellps=WGS84 +no_defs +towgs84=0,0,0"
+```
+
+Con esto ya podemos hacer un mapa de méxico: 
+```{r}
+mexico <- readOGR(dsn = "./estados", layer = "states", encoding = "UTF-8")
+map <- mexico
+```
+
+```{r cache=TRUE}
+leaflet(data = map) %>%
+  addTiles() %>%
+  addPolygons(
+    fillOpacity = 0.8, 
+    smoothFactor = 0.5,
+    color = "#BDBDC3", 
+    weight = 1)
+```
+
+Ahora podemos ver lo que tenga la variable `mexico` (en la que guardamos la información de los shapefiles).
+
+```{r}
+
+head(mexico@data)
+str(mexico@data)
+mexico@data['rand'] <- round(rnorm(32,1500,200))
+```
+
+ahora pintemos la nueva variable con información absolutamente confidencial: 
+
+```{r, cache=TRUE}
+pal <- colorBin("Blues", mexico@data$rand, 5, pretty = FALSE)
+map <- mexico
+leaflet(data = map) %>%
+  addTiles() %>%
+  addPolygons(
+    fillOpacity = 0.8, 
+    smoothFactor = 0.5,
+    fillColor = ~pal(rand),
+    color = "#BDBDC3", 
+    weight = 1)
+```
+
+Agregaremos popups de la imagen con los valores de nuestra base de datos absolutamente confidencial: 
+
+
+```{r, cache=TRUE}
+pal <- colorBin("Greens", mexico@data$rand, 5, pretty = FALSE)
+state_popup <- paste0("<strong>Estado: </strong>", 
+                      mexico@data$NOM_ENT, 
+                      "<br>dato super super secreto: ", 
+                      mexico@data$rand)
+map <- mexico
+leaflet(data = map) %>%
+  addTiles() %>%
+  addPolygons(
+    fillOpacity = 0.8, 
+    smoothFactor = 0.5,
+    fillColor = ~pal(rand),
+    color = "#BDBDC3", 
+    weight = 1, 
+    popup=state_popup)
+```
+
+## Mapbox 
+
+Mapbox es un proveedor de mapas que tiene una api dedicada bastante robusta, para elegir diferentes mapas. Se requiere crear una cuenta y con eso se puede sacar el token de la api, ahora podemos elegir un mapa distinto: 
+
+
+```{r, cache=TRUE}
+tcu_map <- paste0("https://api.mapbox.com/styles/v1/mapbox/outdoors-v9/tiles/256/{z}/{x}/{y}?access_token=",Sys.getenv("MAPBOX_TOKEN"))
+pal <- colorBin("Greens", mexico@data$rand, 5, pretty = FALSE)
+state_popup <- paste0("<strong>Estado: </strong>", 
+                      mexico@data$NOM_ENT, 
+                      "<br>dato super super secreto: ", 
+                      mexico@data$rand)
+map <- mexico
+leaflet(data = map) %>%
+  addTiles(urlTemplate = tcu_map) %>%
+  addPolygons(
+    fillOpacity = 0.8, 
+    smoothFactor = 0.5,
+    fillColor = ~pal(rand),
+    color = "#BDBDC3", 
+    weight = 1, 
+    popup=state_popup)
+```
+
+
+Ahora para lo verdaderamente importante, podemos encontrar el tesoro escondido:
+
+
+                  
+
+```{r, cache=TRUE}
+x_marker <- icons("http://rud.is/dl/x.png",
+                  iconHeight=64, iconWidth=64,
+                  iconAnchorX=32, iconAnchorY=32)
+pal <- colorBin("Greens", mexico@data$rand, 5, pretty = FALSE)
+state_popup <- paste0("<strong>Estado: </strong>", 
+                      mexico@data$NOM_ENT, 
+                      "<br>dato super super secreto: ", 
+                      mexico@data$rand)
+map <- mexico
+leaflet(data = map) %>%
+  addTiles(urlTemplate = tcu_map) %>%
+  addPolygons(
+    fillOpacity = 0.8, 
+    smoothFactor = 0.5,
+    fillColor = ~pal(rand),
+    color = "#BDBDC3", 
+    weight = 1, 
+    popup=state_popup) %>% 
+  addMarkers(-99.223250,19.311697, 
+             icon=x_marker, 
+             popup="AquiTa!")
+
+```
+
+## Ejercicio
+
+Base de datos de refugios: https://drive.google.com/open?id=0Bw4a10rhk2QqaTZkUmQwaXU4aEE
