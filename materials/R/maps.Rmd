@@ -39,7 +39,7 @@ GeoJson es un formato que es un poco más explícito para guardar la informació
 
 Ejemplo:
 
-```{json}
+```{js}
 {
   "type": "Feature",
   "geometry": {
