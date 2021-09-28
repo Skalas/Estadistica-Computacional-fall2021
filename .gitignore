@@ -138,3 +138,11 @@ dmypy.json
 *.tsv
 *.csv
 *.psv
+
+*.dbf
+*.prj
+*.sbn
+*.sbx
+*.shp
+*.shx
+*.zip
