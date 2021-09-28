@@ -14,7 +14,7 @@
  - El alumno estará cómodo generando consultas complejas de SQL.
 * Comunicación
 ** Correo
-Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga ~[Estadística Computacional 2021]~.
+Escribe a ~miguel.escalante@itam.mx~ y por favor que el subject del correo diga ~[EC2021]~.
 ** Discord
 
 
