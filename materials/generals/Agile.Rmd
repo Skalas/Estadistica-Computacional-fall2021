@@ -1,0 +1,293 @@
+---
+title: "Agile Data Science"
+author: Miguel Escalante
+output:
+  ioslides_presentation:
+    incremental: true
+---
+  <!-- html_document: -->
+  <!--   theme: spacelab -->
+  <!--   toc: true -->
+  <!--   toc_float: true -->
+  <!-- ioslides_presentation: -->
+  <!--   incremental: true -->
+
+
+# Waterfall
+
+## Waterfall
+
+Es una metodología de trabajo que parte un objetivo en fases lineales subsecuentes. Este enfoque fue muy útil con ingeniería de procesos y manufactura.
+
+<center>
+![](img/Waterfall_model.svg){width=400px, align=center}
+</center>
+
+## Un poco de historia... {.flexbox .vcenter}
+
+Esta metodología tiene mucho sentido cuando estamos hablando de procesos productivos en los que se requieren grandes inversiones, infraestructura, y mantenimiento de equipos
+
+En una planta de producción es bastante útil tener una planeación de este estilo. Y algunos proyectos de desarrollo de software se podrían ver beneficiados por el mismo.
+
+No sorprende que está fundamentado en la cadena de producción creada por Henry Ford.
+
+## Un poco (mas) de historia... {.flexbox .vcenter}
+
+Cuando inicia el desarrollo de software, los sistemas eran muy complejos y específicos, como un proceso de línea de producción.
+
+Al llegar la metodología Waterfall, genera una disciplina muy bienvenida entre los desarrolladores y clientes.
+
+Los contratos eran la fuente de la verdad y se tenía que diseñar con mucha anticipación para que todos los componentes armonizaran entre ellos.
+
+## Características
+
+### Ventajas
+
+* Planeación sólida
+* Estructura
+* Lineal y entendible
+* Como el cliente sabe lo que quiere, es muy sencillo el desarrollo. . . .
+
+### Desventajas
+
+* Poca Resiliencia
+* Resistencia al cambio
+* Como el cliente pocas veces sabe lo que quiere, esto puede caer en muchos problemas.
+
+
+
+# Agile
+
+## ¿Qué es Agile? {.flexbox .vcenter}
+
+Es una metodología asociada al desarrollo de software, que involucra el descubrimiento de los requerimientos y desarrollar las soluciones através de un esfuerzo colaborativo, auto-organizado y multidisciplinario entre los equipos de desarrollo y el cliente.
+
+## Agile Manifesto
+
+Se origina en 2001 cuando un grupo de desarrolladores lanza el [Agile Manifesto](http://agilemanifesto.org/) Que contiene cuatro puntos:
+
+1. Individuos e interacciones sobre procesos y herramientas.
+2. Software Funcional sobre documentación extensiva.
+3. Colaboración con el cliente sobre negociación contractual.
+4. Respuesta ante el cambio sobre seguir un plan.
+
+* Esto es, aunque valoramos los elementos de la derecha, valoramos más los de la izquierda.
+
+## Características
+
+### Ventajas
+
+* Altamente flexible
+* Resiliente a Cambios
+* Pronto a ubicar errores
+* Iterativo
+
+### Desventajas
+
+* Preferible estar en el mismo espacio físico
+* Si no se cuida lo suficiente, puede llevar a código de baja calidad
+* Puede ser complejo llevar correctamente.
+
+# SCRUM
+
+## SCRUM{.flexbox .vcenter}
+
+Scrum es un marco de trabajo que apoya al desarrollo ágil, definiendo diferentes marcos y ceremonias para establecer un ritmo de trabajo, está basado en el concepto de scrum de rugby.
+
+<center>
+![](img/rugby.jpeg){width=500px, align=center}
+</center>
+
+## Sprint {.flexbox .vcenter}
+
+Un sprint es una caja de tiempo predefinida por el equipo, usualmente es de dos semanas, sin embargo se puede acordar crecer o achicar el tiempo de un sprint. El sprint marca la cadencia y la frecuencia con la que se verán resultados claros por parte del equipo de desarrollo.
+
+## Tareas o Historias de Usuario
+
+Estos son los "átomos" de trabajo, entregables o pre-entregables que tienen un inicio y un fin claro con respecto a lo que se tiene que hacer y desarrollar. Se detallan tanto como sea posible y en casos extremos, a falta de documentación, puede que se vuelvan la única fuente de verdad de cómo se generó cierta pieza de software.
+
+Estos átomos se guardan en un **Backlog** de tareas. Mismo donde se guardan todas las ideas con respecto al proyecto que se quiere desarrollar.
+
+## Proceso {.flexbox .vcenter}
+
+<center>
+![](img/scrum.webp){width=800px, align=center}
+</center>
+
+
+## Ceremonias{.flexbox .vcenter}
+
+* Sprint Planning
+* Daily Scrum
+* Sprint Review
+* Sprint Retrospective
+* Sprint Grooming / Refinement
+
+## Sprint Planning {.flexbox .vcenter}
+
+La planeación del sprint se hace al inicio del sprint, sirve para inspeccionar el backlog del proyecto. Se toma la decisión de las tareas a realizar durante el sprint que comienza, usualmente se divide en dos la reunión:
+
+> * ¿Qué se va a hacer?
+> * ¿Cómo lo vamos a hacer?
+
+
+## Sprint Planning{.flexbox .vcenter}
+
+Es fundamental que su stakeholder esté presente para que el compromiso sea de las dos partes, es decir: Pactar el compromiso del equipo, y la suficiencia del producto pactado.
+
+## Daily Scrum{.flexbox .vcenter}
+
+El daily scrum (ahora ven de dónde viene el nombre) es una reunión diaria con el equipo de desarrollo en la cual se responden las siguientes 3 preguntas:
+
+> * ¿Qué hice ayer para acercarnos al objetivo del sprint?
+> * ¿Qué voy a hacer hoy para acercarnos al objetivo del sprint?
+> * ¿Hay algo que bloquee mi capacidad de entregar lo prometido?
+
+
+## Daily Scrum{.flexbox .vcenter}
+
+Es una reunión que es corta, no debe de ser de más de 15 minutos...
+Muchos nos inventamos excusas para decir que no está tan mal que la daily dure 1 hr...
+Es un espacio para inspeccionar y adaptar el equipo a los diferentes bloqueos que van surgiendo, es una práctica auto-organizada y puede ser llevada como al equipo le funcione mejor.
+
+## Sprint Review{.flexbox .vcenter}
+
+Esta reunión ocurre al final del sprint, se busca mostrar los avances y el incremento terminado durante el sprint.
+
+Se muestra el software funcionando y se abren todas las preguntas necesarias para que los stakeholders liberen todas las dudas con respecto a los posibles caminos que se pueden tomar.
+
+Este es un momento a su vez para seguir enganchando a nuestros stakeholders con los diferentes avances y posibilidades que se puedan generar en el producto.
+
+El objetivo principal es marcar la dirección y objetivo del producto desde todas las perspectivas.
+
+## Sprint Retrospective{.flexbox .vcenter}
+
+Esta reunión se convoca justo después del sprint review, en este momento se hace reflexión sobre el último sprint, y se busca encontrar mejoras en el flujo de trabajo.
+
+Se centra en 3 preguntas:
+
+* ¿Qué funcionó bien?
+* ¿Qué falló?
+* ¿Qué puede mejorar?
+
+## Sprint Retrospective{.flexbox .vcenter}
+
+Se sugieren diferentes dinámicas para hacer esta reflexión, en concreto una propuesta es la siguiente:
+
+1. Preparar el camino, romper el hielo
+2. Recolectar información
+3. Generación de Ideas
+4. Acciones generadas
+5. Cierre
+
+
+## Sprint Grooming{.flexbox .vcenter}
+
+La sesión de refinamiento es una practica que ayuda a que nuestro **backlog**, se vea guapo siempre... Esto es, estimar las tareas correctamente, explorar las ideas con respecto a los productos, entender el camino a futuro y romper lo más posible las ideas en tareas concretas y pequeñas.
+
+# Shu Ha Ri
+
+## Shu Ha Ri{.flexbox .vcenter}
+
+Es un concepto de artes marciales japonezas, que representa tres etapas en el aprendizaje de cualquier disciplina:
+
+<center>
+![](img/ShuHaRi.png){width=400px, align=center}
+</center>
+
+## Shu{.flexbox .vcenter}
+
+* Proteger, obedecer
+* Entiende lo que los demás han hecho y síguelo.
+* Aprende los fundamentos de la disciplina.
+* **Aprende las reglas y síguelas**
+
+## Ha{.flexbox .vcenter}
+
+* Desapego, Desprendimiento
+* Explora nuevos conceptos
+* Ruptura con la tradición
+* **Rompe las reglas**
+
+## Ri{.flexbox .vcenter}
+
+* Dejar, Separar
+* Naturalidad de movimiento
+* Fluidez y trascendencia
+* Creación y verdadera inovación
+* **Sé la Regla**
+
+
+
+
+# Proceso de Ciencia de Datos. | O del por qué lo anterior nos sirve, pero no del todo...
+
+## Método Científico{.flexbox .vcenter}
+
+<center>
+![](img/scientific_method.svg){width=400px, align=center}
+</center>
+
+## Ciencia de datos {.flexbox .vcenter}
+
+El proceso de exploración y ciencia con los datos no tiene un resultado claro. No hay manera de predecir exactamente que es lo que se ve va a entregar, ni a corto ni a largo plazo.
+
+Se pueden tener en mente reportes que nos interesan, garantizar la calidad de los datos que usamos, pero cuando hablamos de entender el fenómeno y predecir lo que puede pasar, es cuando se pierde toda certeza de un entregable concreto.
+
+# Agile Data Science
+
+## Principios para Ciencia de Datos Ágil.{.flexbox .vcenter}
+
+Tomando en cuenta lo anterior, y lo que hemos aprendido de las metodologías ágiles, podemos tomar muchos aprendizajes y condensarlos en algunos puntos que nos ayudarán a llevar un buen desarrollo de proyectos de Ciencia de Datos.
+
+## Contexto{.flexbox .vcenter}
+
+Lo primero es reconocer la diferencia entre entregar productos de software contra el desarollo de respuestas a preguntas complejas conrespecto al negocio a todo nivel.
+
+La búsqueda de *insights* genera un elemento de incertidumbre muy importante en los productos de datos.
+
+Usualmente tiende a haber una brecha entre el desarrollo de software y la ciencia de datos, ya que aunque conviven y buscan llegar a un mismo objetivo, el cómo puede diferir mucho.
+
+## Tiempos de Científicos
+
+Los tiempos de investigación cuando hablamos de datos pueden variar mucho, sin embargo, un mismo conjunto de datos nos puede mantener ocupados bastantes meses, esto implica mucho más que un sprint usual.
+
+## Manifiesto de ciencia de Datos ágil
+
+* Itera Itera Itera : tablas, gráficos, reportes, predicciones, todo.
+* Muestra resultados intermedios. Hasta los experimentos fallidos contienen información
+* Prioriza el prototipado por encima de que el producto quede perfecto.
+* Escucha la opinión tirana de los datos.
+* Explora todos los niveles de los datos conforme avanzas
+* Describe procesos, no sólo el resultado final.
+
+## Contradiciendo Agile Software.
+
+Cuando estamos haciendo el desarrollo de nuestros artefactos, debemos ser tolerantes a que sean... feos... por momentos, mientras entendemos dónde esta el valor de lo que estamos haciendo.
+
+Contrario a la ingeniería de software... el código en la exploración de datos no tiene que ser limpio ni bonito siempre, sólo debemos entender que eventualmente tiene que ser bonito y limpio.
+
+Prototipar es sacar a crédito el desarrollo, y pagará bien si al menos uno de esos prototipos nos sirve.
+
+## Consejos del desarrollo ágil en ciencia de datos
+* Manejo de expectativas
+  * ¿Qué vamos a entregar ?
+  * ¿Cuándo lo vamos a entregar?
+* No sabemos con certeza ... ¯\_(ツ)_/¯
+
+## Manejo de Expectativas
+
+No podemos decir exactamente qué vamos a entregar, ni cuando. Pero se ofrece a cambio una serie de reportes de cómo se está avanzando, para que tu tengas entrada directa a los esfuerzos que se están haciendo y puedas dirigir mejor el flujo.
+
+# Conclusión
+
+## ¿Qué si nos sirve de Agile para Ciencia de Datos?
+* Planeación y priorización al principio de los sprints.
+* Definir entregables y tiempos de entrega
+* Retrospectivas y Demostraciones al final del Sprint.
+
+## ¿Qué es lo más complicado de Agile para Ciencia de Datos?
+* Los esfuerzos no están bien definidos y es difícil dar una estimación correcta de lo que se va a entregar y cuándo.
+* Puede que un descubrimiento en los datos, haga que se vire todo el proyecto a otro lugar.
+* Expectativas de los entregables que debe tener un equipo de ciencia de datos.
+* Ser rígido en la práctica de SCRUM
