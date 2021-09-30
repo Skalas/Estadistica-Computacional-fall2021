@@ -1,6 +1,18 @@
+---
+title: "Librerías Importantes"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    theme: spacelab
+
+---
+
 # Datos.
 
-Usando la base de datos que esta en [esta liga](https://drive.google.com/open?id=0Bw4a10rhk2QqaTZkUmQwaXU4aEE), generar los siguientes entregables:
+Usando la base de datos que esta en [esta liga](https://docs.google.com/spreadsheets/d/0Bw4a10rhk2QqaTZkUmQwaXU4aEE/edit?usp=sharing&ouid=101036910978943156470&resourcekey=0-RQa9gRpFX0x3z5bSJGn0Dg&rtpof=true&sd=true), generar los siguientes entregables:
 
 # Necesidades de Negocio.
 
