@@ -146,3 +146,5 @@ dmypy.json
 *.shp
 *.shx
 *.zip
+*.xlsx
+*.xls
