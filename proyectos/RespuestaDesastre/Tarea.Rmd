@@ -23,7 +23,7 @@ Usando la base de datos que esta en [esta liga](https://docs.google.com/spreadsh
 
 # Fecha de Entrega
 
-El proyecto se deberá entregar el Viernes 8 de Octubre antes de las 23:59 hrs. El método de entrega es através de un pull request a este repositorio. Dentro de la carpeta `proyectos/RespuestaDesastre` cada uno de los equipos deberá poner el código que se necesite para reproducir sus resultados.
+El proyecto se deberá entregar el Viernes 15 de Octubre antes de las 23:59 hrs. El método de entrega es através de un pull request a este repositorio. Dentro de la carpeta `proyectos/RespuestaDesastre` cada uno de los equipos deberá poner el código que se necesite para reproducir sus resultados.
 
 # Aspectos a Calificar
   * Limpieza y Claridad de Código
