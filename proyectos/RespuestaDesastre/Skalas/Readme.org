@@ -1,5 +1,10 @@
 * Proyecto Respuesta Desastres
 ** Intergantes del equipo
+
+| Nombre                         |     CU | Mail                     | Usuario Gh |
+|--------------------------------+--------+--------------------------+------------|
+| Miguel Angel Escalante Serrato | 108683 | miguel.escalante@itam.mx | Skalas     |
+|                                |        |                          |            |
 ** Explicación breve de lo que se hizo
 ** Dificultades
 ** Conclusiones
