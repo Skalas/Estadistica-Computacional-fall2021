@@ -58,6 +58,7 @@ El GeoJson soporta  los siguientes tipos de geometrías:
 - Multipoint
 - Multilinestring
 - Multipolygon
+
 ## Visualización de México. 
 
 Para el siguiente ejemplo hay que bajar la información de los estados del INEGI: 
