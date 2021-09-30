@@ -1,0 +1,5 @@
+* Proyecto Respuesta Desastres
+** Intergantes del equipo
+** Explicación breve de lo que se hizo
+** Dificultades
+** Conclusiones
