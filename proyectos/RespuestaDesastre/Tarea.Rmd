@@ -1,5 +1,5 @@
 ---
-title: "Librerías Importantes"
+title: "Proyecto intermedio Estadística Computacional"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document:
@@ -31,3 +31,4 @@ El proyecto se deberá entregar el Viernes 8 de Octubre antes de las 23:59 hrs. 
   * Reproducibilidad
   * Claridad de resultados
   * Inovación
+  * Entendimiento de negocio
