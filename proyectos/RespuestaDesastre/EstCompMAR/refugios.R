@@ -8,6 +8,7 @@ library(leaflet)
 library(magrittr)
 library(sp)
 library(mxmaps)
+library(stringr)
 
 ### Algunas usadas para los mapas
 # install.packages("rgdal")
@@ -26,12 +27,7 @@ library(highcharter)
 
 ### Mejoras:
 # 1. Estamos quitando todos los NA. Tal vez seria mejor solo quitar los
-# renglones con NA en Latitud y/o Longitud
-# 2. Tambien quitamos los NA post aplicar la funcion que convierte las
-# coordenadas. Lo ideal seria robustecer la funcion para que trabaje
-# esos casos particulares (213 354 360 361 117 169 170 171 172 281 351 352 353 385)
-# Con base en esto mismo, tendriamos que trabajar posibles casos futuros en los
-# que alguna coordenada se pase "muy mal"? p.ej. 21-30.40.91"
+# renglones con NA en Nombre, Latitud y/o Longitud
 # 3. Corregir el renglon que tiene volteada la Latitud y Longitud (434)
 # 4. Hay algunas coordenadas que se repiten (p.ej. 414, 415 y 416). Entonces,
 # hay que determinar que hacer. Al momento, se estan sobrescribiendo, pero una
@@ -53,28 +49,44 @@ for(i in 2:n_hojas){
 ### Quitamos los NA
 datos <- datos |> drop_na()
 
+### Agregamos los primeros dos valores si es que los 
+
+# convert_coordinates <- function(x){
+#   ### Segun Wikipedia: D_dec = D + M/60 + S/3600
+#   
+#   # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo splits
+#   coords <- x |>
+#             strsplit(split = "°") |> 
+#             unlist() |> 
+#             strsplit(split = "º") |> 
+#             unlist() |> 
+#             strsplit(split = "ª") |> 
+#             unlist() |> 
+#             # strsplit(split = "|") |> 
+#             # unlist() |> 
+#             strsplit(split = "'") |> 
+#             unlist() |> 
+#             strsplit(split = "\"") |> 
+#             unlist() |>
+#             as.numeric()
+#             
+#   D <- coords[1]
+#   M <- coords[2]
+#   S <- coords[3]
+#   
+#   D + M/60 + S/3600
+# }
+
 convert_coordinates <- function(x){
   ### Segun Wikipedia: D_dec = D + M/60 + S/3600
   
-  # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo splits
-  coords <- x |>
-            strsplit(split = "°") |> 
-            unlist() |> 
-            strsplit(split = "º") |> 
-            unlist() |> 
-            strsplit(split = "ª") |> 
-            unlist() |> 
-            # strsplit(split = "|") |> 
-            # unlist() |> 
-            strsplit(split = "'") |> 
-            unlist() |> 
-            strsplit(split = "\"") |> 
-            unlist() |>
-            as.numeric()
-            
-  D <- coords[1]
-  M <- coords[2]
-  S <- coords[3]
+  # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo regex
+  matches <- regmatches(x, gregexpr("[[:digit:]]+", x))
+  matches <- as.numeric(unlist(matches))
+  
+  D <- matches[1]
+  M <- matches[2]
+  S <- matches[3] +  matches[4]/100
   
   D + M/60 + S/3600
 }
@@ -121,6 +133,8 @@ ubicacion_actual <- ubicacion_actual |> map_dbl(convert_coordinates)
 ubicacion_actual <- c("21º56'52.71", "105º08'40.55")
 ubicacion_actual <- ubicacion_actual |> map_dbl(convert_coordinates)
 
+###### 
+
 #Esto seria si ya se le pasa el vector en coordenadas decimales
 ubicacion_actual <- c(21, -105)
 
@@ -149,6 +163,7 @@ mas_cercanos <- corregidos |>
                   arrange(dist) |>
                   head(n_closer)
 
+
 ### Por municipios (en la implementacion, dar a elegir de una lista)
 municipio_actual <- "ROSAMORADA"
 por_municipio <- corregidos |>
@@ -156,18 +171,19 @@ por_municipio <- corregidos |>
 
 ########## Algunas pruebas para colorear por municipio
 
-# nayarit_map <- rgdal::readOGR("data/estado18.json")
-# nayarit_map <- nayarit_map |> 
-#                 mutate(state_code=as.factor(as.numeric(as.character(state_code))),
-#                        mun_code=as.factor(as.numeric(as.character(mun_code))))
-#
-# nay_new <- spTransform(nayarit_map, CRS("+proj=longlat +init=epsg:4326"))
-# 
-# leaflet() %>%
-#   addProviderTiles("CartoDB.Positron", options= providerTileOptions(opacity = 0.99)) %>%
-#   addPolygons(data = nay_new,
-#               stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5
-#   )
+nayarit_map <- rgdal::readOGR("data/estado18.json")
+
+nayarit_map <- nayarit_map |>
+                mutate(state_code=as.factor(as.numeric(as.character(state_code))),
+                       mun_code=as.factor(as.numeric(as.character(mun_code))))
+
+nay_new <- spTransform(nayarit_map, CRS("+proj=longlat +init=epsg:4326"))
+
+leaflet() %>%
+  addProviderTiles("CartoDB.Positron", options= providerTileOptions(opacity = 0.99)) %>%
+  addPolygons(data = nay_new,
+              stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5
+  )
 
 ##########
 
