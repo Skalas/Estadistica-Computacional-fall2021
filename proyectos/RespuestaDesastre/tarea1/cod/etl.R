@@ -2,16 +2,16 @@
 install.packages('readxl')
 install.packages('dplyr')
 install.packages('tidyr')
-install.packages('sp')
+install.packages('sf')
 
 # Cargar librerías
 library(readxl)
 library(dplyr)
 library(tidyr)
-library(sp)
+library(sf)
 
 # Cargar datos
-path <- '../dat/refugios_nayarit.xlsx'
+path <- '../../Skalas/data/refugios_nayarit.xlsx'
 df <- lapply(excel_sheets(path), read_xlsx, path=path, col_names=FALSE, skip=6) %>% bind_rows()
 
 # Nombre de columnas
