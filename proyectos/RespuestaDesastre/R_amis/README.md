@@ -12,8 +12,9 @@
 
 | Nombre                          |     CU   | Mail             | Usuario Gh                                    |
 | :-----------------------------: | :------: | :--------------: | :-------------------------------------------: |
-| Carlos Roman Lopez Sierra       | 000000   | carlos@itam.mx   | [Carlosrlpzi](https://github.com/Carlosrlpzi) |
-| Uriel Abraham Rangel Díaz       | 000000   | uriel@itam.mx    | [urieluard](https://github.com/urieluard)     |
+| Carlos Roman Lopez Sierra       | 197911   | clopezsi@itam.mx	| [Carlosrlpzi](https://github.com/Carlosrlpzi) |
+| Edgar Bazo Pérez                | 000000   | ebazoper@itam.mx | [EddOselotl](https://github.com/EddOselotl)   |
+| Uriel Abraham Rangel Díaz       | 000000   | urangeld@itam.mx | [urieluard](https://github.com/urieluard)     |
 | José Luis Roberto Zárate Cortés | 183347   | jzaratec@itam.mx | [jlrzarcor](https://github.com/jlrzarcor)     |
 
 ---
@@ -32,11 +33,11 @@ Liga a repo: [Ramis-prjct1](https://github.com/jlrzarcor/ITAM-ecomp2021-Ramis-pr
 
 1. [Acerca de este proyecto](https://github.com/jlrzarcor/)
 2. [Estructura básica del proyecto](https://github.com/jlrzarcor/)
-3. [Sobre nuestro *Data Pipeline*](https://github.com/jlrzarcor/ITAM-dpa2021#sobre-nuestro-data-pipeline--microscope)
-4. [](https://github.com/jlrzarcor/ITAM-dpa2021)
-5. [](https://github.com/jlrzarcor/ITAM-dpa2021)
-6. [](https://github.com/jlrzarcor/ITAM-dpa2021)
-7. [](https://github.com/jlrzarcor/ITAM-dpa2021)
+3. [Sobre nuestro *Data Pipeline*](https://github.com/jlrzarcor/)
+4. [](https://github.com/jlrzarcor/)
+5. [](https://github.com/jlrzarcor/)
+6. [](https://github.com/jlrzarcor/)
+7. [](https://github.com/jlrzarcor/)
 
 
 ### Explicación breve de lo que se hizo
