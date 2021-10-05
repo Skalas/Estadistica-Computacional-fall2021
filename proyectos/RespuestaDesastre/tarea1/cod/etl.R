@@ -5,7 +5,7 @@ library(tidyr)
 library(sp)
 
 # Cargar datos
-path <- '../../Skalas/data/refugios_nayarit.xlsx' 
+path <- '../dat/refugios_nayarit.xlsx'
 df <- lapply(excel_sheets(path), read_xlsx, path=path, col_names=FALSE, skip=6) %>% bind_rows()
 
 # Nombre de columnas
