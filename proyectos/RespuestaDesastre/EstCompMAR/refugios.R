@@ -149,6 +149,11 @@ mas_cercanos <- corregidos |>
                   arrange(dist) |>
                   head(n_closer)
 
+### Por municipios (en la implementacion, dar a elegir de una lista)
+municipio_actual <- "ROSAMORADA"
+por_municipio <- corregidos |>
+                  filter(Municipio == municipio_actual)
+
 ########## Algunas pruebas para colorear por municipio
 
 # nayarit_map <- rgdal::readOGR("data/estado18.json")
@@ -183,10 +188,19 @@ leaflet() |>
   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
   #             # fillColor = ~pal(log10(pop)),
   #             label = ~mun_name) |>
-  addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec, popup = ~Refugio) |>
+  addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
+             popup = ~paste(Refugio, Telefono, sep="\n")) |>
   addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
                     icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
 
+leaflet() |>
+  addTiles() |>
+  # addPolygons(data = nayarit_map_2, 
+  #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+  #             # fillColor = ~pal(log10(pop)),
+  #             label = ~mun_name) |>
+  addMarkers(data = por_municipio, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
+             popup = ~paste(Refugio, Telefono, sep="\n"))
 
 
 
