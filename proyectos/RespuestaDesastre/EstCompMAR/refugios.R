@@ -3,11 +3,15 @@ if (!require("devtools")) {
   install.packages("devtools")
 }
 devtools::install_github("diegovalle/mxmaps")
+install.packages("geosphere")
+library(geosphere)
+
+
 
 library(leaflet)
 library(magrittr)
 library(sp)
-library(mxmaps)
+# library(mxmaps)
 library(stringr)
 
 ### Algunas usadas para los mapas
@@ -17,13 +21,13 @@ library(stringr)
 # install.packages("rmapshaper")
 # install.packages("jsonlite")
 # install.packages("highcharter")
-
-library(rgdal)
-library(geojsonio)
-library(spdplyr)
-library(rmapshaper)
-library(jsonlite)
-library(highcharter)
+# 
+# library(rgdal)
+# library(geojsonio)
+# library(spdplyr)
+# library(rmapshaper)
+# library(jsonlite)
+# library(highcharter)
 
 ### Mejoras:
 # 1. Estamos quitando todos los NA. Tal vez seria mejor solo quitar los
@@ -146,7 +150,8 @@ ubicacion_actual_df <- tibble(id = "Ubicacion actual",
 
 ### Funcion para calcular distancias entre coordenadas
 distancia <- function(x1, x2, y1, y2){
-  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+  # sqrt((x1 - x2)^2 + (y1 - y2)^2)
+  distHaversine(c(y1,x1), c(y2,x2))
 }
 
 ### Calculamos todas las distancias. Primero arreglamos los datos para luego
@@ -158,71 +163,73 @@ aux_dist <- corregidos |>
 
 corregidos$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
 
-#Tomamos los n_closer mas cercanos
-mas_cercanos <- corregidos |>
-                  arrange(dist) |>
-                  head(n_closer)
 
-
-### Por municipios (en la implementacion, dar a elegir de una lista)
-municipio_actual <- "ROSAMORADA"
-por_municipio <- corregidos |>
-                  filter(Municipio == municipio_actual)
-
-########## Algunas pruebas para colorear por municipio
-
-nayarit_map <- rgdal::readOGR("data/estado18.json")
-
-nayarit_map <- nayarit_map |>
-                mutate(state_code=as.factor(as.numeric(as.character(state_code))),
-                       mun_code=as.factor(as.numeric(as.character(mun_code))))
-
-nay_new <- spTransform(nayarit_map, CRS("+proj=longlat +init=epsg:4326"))
-
-leaflet() %>%
-  addProviderTiles("CartoDB.Positron", options= providerTileOptions(opacity = 0.99)) %>%
-  addPolygons(data = nay_new,
-              stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5
-  )
-
-##########
-
-leaflet() |>
-  addTiles() |>
-  # addPolygons(data = nayarit_map_2, 
-  #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-  #             # fillColor = ~pal(log10(pop)),
-  #             label = ~mun_name) |>
-  addMarkers(data = corregidos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-             popup = ~paste(Refugio, Telefono, sep="\n")) |>
-  addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
-                    icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
-
-leaflet() |>
-  addTiles() |>
-  # addPolygons(data = nayarit_map_2, 
-  #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-  #             # fillColor = ~pal(log10(pop)),
-  #             label = ~mun_name) |>
-  addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-             popup = ~paste(Refugio, Telefono, sep="\n")) |>
-  addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
-                    icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
-
-leaflet() |>
-  addTiles() |>
-  # addPolygons(data = nayarit_map_2, 
-  #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-  #             # fillColor = ~pal(log10(pop)),
-  #             label = ~mun_name) |>
-  addMarkers(data = por_municipio, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-             popup = ~paste(Refugio, Telefono, sep="\n"))
+nayarit_refugios <- corregidos
+municipios_unicos <- nayarit_refugios$Municipio |> unique()
 
 
 
-
-
-
-
-#### Referencias
-# http://rstudio-pubs-static.s3.amazonaws.com/327743_a932d7ebdce548dfa7c7ca2b3ff6e038.html
+# #Tomamos los n_closer mas cercanos
+# mas_cercanos <- nayarit_refugios |>
+#                   arrange(dist) |>
+#                   head(n_closer)
+# 
+# 
+# ### Por municipios (en la implementacion, dar a elegir de una lista)
+# municipio_actual <- "ROSAMORADA"
+# por_municipio <- nayarit_refugios |>
+#                   filter(Municipio == municipio_actual)
+# 
+# ########## Algunas pruebas para colorear por municipio
+# 
+# # nayarit_map <- rgdal::readOGR("data/estado18.json")
+# # 
+# # nayarit_map <- nayarit_map |>
+# #                 mutate(state_code=as.factor(as.numeric(as.character(state_code))),
+# #                        mun_code=as.factor(as.numeric(as.character(mun_code))))
+# # 
+# # nay_new <- spTransform(nayarit_map, CRS("+proj=longlat +init=epsg:4326"))
+# # 
+# # leaflet() %>%
+# #   addProviderTiles("CartoDB.Positron", options= providerTileOptions(opacity = 0.99)) %>%
+# #   addPolygons(data = nay_new,
+# #               stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5
+# #   )
+# 
+# ##########
+# 
+# # leaflet() |>
+# #   addTiles() |>
+# #   # addPolygons(data = nayarit_map_2, 
+# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+# #   #             # fillColor = ~pal(log10(pop)),
+# #   #             label = ~mun_name) |>
+# #   addMarkers(data = corregidos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
+# #              popup = ~paste(Refugio, Telefono, sep="\n")) |>
+# #   addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
+# #                     icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
+# # 
+# # leaflet() |>
+# #   addTiles() |>
+# #   # addPolygons(data = nayarit_map_2, 
+# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+# #   #             # fillColor = ~pal(log10(pop)),
+# #   #             label = ~mun_name) |>
+# #   addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
+# #              popup = ~paste(Refugio, Telefono, sep="\n")) |>
+# #   addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
+# #                     icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
+# # 
+# # leaflet() |>
+# #   addTiles() |>
+# #   # addPolygons(data = nayarit_map_2, 
+# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+# #   #             # fillColor = ~pal(log10(pop)),
+# #   #             label = ~mun_name) |>
+# #   addMarkers(data = por_municipio, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
+# #              popup = ~paste(Refugio, Telefono, sep="\n"))
+# # 
+# 
+# 
+# #### Referencias
+# # http://rstudio-pubs-static.s3.amazonaws.com/327743_a932d7ebdce548dfa7c7ca2b3ff6e038.html
