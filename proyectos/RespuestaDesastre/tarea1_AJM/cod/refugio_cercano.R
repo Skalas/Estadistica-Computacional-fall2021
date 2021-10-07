@@ -74,7 +74,7 @@ ui <- fluidPage(
             tabsetPanel(
                 tabPanel(
                     'Mapa',
-                    leafletOutput('mapa')
+                    leafletOutput('map')
                 ),
                 tabPanel(
                     'Tabla',
@@ -110,12 +110,20 @@ server <- function(input, output) {
             select(c('cercania','refugio','direccion','municipio',
                      'capacidad','servicios','lat','lng'))
     )
+
     # Mapa con Top1 refugio más cercano
-    output$map <- renderLeaflet(
-        leaflet(sort_df()) %>%
+    output$map <- renderLeaflet({
+        leaflet() %>% 
             addTiles() %>% 
-            addCircleMarkers(lng=~lng, lat=~lat)
-    )
+            setView(zoom=8, lng=input$lng, lat=input$lat) %>% 
+            addCircleMarkers(
+                data=sort_df(),
+                lng=~lng,
+                lat=~lat,
+                radius=1,
+                popup=~c(direccion, municipio)
+            )
+    })
     # Tabla de TopN refugios cercanos
     output$table <- renderDT({
         sort_df()
