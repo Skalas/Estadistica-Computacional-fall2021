@@ -14,11 +14,11 @@ library(stringr)
 
 ```{r}
 # Nombres de las cada hoja del excel 
-hojas <- excel_sheets('refugios_nayarit.xlsx')
+hojas <- excel_sheets('data/refugios_nayarit.xlsx')
 
 # Lista con cada uno de los refugios 
 lista_refugios <- lapply(hojas, function(x)
-  read_excel('refugios_nayarit.xlsx', sheet = x, skip = 5))
+  read_excel('data/refugios_nayarit.xlsx', sheet = x, skip = 5))
 
 # Dataframe a utilizar
 refugios <- do.call('rbind' ,lista_refugios)
@@ -32,9 +32,6 @@ refugios_ubicacion <- refugios %>% drop_na(Latitud)
 ```
 
 ```{r}
-conv_unit('21 40 57.24', 'deg_min_sec', 'dec_deg')
-```
-```{r}
 # Se limpian las cordenadas de los caracteres que no necesitamos
 lat <- refugios_ubicacion$Latitud 
 lat <- gsub("°|'", ' ', lat)
@@ -47,9 +44,11 @@ lat<- gsub('`', ' ', lat)
 # Se dejan las coordenadas limpias
 refugios_ubicacion$Latitud <- lat
 
+# Se parten las coordenadas en 4 para poder dejar en el formato adecuado
 cd<- refugios_ubicacion %>% 
   separate(Latitud, c('l1', 'l2', 'l3', 'l4'),)
 
+# Se regresan las coordenadas en el formato adecuado
 refugios_ubicacion$Latitud <- str_c(cd$l1, ' ', cd$l2, ' ', cd$l3, '.', cd$l4)
 
 # Se limpian las cordenadas de los caracteres que no necesitamos
@@ -64,12 +63,16 @@ lon<- gsub('`', ' ', lon)
 # Se dejan las coordenadas limpias
 refugios_ubicacion$Longitud <- lon
 
+# Se parten las coordenadas en 4 para poder dejar en el formato adecuado
 c<- refugios_ubicacion %>% 
   separate(Longitud, c('l1', 'l2', 'l3', 'l4'),)
 
+# Se regresan las coordenadas en el formato adecuado
 refugios_ubicacion$Longitud <- str_c(c$l1, ' ', c$l2, ' ', c$l3, '.', c$l4)
 
+# Se eliminan las coordenadas que se convirtieron en NA por tener datos faltantes
 refugios_ubicacion <- refugios_ubicacion %>% drop_na(Latitud)
+refugios_ubicacion <- refugios_ubicacion %>% drop_na(Longitud)
 ```
 
 ```{r}
@@ -93,11 +96,24 @@ for (i in refugios_ubicacion$Latitud){
 ```
 
 ```{r}
+# Se realiza la conversión de las coordenadas para poder manipularlas facilmente
 refugios_ubicacion$Latitud <- conv_unit(refugios_ubicacion$Latitud, 'deg_min_sec', 'dec_deg')
 refugios_ubicacion$Longitud <- conv_unit(refugios_ubicacion$Longitud, 'deg_min_sec', 'dec_deg')
 ```
 
 
+```{r}
+a <- length(refugios_ubicacion$No)
+# For para cambiar las coordenadas que esten en la columna adecuada
+for (i in 1:a){
+  if (as.numeric(refugios_ubicacion$Longitud[i]) < as.numeric(refugios_ubicacion$Latitud[i])){
+    real_lat = refugios_ubicacion$Longitud[i]
+    real_long = refugios_ubicacion$Latitud[i]
+    refugios_ubicacion$Latitud[i] = real_lat
+    refugios_ubicacion$Longitud[i] = real_long
+  }
+}
+```
 
 
 
