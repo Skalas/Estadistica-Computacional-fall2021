@@ -1,0 +1,10 @@
+---
+title: "ETL_Estadistica Comp"
+output: html_document
+---
+
+
+```{r}
+refugios <- read.table('refugios_nayarit.xlsx')
+```
+
