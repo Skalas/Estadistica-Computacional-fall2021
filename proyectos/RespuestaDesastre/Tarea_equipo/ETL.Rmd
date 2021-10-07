@@ -5,6 +5,99 @@ output: html_document
 
 
 ```{r}
-refugios <- read.table('refugios_nayarit.xlsx')
+library(readxl)
+library(tidyverse)
+library(measurements)
+library(tidyr)
+library(stringr)
 ```
+
+```{r}
+# Nombres de las cada hoja del excel 
+hojas <- excel_sheets('refugios_nayarit.xlsx')
+
+# Lista con cada uno de los refugios 
+lista_refugios <- lapply(hojas, function(x)
+  read_excel('refugios_nayarit.xlsx', sheet = x, skip = 5))
+
+# Dataframe a utilizar
+refugios <- do.call('rbind' ,lista_refugios)
+colnames(refugios) <- c('No', 'Refugio', 'Municipio', 'Direccion', 'Uso del Inmueble', 'Servicios', 'Capacidad de personas', 'Latitud', 'Longitud', 'Altitud', 'Responsable', 'Telefono')
+
+# Se eliminan las filas con NAN en la columna Refugio
+refugios <- refugios %>% drop_na(Refugio)
+
+# Se eliminan los refugios que no tenemos ubicación
+refugios_ubicacion <- refugios %>% drop_na(Latitud)
+```
+
+```{r}
+conv_unit('21 40 57.24', 'deg_min_sec', 'dec_deg')
+```
+```{r}
+# Se limpian las cordenadas de los caracteres que no necesitamos
+lat <- refugios_ubicacion$Latitud 
+lat <- gsub("°|'", ' ', lat)
+lat <- gsub("º|ª", ' ', lat)
+lat <- gsub('"|  ', ' ', lat)
+lat <- gsub('-', '.', lat)
+lat<- gsub('\\|', ' ', lat)
+lat<- gsub('`', ' ', lat)
+
+# Se dejan las coordenadas limpias
+refugios_ubicacion$Latitud <- lat
+
+cd<- refugios_ubicacion %>% 
+  separate(Latitud, c('l1', 'l2', 'l3', 'l4'),)
+
+refugios_ubicacion$Latitud <- str_c(cd$l1, ' ', cd$l2, ' ', cd$l3, '.', cd$l4)
+
+# Se limpian las cordenadas de los caracteres que no necesitamos
+lon <- refugios_ubicacion$Longitud 
+lon <- gsub("°|'", ' ', lon)
+lon <- gsub("º|ª", ' ', lon)
+lon<- gsub('"|  ', ' ', lon)
+lon <- gsub('-', '.', lon)
+lon<- gsub('\\|', ' ', lon)
+lon<- gsub('`', ' ', lon)
+
+# Se dejan las coordenadas limpias
+refugios_ubicacion$Longitud <- lon
+
+c<- refugios_ubicacion %>% 
+  separate(Longitud, c('l1', 'l2', 'l3', 'l4'),)
+
+refugios_ubicacion$Longitud <- str_c(c$l1, ' ', c$l2, ' ', c$l3, '.', c$l4)
+
+refugios_ubicacion <- refugios_ubicacion %>% drop_na(Latitud)
+```
+
+```{r}
+# Se eliminan las coordenadas que son incorrectas por tener un dato faltante
+row=1
+for (i in refugios_ubicacion$Longitud){
+  if (str_length(i)<10){
+    refugios_ubicacion <- refugios_ubicacion[-c(row), ]
+  }
+  row=row+1
+}
+
+row = 1
+for (i in refugios_ubicacion$Latitud){
+  if (str_length(i)<10){
+    refugios_ubicacion <- refugios_ubicacion[-c(row), ]
+  }
+  row=row+1
+}
+
+```
+
+```{r}
+refugios_ubicacion$Latitud <- conv_unit(refugios_ubicacion$Latitud, 'deg_min_sec', 'dec_deg')
+refugios_ubicacion$Longitud <- conv_unit(refugios_ubicacion$Longitud, 'deg_min_sec', 'dec_deg')
+```
+
+
+
+
 
