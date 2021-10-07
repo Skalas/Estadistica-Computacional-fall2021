@@ -1,21 +1,27 @@
 # Librerías -----------------------------------------------------------------------------------
+
 # Librerías requeridas
-required <- c('readxl','dplyr','tidyr','sp','shiny')
+required <- c('readxl','dplyr','tidyr','sp','shiny','leaflet','DT')
+
 # Instalar librerías en caso de que no existan en local
 if (sum(!(required %in% installed.packages())) > 0){
     lapply(list(required[!(required %in% installed.packages())]), install.packages)
 }
-# Cargar librerías
-lapply(list(required), library)
 
-# Limpieza ------------------------------------------------------------------------------------
+# Cargar librerías
+lapply(required, library, character.only=TRUE)
+
+
+# Limpieza de refugios ------------------------------------------------------------------------
+
 # Cargar archivo
 path <- '../dat/refugios_nayarit.xlsx'
 df <- lapply(excel_sheets(path), read_xlsx, path=path, col_names=FALSE, skip=6) %>% bind_rows()
+temp <- df
 
-# Nombre de columnas
-names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacidad','lat','long',
-              'alt','responsable','tel')
+# Renombrar columnas
+names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacidad','lat',
+              'long','alt','responsable','tel')
 
 # Parsear `lat` y `long`
 df <- df %>%
@@ -38,29 +44,55 @@ df <- df %>%
 proj <- CRS("+proj=longlat +datum=WGS84")
 df <- SpatialPointsDataFrame(coords=df %>% select(c(long, lat)), data=df, proj4string=proj)
 
-# Usuario mete su localización
-user_lon <- 22.48
-user_lat <- 105.8
-user_loc <- SpatialPoints(coords=matrix(data=c(user_lon,user_lat), nrow=1), proj4string=proj)
-
-# Distancia a todos los puntos
-df$dist <- spDists(x=user_loc, y=df, longlat=TRUE)[1,]
-
-# Seleccionar el refucio más cercano
-df@data %>% filter(dist == df@data$dist %>% min())
-
 
 # UI ------------------------------------------------------------------------------------------
+
 ui <- fluidPage(
-    # Application title
-    
+    titlePanel('Refugio más cercano'),
+    sidebarLayout(
+        sidebarPanel(
+            numericInput('lon', 'Longitud', value=105, min=-180, max=180),
+            numericInput('lat', 'Latitud', value=21.5, min=-90, max=90),
+            sliderInput(
+                'nref',
+                '¿Cuántos refugios cercanos quieres ver en la tabla?',
+                min=1, max=10, value=3
+            )
+        ),
+        mainPanel(
+            tabsetPanel(
+                tabPanel(
+                    'Mapa'
+                ),
+                tabPanel(
+                    'Tabla',
+                    DTOutput('table')
+                )
+            )
+        )
+    )
 )
 
 
-# Server --------------------------------------------------------------------------------------
 server <- function(input, output) {
-
+    # Convertir lon-lat del usuario a SP
+    user_loc <- reactive(
+        SpatialPoints(
+            coords=matrix(data=c(input$lon, input$lat), nrow=1),
+            proj=CRS("+proj=longlat +datum=WGS84"))
+    )
+        # Calcular distancia desde user_loc -> todos los refugios
+    sort_df <- reactive(
+        df@data %>% 
+            mutate(dist=spDists(x=user_loc(), y=df)[1,]) %>% 
+            arrange() %>% 
+            head(input$nref) %>% 
+            select(c('refugio','direccion','municipio','capacidad','servicios','long','lat'))
+    )
+    
+    output$table <- renderDT({
+        sort_df()
+    })
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
