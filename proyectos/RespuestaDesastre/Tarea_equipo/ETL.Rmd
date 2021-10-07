@@ -116,4 +116,19 @@ for (i in 1:a){
 ```
 
 
+```{r}
+library(leaflet)
+
+mexico <- leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng=-as.numeric(refugios_ubicacion$Longitud),
+             lat=as.numeric(refugios_ubicacion$Latitud), 
+             popup = refugios_ubicacion$Direccion, 
+             label = refugios_ubicacion$Municipio)
+
+mexico
+```
+
+
+
 
