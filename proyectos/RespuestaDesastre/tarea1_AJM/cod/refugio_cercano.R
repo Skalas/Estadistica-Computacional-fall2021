@@ -25,7 +25,7 @@ names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacid
 # Parsear `lat` y `lng`
 df <- df %>%
     # Sin NAs
-    drop_na(c(id,lat,lng)) %>% 
+    drop_na(c(lat,lng)) %>% 
     # Quitar espacios
     mutate(lat=gsub(' ','',lat), lng=gsub(' ','',lng)) %>%
     # Casos especiales
@@ -55,13 +55,14 @@ df <- df %>%
 proj <- CRS("+proj=longlat +datum=WGS84")
 df <- SpatialPointsDataFrame(coords=df %>% select(c(lng, lat)), data=df, proj4string=proj)
 
+
 # UI ------------------------------------------------------------------------------------------
 
 ui <- fluidPage(
     titlePanel('Encuentra tu refugio más cercano'),
     sidebarLayout(
         sidebarPanel(
-            numericInput('lng', 'Ingresa tu longitud', value=104.6, min=-180, max=180),
+            numericInput('lng', 'Ingresa tu longitud', value=-104.6, min=-180, max=180),
             numericInput('lat', 'Ingresa tu latitud', value=21.2, min=-90, max=90),
             sliderInput(
                 'nref',
@@ -85,24 +86,35 @@ ui <- fluidPage(
 )
 
 
+# Server --------------------------------------------------------------------------------------
+
 server <- function(input, output) {
     # Convertir lng-lat del usuario a SP
     user_loc <- reactive(
         SpatialPoints(
             coords=matrix(data=c(input$lng, input$lat), nrow=1),
-            proj=CRS("+proj=longlat +datum=WGS84"))
+            proj=CRS("+proj=longlat +datum=WGS84")
+        )
     )
     # Calcular distancia de user_loc -> todos los refugios
     sort_df <- reactive(
         df@data %>% 
-            mutate(dist=spDists(x=user_loc(), y=df)[1,]) %>% 
+            # Columna de distancias
+            mutate(dist=spDists(user_loc(), df)[1,]) %>% 
+            # Ordenar por distancia
             arrange(dist) %>% 
+            # TopN refugios
             head(input$nref) %>% 
-            select(c('refugio','direccion','municipio','capacidad','servicios'))
+            # Rank por cercanía
+            mutate(cercania=1:input$nref) %>% 
+            select(c('cercania','refugio','direccion','municipio',
+                     'capacidad','servicios','lat','lng'))
     )
     # Mapa con Top1 refugio más cercano
     output$map <- renderLeaflet(
-        leaflet() %>% addTiles()
+        leaflet(sort_df()) %>%
+            addTiles() %>% 
+            addCircleMarkers(lng=~lng, lat=~lat)
     )
     # Tabla de TopN refugios cercanos
     output$table <- renderDT({
