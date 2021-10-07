@@ -1,14 +1,12 @@
 # Librerías -----------------------------------------------------------------------------------
-install.packages('readxl')
-install.packages('dplyr')
-install.packages('tidyr')
-install.packages('sp')
-install.packages('shiny')
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(sp)
-library(shiny)
+# Librerías requeridas
+required <- c('readxl','dplyr','tidyr','sp','shiny')
+# Instalar librerías en caso de que no existan en local
+if (sum(!(required %in% installed.packages())) > 0){
+    lapply(list(required[!(required %in% installed.packages())]), install.packages)
+}
+# Cargar librerías
+lapply(list(required), library)
 
 # Limpieza ------------------------------------------------------------------------------------
 # Cargar archivo
