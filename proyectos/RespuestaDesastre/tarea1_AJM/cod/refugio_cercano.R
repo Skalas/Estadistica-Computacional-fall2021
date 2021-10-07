@@ -1,3 +1,4 @@
+# TODO: char2dms + as.numeric are rounding coordinates
 # Librerías -----------------------------------------------------------------------------------
 
 # Librerías requeridas
@@ -17,42 +18,42 @@ lapply(required, library, character.only=TRUE)
 # Cargar archivo
 path <- '../dat/refugios_nayarit.xlsx'
 df <- lapply(excel_sheets(path), read_xlsx, path=path, col_names=FALSE, skip=6) %>% bind_rows()
-temp <- df
 
 # Renombrar columnas
 names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacidad','lat',
-              'long','alt','responsable','tel')
+              'lng','alt','responsable','tel')
 
-# Parsear `lat` y `long`
+# Parsear `lat` y `lng`
 df <- df %>%
-    filter(!(is.na(id) | is.na(lat) | is.na(long))) %>%         # Sin NAs en [id,lat,long]
-    mutate(lat=gsub(' ','',lat), long=gsub(' ','',long)) %>%    # Quitar espacios
-    mutate(lat=gsub('º\'|°\'','º',lat)) %>%                     # Quitar casos raros
-    separate(lat, into=paste0('lat', 1:4), sep='[^0-9]') %>% 
-    separate(long, into=paste0('long', 1:4), sep='[^0-9]') %>% 
-    mutate(lat=paste0(lat1,'d',lat2,'m',lat3,'.',lat4,'s')) %>% 
-    mutate(long=paste0(long1,'d',long2,'m',long3,'.',long4,'s')) %>% 
-    select(-c(lat1,lat2,lat3,lat4,long1,long2,long3,long4)) # Quitar columnas temporales
+    filter(!(is.na(id) | is.na(lat) | is.na(lng))) %>%                      # Sin NAs
+    mutate(lat=gsub(' ','',lat), lng=gsub(' ','',lng)) %>%                  # Quitar espacios
+    mutate(lat=gsub('º\'|°\'','º',lat)) %>%                                 # Casos especiales
+    separate(lat, into=paste0('lat', 1:4), sep='[^0-9]', remove=FALSE) %>% 
+    separate(lng, into=paste0('lng', 1:4), sep='[^0-9]', remove=FALSE) %>% 
+    mutate(lat=paste0(lat1,'d',lat2,'m',lat3,'.',lat4,'s')) %>%
+    mutate(lng=paste0(lng1,'d',lng2,'m',lng3,'.',lng4,'s')) %>%
+    select(-c(lat1,lat2,lat3,lat4,lng1,lng2,lng3,lng4)) %>%                 # Quitar temporales
+    select(c(id,refugio,direccion,municipio,tipo,servicios,
+             capacidad,responsable,tel,lng,lat,alt))                        # Ordernar columnas
 
 # Convertir coordenadas de STR a DMS a NUM y quitar casos que no se parsean con patrón
 df <- df %>%
     mutate(lat=char2dms(from=df$lat, chd='d', chm='m', chs='s') %>% as.numeric()) %>% 
-    mutate(long=char2dms(from=df$long, chd='d', chm='m', chs='s') %>% as.numeric()) %>% 
-    filter(!(is.na(responsable) | is.na(tel)))
+    mutate(lng=char2dms(from=df$lng, chd='d', chm='m', chs='s') %>% as.numeric())
 
 # Convertir datos planos a SpatialPointDataFrame
 proj <- CRS("+proj=longlat +datum=WGS84")
-df <- SpatialPointsDataFrame(coords=df %>% select(c(long, lat)), data=df, proj4string=proj)
+df <- SpatialPointsDataFrame(coords=df %>% select(c(lng, lat)), data=df, proj4string=proj)
 
 
 # UI ------------------------------------------------------------------------------------------
 
 ui <- fluidPage(
-    titlePanel('Refugio más cercano'),
+    titlePanel('Encuentra tu refugio más cercano'),
     sidebarLayout(
         sidebarPanel(
-            numericInput('lon', 'Longitud', value=105, min=-180, max=180),
-            numericInput('lat', 'Latitud', value=21.5, min=-90, max=90),
+            numericInput('lng', 'Ingresa tu longitud', value=104.6, min=-180, max=180),
+            numericInput('lat', 'Ingresa tu latitud', value=21.2, min=-90, max=90),
             sliderInput(
                 'nref',
                 '¿Cuántos refugios cercanos quieres ver en la tabla?',
@@ -75,21 +76,23 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
-    # Convertir lon-lat del usuario a SP
+    # Convertir lng-lat del usuario a SP
     user_loc <- reactive(
         SpatialPoints(
-            coords=matrix(data=c(input$lon, input$lat), nrow=1),
+            coords=matrix(data=c(input$lng, input$lat), nrow=1),
             proj=CRS("+proj=longlat +datum=WGS84"))
     )
-        # Calcular distancia desde user_loc -> todos los refugios
+    # Calcular distancia de user_loc -> todos los refugios
     sort_df <- reactive(
         df@data %>% 
             mutate(dist=spDists(x=user_loc(), y=df)[1,]) %>% 
-            arrange() %>% 
+            arrange(dist) %>% 
             head(input$nref) %>% 
-            select(c('refugio','direccion','municipio','capacidad','servicios','long','lat'))
+            select(c('refugio','direccion','municipio','capacidad','servicios'))
     )
+    # Mapa con Top1 refugio más cercano
     
+    # Tabla de TopN refugios cercanos
     output$table <- renderDT({
         sort_df()
     })
