@@ -1,4 +1,3 @@
-# TODO: char2dms + as.numeric are rounding coordinates
 # Librerías -----------------------------------------------------------------------------------
 
 # Librerías requeridas
@@ -25,26 +24,36 @@ names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacid
 
 # Parsear `lat` y `lng`
 df <- df %>%
-    filter(!(is.na(id) | is.na(lat) | is.na(lng))) %>%                      # Sin NAs
-    mutate(lat=gsub(' ','',lat), lng=gsub(' ','',lng)) %>%                  # Quitar espacios
-    mutate(lat=gsub('º\'|°\'','º',lat)) %>%                                 # Casos especiales
+    # Sin NAs
+    drop_na(c(id,lat,lng)) %>% 
+    # Quitar espacios
+    mutate(lat=gsub(' ','',lat), lng=gsub(' ','',lng)) %>%
+    # Casos especiales
+    mutate(lat=gsub('º\'|°\'','º',lat)) %>%
+    # Split sobre números
     separate(lat, into=paste0('lat', 1:4), sep='[^0-9]', remove=FALSE) %>% 
     separate(lng, into=paste0('lng', 1:4), sep='[^0-9]', remove=FALSE) %>% 
-    mutate(lat=paste0(lat1,'d',lat2,'m',lat3,'.',lat4,'s')) %>%
-    mutate(lng=paste0(lng1,'d',lng2,'m',lng3,'.',lng4,'s')) %>%
-    select(-c(lat1,lat2,lat3,lat4,lng1,lng2,lng3,lng4)) %>%                 # Quitar temporales
-    select(c(id,refugio,direccion,municipio,tipo,servicios,
-             capacidad,responsable,tel,lng,lat,alt))                        # Ordernar columnas
+    # Quitar registros que les falta al menos un elemento o exceden Nayarit
+    filter(
+        !(is.na(lat4) | is.na(lng4))
+        & between(lat1,21,22)
+        & between(lng1,104,105)
+    ) %>% 
+    # Formato correcto DMS
+    mutate(lat=paste0(lat1,'d',lat2,'m',lat3,'.',lat4,'sN')) %>%
+    mutate(lng=paste0(lng1,'d',lng2,'m',lng3,'.',lng4,'sW')) %>%
+    # Ordenar columnas
+    select(c(refugio,direccion,municipio,tipo,servicios,
+             capacidad,responsable,tel,lng,lat,alt))
 
 # Convertir coordenadas de STR a DMS a NUM y quitar casos que no se parsean con patrón
 df <- df %>%
-    mutate(lat=char2dms(from=df$lat, chd='d', chm='m', chs='s') %>% as.numeric()) %>% 
-    mutate(lng=char2dms(from=df$lng, chd='d', chm='m', chs='s') %>% as.numeric())
+    mutate(lat=char2dms(from=lat, chd='d', chm='m', chs='s') %>% as.numeric()) %>% 
+    mutate(lng=char2dms(from=lng, chd='d', chm='m', chs='s') %>% as.numeric())
 
 # Convertir datos planos a SpatialPointDataFrame
 proj <- CRS("+proj=longlat +datum=WGS84")
 df <- SpatialPointsDataFrame(coords=df %>% select(c(lng, lat)), data=df, proj4string=proj)
-
 
 # UI ------------------------------------------------------------------------------------------
 
@@ -63,7 +72,8 @@ ui <- fluidPage(
         mainPanel(
             tabsetPanel(
                 tabPanel(
-                    'Mapa'
+                    'Mapa',
+                    leafletOutput('mapa')
                 ),
                 tabPanel(
                     'Tabla',
@@ -91,7 +101,9 @@ server <- function(input, output) {
             select(c('refugio','direccion','municipio','capacidad','servicios'))
     )
     # Mapa con Top1 refugio más cercano
-    
+    output$map <- renderLeaflet(
+        leaflet() %>% addTiles()
+    )
     # Tabla de TopN refugios cercanos
     output$table <- renderDT({
         sort_df()
