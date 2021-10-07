@@ -35,7 +35,7 @@ df <- SpatialPointsDataFrame(coords=df %>% select(c(long, lat)), data=df, proj4s
 
 # Usuario mete su localización
 user_lon <- 22.48
-user_lat <- 105.35
+user_lat <- 105.8
 user_loc <- SpatialPoints(coords=matrix(data=c(user_lon,user_lat), nrow=1), proj4string=proj)
 
 # Distancia a todos los puntos
