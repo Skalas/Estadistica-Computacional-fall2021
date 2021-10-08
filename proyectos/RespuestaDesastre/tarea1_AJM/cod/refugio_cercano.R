@@ -1,5 +1,4 @@
 # Librerías -----------------------------------------------------------------------------------
-
 # Librerías requeridas
 required <- c('readxl','dplyr','tidyr','sp','shiny','leaflet','DT')
 
@@ -13,14 +12,13 @@ lapply(required, library, character.only=TRUE)
 
 
 # Limpieza de refugios ------------------------------------------------------------------------
-
 # Cargar archivo
 path <- '../dat/refugios_nayarit.xlsx'
 df <- lapply(excel_sheets(path), read_xlsx, path=path, col_names=FALSE, skip=6) %>% bind_rows()
 
 # Renombrar columnas
-names(df) <-c('id','refugio','municipio','direccion','tipo','servicios','capacidad','lat',
-              'lng','alt','responsable','tel')
+names(df) <-c('id','refugio','municipio','direccion','tipo','servicios',
+              'capacidad','lat','lng','alt','responsable','tel')
 
 # Parsear `lat` y `lng`
 df <- df %>%
@@ -36,15 +34,15 @@ df <- df %>%
     # Quitar registros que les falta al menos un elemento o exceden Nayarit
     filter(
         !(is.na(lat4) | is.na(lng4))
-        & between(lat1,21,22)
-        & between(lng1,104,105)
+        & between(lat1,20,24)
+        & between(lng1,103,106)
     ) %>% 
     # Formato correcto DMS
     mutate(lat=paste0(lat1,'d',lat2,'m',lat3,'.',lat4,'sN')) %>%
     mutate(lng=paste0(lng1,'d',lng2,'m',lng3,'.',lng4,'sW')) %>%
     # Ordenar columnas
-    select(c(refugio,direccion,municipio,tipo,servicios,
-             capacidad,responsable,tel,lng,lat,alt))
+    select(c('refugio','direccion','municipio','tipo','servicios',
+             'capacidad','responsable','tel','lng','lat','alt'))
 
 # Convertir coordenadas de STR a DMS a NUM y quitar casos que no se parsean con patrón
 df <- df %>%
@@ -55,26 +53,34 @@ df <- df %>%
 proj <- CRS("+proj=longlat +datum=WGS84")
 df <- SpatialPointsDataFrame(coords=df %>% select(c(lng, lat)), data=df, proj4string=proj)
 
+# Texto de botón
+about_text <- 'Esta aplicación encuentra los refugios más cercanos a tu ubicación.
+
+
+Para encontrar tus refugios más cercanos, ingresa la latitud y longitud de tu ubicación actual
+en las casillas correspondientes. También puedes buscar los refugios más cercanos a ti dependiendo
+del tipo de servicios disponibles.'
+
 
 # UI ------------------------------------------------------------------------------------------
-
 ui <- fluidPage(
     titlePanel('Encuentra tu refugio más cercano'),
     sidebarLayout(
         sidebarPanel(
-            numericInput('lng', 'Ingresa tu longitud', value=-104.6, min=-180, max=180),
-            numericInput('lat', 'Ingresa tu latitud', value=21.2, min=-90, max=90),
+            numericInput('lng', 'Ingresa tu longitud', value=-105, min=-180, max=180),
+            numericInput('lat', 'Ingresa tu latitud', value=22, min=-90, max=90),
             sliderInput(
                 'nref',
-                '¿Cuántos refugios cercanos quieres ver en la tabla?',
+                '¿Cuántos refugios cercanos quieres ver?',
                 min=1, max=10, value=3
-            )
+            ),
+            actionButton('about','A cerca de este proyecto')
         ),
         mainPanel(
             tabsetPanel(
                 tabPanel(
                     'Mapa',
-                    leafletOutput('map')
+                    leafletOutput('map', height=800)
                 ),
                 tabPanel(
                     'Tabla',
@@ -87,8 +93,12 @@ ui <- fluidPage(
 
 
 # Server --------------------------------------------------------------------------------------
-
 server <- function(input, output) {
+    # Butón de about
+    observeEvent(
+        input$about,
+        {showModal(modalDialog(about_text, title='Acerca de este proyecto'))}
+    )
     # Convertir lng-lat del usuario a SP
     user_loc <- reactive(
         SpatialPoints(
@@ -107,21 +117,33 @@ server <- function(input, output) {
             head(input$nref) %>% 
             # Rank por cercanía
             mutate(cercania=1:input$nref) %>% 
-            select(c('cercania','refugio','direccion','municipio',
-                     'capacidad','servicios','lat','lng'))
+            select(c(cercania,refugio,direccion,municipio,
+                     capacidad,servicios,lng,lat))
     )
 
     # Mapa con Top1 refugio más cercano
     output$map <- renderLeaflet({
         leaflet() %>% 
             addTiles() %>% 
-            setView(zoom=8, lng=input$lng, lat=input$lat) %>% 
+            setView(zoom=9, lng=input$lng, lat=input$lat) %>% 
             addCircleMarkers(
                 data=sort_df(),
                 lng=~lng,
                 lat=~lat,
                 radius=1,
-                popup=~c(direccion, municipio)
+                popup=~paste0(
+                    'Nombre de refugio: ', refugio, '<br>',
+                    'Cercanía de refugio: ', cercania, ' de ', input$nref, '<br>',
+                    'Dirección: ', direccion, ', Municipio ', municipio, '<br>',
+                    'Servicios disponibles: ', servicios
+                )
+            ) %>% 
+            addCircleMarkers(
+                lng=input$lng,
+                lat=input$lat,
+                popup='Tú estás aquí',
+                color='red',
+                radius=2
             )
     })
     # Tabla de TopN refugios cercanos
@@ -130,4 +152,6 @@ server <- function(input, output) {
     })
 }
 
+
+# App -----------------------------------------------------------------------------------------
 shinyApp(ui = ui, server = server)
