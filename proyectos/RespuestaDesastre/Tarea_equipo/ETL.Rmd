@@ -3,13 +3,9 @@ title: "ETL_Estadistica Comp"
 output: html_document
 ---
 
-
 ```{r}
-library(readxl)
-library(tidyverse)
-library(measurements)
-library(tidyr)
-library(stringr)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr)
 ```
 
 ```{r}
