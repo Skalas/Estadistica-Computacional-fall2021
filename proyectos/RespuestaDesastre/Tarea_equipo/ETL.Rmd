@@ -109,6 +109,9 @@ for (i in 1:a){
     refugios_ubicacion$Longitud[i] = real_long
   }
 }
+
+refugios_ubicacion$Longitud <- -as.numeric(refugios_ubicacion$Longitud)
+refugios_ubicacion$Latitud <- as.numeric(refugios_ubicacion$Latitud)
 ```
 
 
@@ -117,10 +120,17 @@ library(leaflet)
 
 mexico <- leaflet() %>% 
   addTiles() %>% 
-  addMarkers(lng=-as.numeric(refugios_ubicacion$Longitud),
-             lat=as.numeric(refugios_ubicacion$Latitud), 
-             popup = refugios_ubicacion$Direccion, 
-             label = refugios_ubicacion$Municipio)
+  addMarkers(lng=refugios_ubicacion$Longitud,
+             lat=refugios_ubicacion$Latitud, 
+             popup = paste ("<h3 style ='color: blue'>", refugios_ubicacion$No,refugios_ubicacion$Refugio, '</h3>',
+                            '<b>Dirección:</b>', refugios_ubicacion$Direccion, '<br>',
+                            '<b>Capcidad:</b>', refugios_ubicacion$`Capacidad de personas`, '<br>', 
+                            '<b>Contacto:</b>', refugios_ubicacion$Responsable, refugios_ubicacion$Telefono), 
+             label = refugios_ubicacion$Municipio, 
+             group = 'Refugios',
+             icon = makeIcon('refugio.png', 20, 20)) %>% 
+  addLayersControl(overlayGroups = 'Refugios',
+                   options = layersControlOptions(collapsed = FALSE))
 
 mexico
 ```
