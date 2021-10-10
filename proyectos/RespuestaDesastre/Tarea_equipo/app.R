@@ -10,7 +10,10 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr)
 
 library(shiny)
+library(shinyWidgets)
 library(DT)
+library(leaflet)
+library(htmlwidgets)
 
 # Nombres de las cada hoja del excel 
 hojas <- excel_sheets('refugios_nayarit.xlsx')
@@ -126,15 +129,50 @@ ui <- fluidPage(
               hr(),
               DT::dataTableOutput('refugios')),
               
-              #tabPanel('Ubicación de refugios',
-                       #leafletOutput()
-                       #)
-              )
+              tabPanel('Ubicación de refugios',
+                       leafletOutput('mexico', width = 10000, height = 10000),
+                       
+                       absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                     draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                                     width = 330, height = "auto",
+                                     
+                                     h2("Localizador de Refugios"),
+                                     
+                                     pickerInput('umunicipios', label = 'Selecciona municipios: ',
+                                                 choices = c('Todos los municipios', unique(refugios_ubicacion$Municipio)), 
+                                                 options = list(`live-search` = TRUE))
+                                    )
+                      )
+             )
 )
-
+                         
 
 # Define server logic required 
 server <- function(input, output, session) {
+    
+    refugios_mun <- reactive({
+        if(input$umunicipios == 'Todos los municipios' ){
+            refugios_ubicacion
+        } else {
+            filter(refugios_ubicacion, Municipio == input$umunicipios)
+        }
+    })
+    
+    output$mexico <- renderLeaflet({
+        leaflet(refugios_ubicacion) %>% 
+            addTiles() %>% 
+            addMarkers(refugios_ubicacion$Longitud,
+                       refugios_ubicacion$Latitud, 
+                       popup = paste ("<h3 style ='color: blue'>", refugios_ubicacion$No,refugios_ubicacion$Refugio, '</h3>',
+                                      '<b>Dirección:</b>', refugios_ubicacion$Direccion, '<br>',
+                                      '<b>Capcidad:</b>', refugios_ubicacion$`Capacidad de personas`, '<br>', 
+                                      '<b>Contacto:</b>', refugios_ubicacion$Responsable, refugios_ubicacion$Telefono), 
+                       label = refugios_ubicacion$Municipio,
+            )
+    })
+    
+    
+    
     observe({
         direccion <- if (is.null(input$municipios)) character(0) else {
             filter(refugios_ubicacion, Municipio %in% input$municipios) %>%
