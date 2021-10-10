@@ -14,7 +14,10 @@ path <- "C:/Users/usuario/Downloads/refugios_nayarit.xlsx"
 ```
 
 ```{r}
-refugios <- path %>% excel_sheets() %>% set_names() %>% map_df(~read_excel(path=path, sheet = .x, skip = 2, col_names = T, trim_ws = T))
+refugios <- path %>% 
+ excel_sheets() %>% 
+ set_names() %>% 
+ map_df(~read_excel(path=path, sheet = .x, skip = 2, col_names = T, trim_ws = T))
 colnames(refugios)[which(names(refugios) == "COORDENADAS GEOGRAFICAS")] <- "LATITUD"
 colnames(refugios)[which(names(refugios) == "...9")] <- "LONGITUD"
 colnames(refugios)[which(names(refugios) == "...10")] <- "ALTITUD"
