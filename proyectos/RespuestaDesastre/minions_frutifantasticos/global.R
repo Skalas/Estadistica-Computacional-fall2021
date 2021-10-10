@@ -45,7 +45,6 @@ distance_compute <- function(data, lat_input, lon_input){
 shp <- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
-
 path <- list.files("data/", pattern = ".xlsx", full.names = T)
 
 data <- path %>% 
@@ -117,5 +116,6 @@ labels <- sprintf(
 
 
 
+##### JOINS GEOESPACIAL #####
 
 
