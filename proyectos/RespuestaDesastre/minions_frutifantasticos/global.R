@@ -33,7 +33,8 @@ loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt 
 shp <- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
-path <- "data/refugios_nayarit.xlsx" 
+
+path <- list.files("data/", pattern = ".xlsx", full.names = T)
 
 data <- path %>% 
   excel_sheets() %>% 
@@ -56,9 +57,10 @@ data %<>%
   separate(lat, c("d","m","s_int","s_dec", "basura"), sep = "([°º'\\,ª.;\"])") %>% 
   separate(lng, c("d_lg","m_lg","s_int_lg","s_dec_lg", "basura_lg"), sep = "([°º'\\,ª.;\"])") %>% 
   mutate(
-    lat = as.numeric(d) + as.numeric(m)/60 + as.numeric(s_int)/3600 + as.numeric(s_dec)/360000,
-    lng = -(as.numeric(d_lg) + as.numeric(m_lg)/60 + as.numeric(s_int_lg)/3600 + as.numeric(s_dec_lg)/360000)) %>% 
-  select(-c(d,m,s_int,s_dec, basura, d_lg, m_lg, s_int_lg, s_dec_lg,basura_lg))
+    coor1 = as.numeric(d) + as.numeric(m)/60 + as.numeric(s_int)/3600 + as.numeric(s_dec)/360000,
+    coor2 = (as.numeric(d_lg) + as.numeric(m_lg)/60 + as.numeric(s_int_lg)/3600 + as.numeric(s_dec_lg)/360000)) %>% 
+  mutate(lat = pmin( coor1,coor2), lng = -pmax(coor1, coor2)) %>% 
+  select(-c(coor1, coor2, d,m,s_int,s_dec, basura, d_lg, m_lg, s_int_lg, s_dec_lg,basura_lg))
 
 #uso_inmueble <- c("EDUCACION", "EJIDAL", "GOBIERNO MUNICIPAL", "OTROS")
 pal <- colorFactor(
@@ -93,12 +95,23 @@ labels <- sprintf(
 
 
 
+# lat_input <- 21.736867
+# lon_input <- -104.756833
+
+library(geosphere)
 
 
+distance_compute <- function(data, lat_input, lon_input){ 
+  
+  # This function returns the distance of a vector vs the inputs of nayarit in meters
+
+  data <- data %>% rowwise() %>% 
+    mutate(distance = as.vector(distm(c(lng, lat), c(lon_input,lat_input), fun=distGeo)))
+  
+  return(data) }
 
 
-
-
+# distance_compute (data, lat_input , lon_input)
 
 
 
