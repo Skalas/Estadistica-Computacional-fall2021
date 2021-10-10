@@ -7,12 +7,14 @@ shinyServer(function(input, output, session) {
 
     output$map <- renderLeaflet({
         
-        opacity = 1
+        opacity = 0.9
         split_data <- split(data, data$uso_cat)
         
         map <- data %>% 
             leaflet() %>% 
             addTiles() %>% 
+            fitBounds(lng1 = shp@bbox[1, 1], lng2 = shp@bbox[1, 2],
+                      lat1 = shp@bbox[2, 1], lat2 = shp@bbox[2, 2]) %>% 
             addTiles(group = "OSM (default)") %>%
             addProviderTiles("Esri.WorldImagery", group = "Satellital") %>%
             addProviderTiles("CartoDB.Positron", group = "CartoDB") %>%
@@ -20,6 +22,13 @@ shinyServer(function(input, output, session) {
                 color = "black", 
                 fillColor = "transparent", 
                 weight = 2,
+                dashArray = "5",
+                highlightOptions = highlightOptions(
+                    weight = 4,
+                    color = "black",
+                    dashArray = "",
+                    fillOpacity = 0.7,
+                    bringToFront = FALSE),
                 data = shp
             )
         
@@ -30,10 +39,11 @@ shinyServer(function(input, output, session) {
                         data = split_data[[category]],
                         lng =~ lng, 
                         lat =~ lat, 
-                        radius =~ log(capacidad_de_personas),
+                        radius =~ sqrt(capacidad)/7,
                         label =~  refugio,
                         weight = 1,
-                        color = ~ pal(uso_cat),
+                        #color = "black",
+                        color =~ pal(uso_cat),
                         fillOpacity = opacity,
                         group = category)
             })
@@ -70,7 +80,8 @@ shinyServer(function(input, output, session) {
         return(map)
     })
     
-    output$table <- renderDataTable(
+    output$table <- renderDataTable({
+        datatable(
         data,
         rownames = F,
         extensions = c('Buttons', 'Scroller', "FixedColumns"),
@@ -86,8 +97,8 @@ shinyServer(function(input, output, session) {
                 "function(settings, json) {",
                 "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
                 "}")
-        )
-    )
+        ))
+    })
     
     observeEvent(input$search, {
         sendSweetAlert(
