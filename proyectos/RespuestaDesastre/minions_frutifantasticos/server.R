@@ -1,5 +1,8 @@
 library(shinydashboard)
 library(leaflet)
+# devtools::install_github("tomroh/leaflegend")
+library(leaflegend)
+library(leaflet.extras)
 library(purrr)
 library(DT)
 
@@ -22,18 +25,13 @@ shinyServer(function(input, output, session) {
                 color = "black", 
                 fillColor = "transparent", 
                 weight = 2,
-                dashArray = "5",
+                dashArray = "4",
                 highlightOptions = highlightOptions(
-                    weight = 4,
+                    weight = 3,
                     color = "black",
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = FALSE),
-                label = labels,
-                labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "15px",
-                    direction = "auto"),
                 data = shp
             )
         
@@ -45,7 +43,11 @@ shinyServer(function(input, output, session) {
                         lng =~ lng, 
                         lat =~ lat, 
                         radius =~ sqrt(capacidad)/7,
-                        label =~  refugio,
+                        label = labels,
+                        labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "11px",
+                            direction = "auto"),
                         weight = 1,
                         #color = "black",
                         color =~ pal(uso_cat),
@@ -56,30 +58,56 @@ shinyServer(function(input, output, session) {
         map %<>%
             addScaleBar("bottomright") %>% 
             addLayersControl(
-                baseGroups = c("OSM", "Satellital", "CartoDB"),
+                baseGroups = c("CartoDB", "OSM", "Satellital"),
                 overlayGroups = names(split_data),
                 options = layersControlOptions(collapsed = T)) %>%
             addEasyButton(easyButton(
                 icon= "fa-globe", 
                 title= "Zoom to Level 1",
                 onClick = JS("function(btn, map){ map.setZoom(5); }"))) %>% 
+            addMeasure(
+                position = "topright",
+                primaryLengthUnit = "meters",
+                secondaryLengthUnit = "kilometers",
+                primaryAreaUnit = "sqmeters",
+                localization = "es",
+                activeColor = "navy",
+                completedColor = "navy"
+            ) %>% 
             addMiniMap(
                 toggleDisplay = TRUE, 
-                width = 90, 
-                height = 90, 
+                width = 85, 
+                height = 85, 
                 minimized = T) %>% 
-            addLegend(
+            addLegendFactor(
                 title = "Uso de inmueble",
                 position = "bottomleft",
                 pal = pal,
-                values = c("EDUCACION", "EJIDAL", "GOBIERNO MUNICIPAL", "OTROS"),
-                opacity = opacity
+                values = c("Educación", "Ejidal", "Gobierno Municipal", "Otros"),
+                opacity = opacity,
+                width = 11,
+                height = 11,
+                shape = "circle"
+            ) %>% 
+            addControlGPS(
+                options = gpsOptions(
+                    position = "topleft", 
+                    activate = TRUE,
+                    autoCenter = TRUE, 
+                    maxZoom = 60,
+                    setView = F
+                )
             )
         
         if (input$search != 0){
             isolate({
                 input$search
-                map %<>% addMarkers(lng = input$lng, lat = input$lat)
+                map %<>% 
+                    addMarkers(
+                        lng = input$lng, 
+                        lat = input$lat,
+                        label = "Mi ubicación"
+                    )
             })
         }
         return(map)
@@ -114,5 +142,11 @@ shinyServer(function(input, output, session) {
         )
     })
     
-
+    observe(print(input$map_gps_located))
+    
 })
+
+
+
+
+

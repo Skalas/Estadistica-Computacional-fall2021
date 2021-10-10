@@ -34,7 +34,7 @@ dashboardPage(
         tags$br(),
         menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar")),
         tags$br(),
-        menuItem("Buscar", icon = icon(name = "search"), startExpanded = F,
+        menuItem("Buscar", icon = icon(name = "search"), startExpanded = T,
             numericInput("lng", label = "Longitud", value = -104.812454, step = 0.000001),
             numericInput("lat", label = "Latitud", value = 21.815353, step = 0.000001)
         ),
@@ -50,7 +50,7 @@ dashboardPage(
         useSweetAlert(theme = "dark"),
         fluidRow(
             column(
-                width = 5,
+                width = 6,
                 box(
                     width = NULL,
                     solidHeader = T,
@@ -58,7 +58,7 @@ dashboardPage(
                 )
             ),
             column(
-                width = 7,
+                width = 6,
                 box(
                     width = NULL,
                     solidHeader = T,
