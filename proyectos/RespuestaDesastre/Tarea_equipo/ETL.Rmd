@@ -135,6 +135,18 @@ mexico <- leaflet() %>%
 mexico
 ```
 
+```{r}
+library(geosphere)
 
+# el usuario proporciona las coordenadas de su ubicación 
 
+ubicacion = c(-105.360352777778, 22.4989055555556)
+
+# calculamos la distancia de su ubicación a cada uno de los centros e imprimimos los cinco más cercanos
+refugios_ubicacion %>%
+  rowwise() %>%
+  mutate(distance = distHaversine(c(Longitud, Latitud),ubicacion)) %>%
+  arrange(distance) %>%
+  head(5) 
+```
 
