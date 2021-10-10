@@ -33,7 +33,6 @@ loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt 
 shp <- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
-
 path <- list.files("data/", pattern = ".xlsx", full.names = T)
 
 data <- path %>% 
@@ -93,14 +92,10 @@ labels <- sprintf(
 
 ##### Cálculo de distancias #####
 
-
-
 # lat_input <- 21.736867
 # lon_input <- -104.756833
 
 library(geosphere)
-
-
 distance_compute <- function(data, lat_input, lon_input){ 
   
   # This function returns the distance of a vector vs the inputs of nayarit in meters
@@ -115,5 +110,6 @@ distance_compute <- function(data, lat_input, lon_input){
 
 
 
+##### JOINS GEOESPACIAL #####
 
 
