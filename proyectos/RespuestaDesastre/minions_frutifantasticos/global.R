@@ -37,7 +37,7 @@ path <- "data/refugios_nayarit.xlsx"
 
 data <- path %>% 
   excel_sheets() %>% 
-  map(function(X) readxl::read_excel(path = path, sheet = X, skip = 5)) %>% 
+  map(function(X) readxl::read_excel(path = path, sheet = X, skip = 5, trim_ws = T)) %>% 
   bind_rows()
 
 names(data) <- c("no", "refugio", "municipio", "direccion", "uso_inmueble",
@@ -76,10 +76,11 @@ labels <- sprintf(
 labels <- sprintf(
   "<strong>Refugio:</strong><br/>%s<br/>
    <strong>Servicios:</strong><br/>%s<br/>
-  <strong>Capacidad:</strong><br/>%s<br/>
-  
-  ",
-  data$refugio, data$servicios, data$capacidad
+   <strong>Capacidad:</strong><br/>%s<br/>
+   <strong>Responsable:</strong><br/>%s<br/>
+   <strong>Teléfono:</strong><br/>%s<br/>",
+  data$refugio, data$servicios, data$capacidad, 
+  data$responsable, data$telefono
 ) %>% lapply(htmltools::HTML)
 
 
@@ -88,7 +89,7 @@ labels <- sprintf(
 
 
 
-
+##### Cálculo de distancias #####
 
 
 

@@ -29,6 +29,11 @@ shinyServer(function(input, output, session) {
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = FALSE),
+                label = labels,
+                labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto"),
                 data = shp
             )
         
