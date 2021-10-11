@@ -102,4 +102,20 @@ pal <- colorFactor(
 
 ##### JOINS GEOESPACIAL #####
 
+library(spatialEco)
+
+shape_loc <- readOGR("data/loc_urb.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
+
+shape_loc@data <- shape_loc@data %>% 
+  select (CVEGEO,NOM_ENT,NOM_MUN,NOMGEO)
+
+data1 <-  data %>% filter( !is.na(lat))
+coordinates(data1) <- ~ lng + lat
+proj4string(data1) <- proj4string(shape_loc)
+data_spacialjoined <- data1 %>% point.in.poly(shape_loc)
+data_spacialjoined@data %>% head()
+
+
+
+
 
