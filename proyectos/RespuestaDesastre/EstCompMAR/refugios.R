@@ -1,18 +1,20 @@
-install.packages("leaflet")
+# install.packages("leaflet")
 if (!require("devtools")) {
   install.packages("devtools")
 }
-devtools::install_github("diegovalle/mxmaps")
-install.packages("geosphere")
+# devtools::install_github("diegovalle/mxmaps")
+# install.packages("geosphere")
 library(geosphere)
 
-
+# install.packages("tidymodels")
+library(tidymodels)
 
 library(leaflet)
 library(magrittr)
 library(sp)
 # library(mxmaps)
 library(stringr)
+library(readxl)
 
 ### Algunas usadas para los mapas
 # install.packages("rgdal")
@@ -36,6 +38,19 @@ library(stringr)
 # 4. Hay algunas coordenadas que se repiten (p.ej. 414, 415 y 416). Entonces,
 # hay que determinar que hacer. Al momento, se estan sobrescribiendo, pero una
 # idea podria ser mostrar todos los valores en el popup.
+
+municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
+                   "AMATLAN DE CAÑAS"="AMATLAN DE CAÑAS","COMPOSTELA" ="COMPOSTELA",
+                   "COMPOSTELA"="COMPOSTELA","RUIZ"="RUIZ",
+                   "SAN BLAS"="SAN BLAS", "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS",
+                   "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS", 
+                   "SANTA MARIA DEL ORO"="SANTA MARIA DEL ORO",
+                   "SANTIAGO IXCUINTLA"="SANTIAGO IXCUINTLA",
+                   "TECUALA"="TECUALA","TEPIC"="TEPIC","TUXPAN"="TUXPAN",
+                   "LA YESCA"="LA YESCA","XALISCO"="XALISCO","HUAJICORI"="HUAJICORI",
+                   "IXTLAN DEL RIO"="IXTLAN DEL RIO","JALA"="JALA","ROSAMORADA"="ROSAMORADA",
+                   "BAHIA DE BANDERAS"="BAHIA DE BANDERAS")
+
 
 filepath <-"data/refugios_nayarit.xlsx"
 n_hojas <- length(excel_sheets(filepath))
@@ -167,6 +182,50 @@ corregidos$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist
 nayarit_refugios <- corregidos
 municipios_unicos <- nayarit_refugios$Municipio |> unique()
 
+
+
+obten_mas_cercanos <- function(lat_D, lat_M, lat_S, lon_D, lon_M, lon_S){
+  
+  latitud_actual <- paste(lat_D, "º", lat_M, "'", lat_S, sep = "" )
+  longitud_actual <- paste(lon_D, "º", lon_M, "'", lon_S,sep = "" )
+  ubicacion_actual <- c(latitud_actual, longitud_actual) |> map_dbl(convert_coordinates)
+  
+  
+  aux_dist <- nayarit_refugios |> 
+    mutate(x_actual = ubicacion_actual[1], y_actual = -1*ubicacion_actual[2]) |>
+    select(c("Latitud_Dec", "x_actual" , "Longitud_Dec", "y_actual")) |>
+    rename(x1 = Latitud_Dec, x2 = x_actual, y1 = Longitud_Dec, y2 = y_actual)
+  
+  nayarit_refugios$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
+  
+  #Tomamos los n_closer mas cercanos
+  mas_cercanos <- nayarit_refugios |>
+    arrange(dist) |>
+    head(n_closer)
+  
+  mas_cercanos
+}  
+
+obten_ubicacion_actual_df <- function(lat_D, lat_M, lat_S, lon_D, lon_M, lon_S){
+  
+  latitud_actual <- paste(lat_D, "º", lat_M, "'", lat_S, sep = "" )
+  longitud_actual <- paste(lon_D, "º", lon_M, "'", lon_S,sep = "" )
+  ubicacion_actual <- c(latitud_actual, longitud_actual) |> map_dbl(convert_coordinates)
+  
+  #Para cualquier caso, lo agregamos a un df para pasarlo al mapa
+  ubicacion_actual_df <- tibble(id = "Ubicacion actual",
+                                lat = ubicacion_actual[1],
+                                lng = -1*ubicacion_actual[2])
+  
+  ubicacion_actual_df
+}
+
+obten_municipios <- function(municipio){
+  ### Por municipios (en la implementacion, dar a elegir de una lista)
+  municipio_actual <- municipio
+  por_municipio <- nayarit_refugios |>
+    filter(Municipio == municipio_actual)
+}
 
 
 # #Tomamos los n_closer mas cercanos
