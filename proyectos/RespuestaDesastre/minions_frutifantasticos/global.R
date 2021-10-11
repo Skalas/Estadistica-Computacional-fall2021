@@ -114,3 +114,28 @@ pal <- colorFactor(
 
 
 
+
+##### JOINS GEOESPACIAL #####
+
+library(spatialEco)
+
+shape_loc <- readOGR("data/loc_urb.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
+
+shape_loc@data <- shape_loc@data %>% 
+  select ("EDOMUNLOC" = CVEGEO, "ENTIDAD"=  NOM_ENT, "LOCALIDAD" = NOMGEO)
+
+data1 <-  data %>% filter( !is.na(lat))
+coordinates(data1) <- ~ lng + lat
+proj4string(data1) <- proj4string(shape_loc)
+data_spacialjoined <- data1 %>% point.in.poly(shape_loc)
+data_spacialjoined@data %>% head()
+
+shape_mun<- readOGR("data/municipal.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
+
+shape_mun@data <- shape_mun@data %>% 
+  select (CVEGEO, "MUNICIPIO" = NOMGEO )
+
+data_spacialjoined_mun<- data_spacialjoined %>% point.in.poly(shape_mun)
+data_spacialjoined_mun@data %>% head()
+
+
