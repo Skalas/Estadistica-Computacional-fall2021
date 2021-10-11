@@ -1,0 +1,16 @@
+Pendientes
+
+General
+1. Mejorar formato
+2. Comentar y estructurar mejor el codigo
+
+Tab de Mas cercanos
+1. Que regrese la tabla con los n valores mas cercanos
+2. 
+
+Tab de Municipios
+1. Que regrese la tabla con los del municipio
+
+
+Tab de Picarle y que te de el Mas Cercano
+1. Que regrese la tabla con el mas cercano dada la ubi elegida
