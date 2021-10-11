@@ -148,3 +148,6 @@ dmypy.json
 *.zip
 *.xlsx
 *.xls
+
+# Key and passwords
+auth/
