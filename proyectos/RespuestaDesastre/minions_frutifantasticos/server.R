@@ -5,15 +5,32 @@ library(leaflegend)
 library(leaflet.extras)
 library(purrr)
 library(DT)
+library(geosphere)
 
 shinyServer(function(input, output, session) {
+    
+    datum <- reactive({
+        
+        df <- data
+        if(input$search == 0) return(df)
+        
+        input$search
+        isolate({
+            df %<>% distance_compute(
+                    lat_input = input$lat, 
+                    lon_input = input$lng) %>% 
+                arrange(distance)
+            
+            return(df)
+        })
+    })
 
     output$map <- renderLeaflet({
         
         opacity = 0.9
-        split_data <- split(data, data$uso_cat)
+        split_data <- split(datum(), datum()$uso_cat)
         
-        map <- data %>% 
+        map <- datum() %>% 
             leaflet() %>% 
             addTiles() %>% 
             fitBounds(lng1 = shp@bbox[1, 1], lng2 = shp@bbox[1, 2],
@@ -35,8 +52,38 @@ shinyServer(function(input, output, session) {
                 data = shp
             )
         
+        if (input$search != 0){
+            input$search
+            isolate({
+                
+                map %<>% 
+                    addMarkers(
+                        lng = input$lng, 
+                        lat = input$lat,
+                        label = "Mi ubicación"
+                    )
+            })
+        }
+        
+        
         names(split_data) %>%
             walk(function(category) {
+                
+                labels <- sprintf(
+                    "<strong> Refugio: </strong> <br/> %s <br/>
+                     <strong> Servicios: </strong> <br/> %s <br/>
+                     <strong> Capacidad: </strong> <br/> %s personas <br/>
+                     <strong> Disponibilidad: </strong> <br/> %g personas <br/>
+                     <strong> Responsable: </strong> <br/> %s <br/>
+                     <strong> Teléfono: </strong> <br/> %s <br/>",
+                    tolower(split_data[[category]]$refugio), 
+                    tolower(split_data[[category]]$servicios), 
+                    tolower(split_data[[category]]$capacidad), 
+                    split_data[[category]]$disponibilidad,
+                    tolower(split_data[[category]]$responsable), 
+                    tolower(split_data[[category]]$telefono)) %>% 
+                    map(htmltools::HTML)
+                
                 map <<- map %>%
                     addCircleMarkers(
                         data = split_data[[category]],
@@ -99,23 +146,13 @@ shinyServer(function(input, output, session) {
                 )
             )
         
-        if (input$search != 0){
-            isolate({
-                input$search
-                map %<>% 
-                    addMarkers(
-                        lng = input$lng, 
-                        lat = input$lat,
-                        label = "Mi ubicación"
-                    )
-            })
-        }
         return(map)
     })
     
     output$table <- renderDataTable({
+        
         datatable(
-        data,
+        datum(),
         rownames = F,
         extensions = c('Buttons', 'Scroller', "FixedColumns"),
         options = list(
@@ -143,6 +180,7 @@ shinyServer(function(input, output, session) {
     })
     
     observe(print(input$map_gps_located))
+    observe(print(glimpse(datum())))
     
 })
 

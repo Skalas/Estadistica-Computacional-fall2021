@@ -37,7 +37,8 @@ distance_compute <- function(data, lat_input, lon_input){
     mutate(distance = as.vector(
       round(distm(c(lng, lat), c(lon_input,lat_input), fun=distGeo)/1000, 3)
       )
-    )
+    ) %>% 
+    ungroup()
   
   return(data) 
 }
@@ -77,6 +78,7 @@ data %<>%
     disponibilidad = sample(capacidad, size = 1),
     lat = pmin( coor1,coor2), 
     lng = -pmax(coor1, coor2)) %>% 
+  ungroup() %>% 
   relocate("alt", .after = last_col()) %>% 
   select(-c(coor1, coor2, d,m,s_int,s_dec, basura, d_lg, m_lg, s_int_lg, s_dec_lg,basura_lg))
 
@@ -86,25 +88,7 @@ pal <- colorFactor(
   domain = unique(data$uso_cat)
   )
 
-labels <- sprintf(
-  "<strong> Refugio: </strong> <br/> %s <br/>
-   <strong> Servicios: </strong> <br/> %s <br/>
-   <strong> Capacidad: </strong> <br/> %s personas <br/>
-   <strong> Disponibilidad: </strong> <br/> %g personas <br/>
-   <strong> Responsable: </strong> <br/> %s <br/>
-   <strong> Teléfono: </strong> <br/> %s <br/>",
-  tolower(data$refugio), 
-  tolower(data$servicios), 
-  tolower(data$capacidad), 
-  data$disponibilidad,
-  tolower(data$responsable), 
-  tolower(data$telefono)) %>% 
-  map(htmltools::HTML)
-
-
-
-
-
+#21.5124555555556	-104.892644444444
 
 
 ##### Cálculo de distancias #####
