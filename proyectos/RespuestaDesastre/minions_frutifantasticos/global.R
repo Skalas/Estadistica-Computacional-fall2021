@@ -8,6 +8,7 @@ library(tidyr)
 library(geosphere)
 library(spatialEco)
 
+#### Funciones ####
 loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt = NULL) {
  tagList(
   tags$head(
@@ -44,14 +45,30 @@ distance_compute <- function(data, lat_input, lon_input){
   return(data) 
 }
 
-shp <- readOGR("data/municipal.shp") %>% 
+icons <- function(color){
+  awesomeIcons(
+    icon = 'ios-close',
+    iconColor = 'black',
+    library = 'ion',
+    markerColor = color
+  )
+}
+
+pal <- colorFactor(
+  palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
+  domain = unique(data$uso_cat)
+)
+
+#### Datos ####
+
+shp_mun<- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
 shp_loc <- readOGR("data/loc_urb.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
-shp_loc@data <- select(shp_loc@data, CVEGEO, NOM_ENT, NOM_MUN, NOM_LOC = NOMGEO)
-
+shp_mun@data <- select(shp_mun@data, CVEGEO, NOM_ENT, "municipio" = NOMGEO )
+shp_loc@data <- select(shp_loc@data, CVEGEOLOC = CVEGEO, NOM_LOC = NOMGEO)
 
 path <- list.files("data/", pattern = ".xlsx", full.names = T)
 
@@ -63,6 +80,8 @@ data <- path %>%
 names(data) <- c("no", "refugio", "municipio", "direccion", "uso_inmueble",
                  "servicios", "capacidad", "lat", "lng", "alt", "responsable", 
                  "telefono")
+
+#### Procesos únicos ####
 
 set.seed(12345)
 data %<>%  
@@ -99,43 +118,21 @@ proj4string(data_coord) <- proj4string(shp_loc)
 data <- data_coord %>% 
   point.in.poly(shp_loc) %>% 
   as_tibble() %>% 
-  select(no, CVEGEO, entidad = NOM_ENT, municipio = NOM_MUN, localidad = NOM_LOC) %>% 
+  select(no, CVEGEOLOC, localidad = NOM_LOC) %>% 
   rename_with(tolower) %>% 
   right_join(data, by = "no") %>% 
-  relocate(refugio, .before = cvegeo) %>% 
+  relocate(refugio, .before = cvegeoloc) %>% 
   relocate(direccion, .after = refugio) %>%
-  relocate(cvegeo, .after = localidad)
+  relocate(cvegeoloc, .after = localidad)
 
-#uso_inmueble <- c("EDUCACION", "EJIDAL", "GOBIERNO MUNICIPAL", "OTROS")
-pal <- colorFactor(
-  palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
-  domain = unique(data$uso_cat)
-  )
-
-
-
-
-##### JOINS GEOESPACIAL #####
-
-library(spatialEco)
-
-shape_loc <- readOGR("data/loc_urb.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
-
-shape_loc@data <- shape_loc@data %>% 
-  select ("EDOMUNLOC" = CVEGEO, "ENTIDAD"=  NOM_ENT, "LOCALIDAD" = NOMGEO)
-
-data1 <-  data %>% filter( !is.na(lat))
-coordinates(data1) <- ~ lng + lat
-proj4string(data1) <- proj4string(shape_loc)
-data_spacialjoined <- data1 %>% point.in.poly(shape_loc)
-data_spacialjoined@data %>% head()
-
-shape_mun<- readOGR("data/municipal.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
-
-shape_mun@data <- shape_mun@data %>% 
-  select (CVEGEO, "MUNICIPIO" = NOMGEO )
-
-data_spacialjoined_mun<- data_spacialjoined %>% point.in.poly(shape_mun)
-data_spacialjoined_mun@data %>% head()
+data <- data_coord %>% 
+  point.in.poly(shp_mun) %>% 
+  as_tibble() %>% 
+  select(no, cvegeo = CVEGEO, entidad = NOM_ENT, municipio) %>% 
+  right_join(data, by = "no") %>% 
+  relocate(entidad, .before = localidad) %>% 
+  relocate(municipio, .after = entidad) %>%
+  relocate(cvegeo, .before = cvegeoloc) 
+  
 
 

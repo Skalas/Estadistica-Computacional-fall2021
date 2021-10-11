@@ -16,7 +16,8 @@ shinyServer(function(input, output, session) {
         
         input$search
         isolate({
-            df %<>% distance_compute(
+            df %<>% 
+                distance_compute(
                     lat_input = input$lat, 
                     lon_input = input$lng) %>% 
                 arrange(distance)
@@ -33,14 +34,14 @@ shinyServer(function(input, output, session) {
         map <- datum() %>% 
             leaflet() %>% 
             addTiles() %>% 
-            fitBounds(lng1 = shp@bbox[1, 1], lng2 = shp@bbox[1, 2],
-                      lat1 = shp@bbox[2, 1], lat2 = shp@bbox[2, 2]) %>% 
+            fitBounds(lng1 = shp_mun@bbox[1, 1], lng2 = shp_mun@bbox[1, 2],
+                      lat1 = shp_mun@bbox[2, 1], lat2 = shp_mun@bbox[2, 2]) %>% 
             addTiles(group = "OSM (default)") %>%
             addProviderTiles("Esri.WorldImagery", group = "Satellital") %>%
             addProviderTiles("CartoDB.Positron", group = "CartoDB") %>%
             addPolygons(
                 color = "black", 
-                fillColor = "blue", 
+                fillColor = "lightblue", 
                 weight = 2,
                 dashArray = "4",
                 highlightOptions = highlightOptions(
@@ -49,22 +50,8 @@ shinyServer(function(input, output, session) {
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = FALSE),
-                data = shp_loc
+                data = shp_mun
             )
-        
-        if (input$search != 0){
-            input$search
-            isolate({
-                
-                map %<>% 
-                    addMarkers(
-                        lng = input$lng, 
-                        lat = input$lat,
-                        label = "Mi ubicación"
-                    )
-            })
-        }
-        
         
         names(split_data) %>%
             walk(function(category) {
@@ -89,7 +76,7 @@ shinyServer(function(input, output, session) {
                         data = split_data[[category]],
                         lng =~ lng, 
                         lat =~ lat, 
-                        radius =~ sqrt(capacidad)/7,
+                        radius =~ sqrt(capacidad)/7 + 1,
                         label = labels,
                         labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -101,6 +88,26 @@ shinyServer(function(input, output, session) {
                         fillOpacity = opacity,
                         group = category)
             })
+        
+        if (input$search != 0){
+            input$search
+            isolate({
+                
+                map %<>% 
+                    addAwesomeMarkers(
+                        lng = input$lng, 
+                        lat = input$lat,
+                        icon = icons("blue"),
+                        label = "Mi ubicación"
+                    ) %>% 
+                    addAwesomeMarkers(
+                        lng = datum()[1,]$lng,
+                        lat = datum()[1,]$lat + 0.00025,
+                        icon = icons("green"),
+                        label = "Refugio más cercano"
+                    )
+            })
+        }
         
         map %<>%
             addScaleBar("bottomright") %>% 
@@ -180,8 +187,7 @@ shinyServer(function(input, output, session) {
     })
     
     observe(print(input$map_gps_located))
-    observe(print(glimpse(datum())))
-    
+
 })
 
 
