@@ -50,7 +50,7 @@ dashboardPage(
         useSweetAlert(theme = "dark"),
         fluidRow(
             column(
-                width = 6,
+                width = 5,
                 box(
                     width = NULL,
                     solidHeader = T,
@@ -58,7 +58,7 @@ dashboardPage(
                 )
             ),
             column(
-                width = 6,
+                width = 7,
                 box(
                     width = NULL,
                     solidHeader = T,

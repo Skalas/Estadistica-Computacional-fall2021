@@ -6,6 +6,7 @@ library(readxl)
 library(purrr)
 library(tidyr)
 library(geosphere)
+library(spatialEco)
 
 loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt = NULL) {
  tagList(
@@ -46,6 +47,12 @@ distance_compute <- function(data, lat_input, lon_input){
 shp <- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
 
+shp_loc <- readOGR("data/loc_urb.shp") %>% 
+  spTransform(CRS("+proj=longlat +datum=WGS84"))
+
+shp_loc@data <- select(shp_loc@data, CVEGEO, NOM_ENT, NOM_MUN, NOM_LOC = NOMGEO)
+
+
 path <- list.files("data/", pattern = ".xlsx", full.names = T)
 
 data <- path %>% 
@@ -80,42 +87,30 @@ data %<>%
     lng = -pmax(coor1, coor2)) %>% 
   ungroup() %>% 
   relocate("alt", .after = last_col()) %>% 
-  select(-c(coor1, coor2, d,m,s_int,s_dec, basura, d_lg, m_lg, s_int_lg, s_dec_lg,basura_lg))
+  select(-c(coor1, coor2, d,m,s_int,s_dec, basura, d_lg, 
+            m_lg, s_int_lg, s_dec_lg, basura_lg, municipio))
+
+
+data_coord <- data %>% filter(!is.na(lat))
+
+coordinates(data_coord) <- ~ lng + lat
+proj4string(data_coord) <- proj4string(shp_loc)
+
+data <- data_coord %>% 
+  point.in.poly(shp_loc) %>% 
+  as_tibble() %>% 
+  select(no, CVEGEO, entidad = NOM_ENT, municipio = NOM_MUN, localidad = NOM_LOC) %>% 
+  rename_with(tolower) %>% 
+  right_join(data, by = "no") %>% 
+  relocate(refugio, .before = cvegeo) %>% 
+  relocate(direccion, .after = refugio) %>%
+  relocate(cvegeo, .after = localidad)
 
 #uso_inmueble <- c("EDUCACION", "EJIDAL", "GOBIERNO MUNICIPAL", "OTROS")
 pal <- colorFactor(
   palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
   domain = unique(data$uso_cat)
   )
-
-#21.5124555555556	-104.892644444444
-
-
-##### Cálculo de distancias #####
-
-# lat_input <- 21.736867
-# lon_input <- -104.756833
-
-# distance_compute(data, lat_input , lon_input) %>% glimpse()
-
-
-
-##### JOINS GEOESPACIAL #####
-
-library(spatialEco)
-
-shape_loc <- readOGR("data/loc_urb.shp") %>% spTransform(CRS("+proj=longlat +datum=WGS84"))
-
-shape_loc@data <- shape_loc@data %>% 
-  select (CVEGEO,NOM_ENT,NOM_MUN,NOMGEO)
-
-data1 <-  data %>% filter( !is.na(lat))
-coordinates(data1) <- ~ lng + lat
-proj4string(data1) <- proj4string(shape_loc)
-data_spacialjoined <- data1 %>% point.in.poly(shape_loc)
-data_spacialjoined@data %>% head()
-
-
 
 
 

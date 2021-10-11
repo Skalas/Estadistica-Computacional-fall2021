@@ -40,7 +40,7 @@ shinyServer(function(input, output, session) {
             addProviderTiles("CartoDB.Positron", group = "CartoDB") %>%
             addPolygons(
                 color = "black", 
-                fillColor = "transparent", 
+                fillColor = "blue", 
                 weight = 2,
                 dashArray = "4",
                 highlightOptions = highlightOptions(
@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = FALSE),
-                data = shp
+                data = shp_loc
             )
         
         if (input$search != 0){
