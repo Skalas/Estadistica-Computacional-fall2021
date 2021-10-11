@@ -20,15 +20,18 @@ shinyServer(function(input, output, session) {
                 distance_compute(
                     lat_input = input$lat, 
                     lon_input = input$lng) %>% 
-                arrange(distance)
-            
+                arrange(distance) %>% 
+                mutate(rankid = row_number()) %>% 
+                relocate(distance, .after = no) %>% 
+                relocate(rankid, .before = distance) %>% 
+                relocate(no, .after = last_col())
+
             return(df)
         })
     })
 
     output$map <- renderLeaflet({
         
-        opacity = 0.9
         split_data <- split(datum(), datum()$uso_cat)
         
         map <- datum() %>% 
@@ -80,13 +83,15 @@ shinyServer(function(input, output, session) {
                         label = labels,
                         labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "11px",
+                            textsize = "10px",
                             direction = "auto"),
                         weight = 1,
                         #color = "black",
                         color =~ pal(uso_cat),
                         fillOpacity = opacity,
-                        group = category)
+                        group = category,
+                        layerId =~ no
+                    )
             })
         
         if (input$search != 0){
@@ -162,12 +167,15 @@ shinyServer(function(input, output, session) {
         datum(),
         rownames = F,
         extensions = c('Buttons', 'Scroller', "FixedColumns"),
+        selection = "single",
         options = list(
-            scroller = TRUE,
+            stateSave = TRUE,
+            #scroller = TRUE,
             scrollX = TRUE,
-            scrollY = 330,
-            fixedColumns = list(leftColumns = 2),
-            #pageLength = 5,
+            #scrollY = 330,
+            pageLength = 5,
+         lengthMenu = c(5, 10, 15, 20),
+            fixedColumns = list(leftColumns = 3),
             dom = 'Bfrtip',
             buttons = c('copy', 'excel', 'pdf', 'print'),
             initComplete = JS(
@@ -176,6 +184,10 @@ shinyServer(function(input, output, session) {
                 "}")
         ))
     })
+    
+    prev_row <- reactiveVal()
+    
+    observe(print(input$map_gps_located))
     
     observeEvent(input$search, {
         sendSweetAlert(
@@ -186,7 +198,31 @@ shinyServer(function(input, output, session) {
         )
     })
     
-    observe(print(input$map_gps_located))
+    observeEvent(input$table_rows_selected, {
+        row_selected = datum()[input$table_rows_selected,]
+        proxy <- leafletProxy('map')
+        proxy %>%
+            addAwesomeMarkers(
+                layerId = as.character(row_selected$no),
+                lng=row_selected$lng, 
+                lat=row_selected$lat,
+                icon = my_icon
+            )
+        
+        if(!is.null(prev_row())) {
+            proxy %>% removeMarker(layerId = as.character(prev_row()$no))
+        }
+        prev_row(row_selected)
+    })
+    
+    observeEvent(input$map_marker_click, {
+        clickId <- input$map_marker_click$id
+        dataTableProxy("table") %>%
+            selectRows(which(datum()$no == clickId)) %>%
+            selectPage(ceiling(
+                datum()[which(datum()$no == clickId),]$rankid / input$table_state$length)
+                )
+    })
 
 })
 

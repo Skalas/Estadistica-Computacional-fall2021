@@ -32,7 +32,13 @@ dashboardPage(
         tags$br(),
         menuItem("Filtros", tabName = "Filtros", icon = icon("filter")),
         tags$br(),
-        menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar")),
+        menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar"),
+            radioButtons(
+                inputId = "boton_plot", 
+                label = "Tipo de gráfico",
+                choices = c("Municipio", "Refugios", "Ocupación Gral"),
+                selected = "Municipio"
+            )),
         tags$br(),
         menuItem("Buscar", icon = icon(name = "search"), startExpanded = T,
             numericInput("lng", label = "Longitud", value = -104.898492, step = 0.000001),

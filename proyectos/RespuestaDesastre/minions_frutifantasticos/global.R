@@ -54,10 +54,21 @@ icons <- function(color){
   )
 }
 
+my_icon = makeAwesomeIcon(
+  icon = 'flag', 
+  markerColor = 'red', 
+  iconColor = 'white'
+)
+
 pal <- colorFactor(
   palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
   domain = unique(data$uso_cat)
 )
+
+
+#### Valores Constantes ####
+
+opacity = 0.9
 
 #### Datos ####
 
@@ -132,7 +143,8 @@ data <- data_coord %>%
   right_join(data, by = "no") %>% 
   relocate(entidad, .before = localidad) %>% 
   relocate(municipio, .after = entidad) %>%
-  relocate(cvegeo, .before = cvegeoloc) 
+  relocate(cvegeo, .before = cvegeoloc) %>% 
+  mutate(rankid = row_number()) 
   
 
 
