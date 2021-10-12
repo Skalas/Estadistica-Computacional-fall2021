@@ -1,0 +1,205 @@
+---
+title: "ETL Refugies Nayarit"
+author: "Cecilia Avilés, Leonardo Ceja"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float: true
+    theme: spacelab
+---
+
+```{r Carga librerías a usar, include = F}
+knitr::opts_chunk$set(echo = T, error = F, message = F, warning = F)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(ggthemes)
+#library(shiny)
+library(leaflet)
+library(rgdal)
+library(parzer)
+library(tidyverse)
+library(geosphere)
+library(fontawesome)
+```
+
+```{r Carga de datos, echo = FALSE, message = FALSE, warning = FALSE}
+#Cargamos los datos de todas las hojas del documentos, quitamos las filas con
+#valores NA y los asignamos a la variable data_raw
+
+path <- 'data/refugios_nayarit.xlsx'
+
+data_raw <- path %>% 
+  excel_sheets() %>% 
+  set_names() %>% 
+  map_dfr(read_excel, path=path, skip=3) %>%    #No toma en cuenta las primeras 3 filas
+  drop_na()                                     #Quita filas con valores NA del dataframe
+glimpse(data_raw)
+```
+
+```{r Limpieza encabezado, echo = FALSE, message = FALSE, warning = FALSE}
+#Hacemos limpieza en el encabezado únicamente
+
+refugios <- data_raw %>%                           
+  rename_with(~ gsub('[[:punct:]]', '', .x)) %>%   #Quita signos de puntuación en encabezado
+  rename_with(~ chartr('ÁÉÍÓÚ', 'AEIOU', .x)) %>%  #Quita acentos en encabezado
+  rename_with(~ gsub(' ', '_', .x)) %>%            #Cambia espacios por "_" en encabezado
+  rename(LATITUD = COORDENADAS_GEOGRAFICAS,        #Renombra 3 columnas
+        LONGITUD = 9,
+        ALTITUD = 10)
+glimpse(refugios)
+```
+
+```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
+#Convertimos el tipo de coordenadas y observamos su distribución
+
+coords_raw = refugios %>%
+  mutate(LAT = parse_lat(LATITUD),         #Usamos la función "parse_lat" del paquete "parzer"
+         LON = parse_lon(LONGITUD)) %>%    #Usamos la función "parse_lon" del paquete "parzer"
+  select(LAT,LON)
+
+#Observamos distribución de Latitud y Longitud
+ggplot(data = coords_raw, aes(x=LAT)) +
+  geom_boxplot() +
+  ggtitle("Distribución Latitud")
+
+ggplot(data = coords_raw, aes(x=LON)) +
+  geom_boxplot() +
+  ggtitle("Distribución Longitud")
+```
+```{r Imputación de datos, echo = FALSE, message = FALSE, warning = FALSE}
+#Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos
+
+#Como son pocos datos, nos permitimos corregir cada uno
+refugios <- replace(refugios, refugios=="104ª29'01\"57\"", "104ª29'01.57\"")    #Error en poner " en lugar de .
+refugios <- replace(refugios, refugios=="22°04'13-26\"", "22°04'13.26\"")       #Error en poner - en lugar de .
+refugios <- replace(refugios, refugios=="48'39.95", "21°48'39.95\"")            #Error al faltar unidad de grados
+refugios <- replace(refugios, refugios=="13'24.41\"", "103'24.41\"")            #Error al faltar un 0 en grados
+
+aux1 <- refugios[refugios$No==434,"LATITUD"]     #Error al poner dato "longitud" en columna "latitud" y viceversa
+aux2 <- refugios[refugios$No==434,"LONGITUD"]
+refugios[refugios$No==434,"LATITUD"] <- aux2
+refugios[refugios$No==434,"LONGITUD"] <- aux1 
+
+#Agregamos una W al dato de longitud para que la función "parser_lon" convierta correctamente
+refugios$LONGITUD <- paste(refugios$LONGITUD, "W", sep=" ")     
+
+#Habiendo hecho las modificaciones previas, volvemos a transformar coordenadas, agregándolas al df refugios
+refugios <- refugios %>%
+  mutate(LAT = parse_lat(LATITUD),
+         LON = parse_lon(LONGITUD))
+#View(refugios)
+
+#Observamos nueva distribución de Latitud y Longitud y vemos que es hermosa
+ggplot(data = refugios, aes(x=LAT)) +
+  geom_boxplot() +
+  ggtitle("Distribución corregida Latitud")
+
+ggplot(data = refugios, aes(x=LON)) +
+  geom_boxplot() +
+  ggtitle("Distribución corregida Longitud")
+```
+
+```{r Creación rangos de capacidad, echo = FALSE, message = FALSE, warning = FALSE}
+
+#Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa
+refugios <- refugios %>%
+  mutate(Rango_Capacidad = case_when(CAPACIDAD_DE_PERSONAS <= 100 ~ 'Máximo 100',
+                                     CAPACIDAD_DE_PERSONAS > 100 & CAPACIDAD_DE_PERSONAS <= 300 ~ '101 a 300',
+                                     CAPACIDAD_DE_PERSONAS > 300 & CAPACIDAD_DE_PERSONAS <= 500 ~ '301 a 500',
+                                     CAPACIDAD_DE_PERSONAS > 500 & CAPACIDAD_DE_PERSONAS <= 1000 ~ '501 a 1,000',
+                                     CAPACIDAD_DE_PERSONAS > 1000 ~ 'Más de 1,000'))
+
+```
+
+```{r Mapa de refugios, echo = FALSE, message = FALSE, warning = FALSE}
+
+refugios$Rango_Capacidad <- factor(refugios$Rango_Capacidad)
+
+#Colores a usar en los markers
+rango_colores <- c("green", "blue", "purple", "darkred", "cadetblue")[refugios$Rango_Capacidad]
+
+#Creamos íconos con base en los colores a usar
+iconos <- awesomeIcons(
+  icon = 'ios-close',
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = rango_colores
+)
+
+#Ploteamos el mapa usando leaflet
+map_refugios <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addTiles() %>%  
+  addAwesomeMarkers(lng = refugios$LON, 
+                    lat = refugios$LAT, 
+                    icon = iconos,
+                    popup = paste(
+                      paste('<b>','Refugio:','</b>',refugios$REFUGIO),
+                      paste('<b>','Capacidad de personas:','</b>',refugios$CAPACIDAD_DE_PERSONAS),
+                      paste('<b>','Teléfono:','</b>',refugios$TELEFONO),
+                      sep = '<br/>'),
+                    label = refugios$REFUGIO) %>%
+  addLegend("bottomright", 
+            colors = c("#006666", "#669900", "deepskyblue", "#FF66FF", "darkred"), 
+            labels = c("Máximo 100", "101 a 300", "301 a 500", "501 a 1,000", "Más de 1,000"), 
+            title = "Capacidad de Personas", 
+            opacity = 1)
+map_refugios
+```
+
+```{r Mapa de refugio más cercano, echo = FALSE, message = FALSE, warning = FALSE}
+
+#Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario
+user_point <- c(-105.262575, 21.811933)
+
+#Calculamos distancias contra todos los refugios usando la función "distHaversine" del paquete "geosphere"
+refugios <- mutate(refugios, 
+       Distancia = distHaversine(cbind(LON,LAT), user_point))
+
+#Seleccionamos el registro con la menos distancia
+refugio_mas_cercano <- refugios %>%
+  slice(which.min(Distancia))
+
+#Creamos íconos fifí para usar en el mapa final
+userIcons <- awesomeIconList(
+  "Persona" = makeAwesomeIcon(
+    icon = "user",
+    markerColor = "blue",
+    iconColor = "black",
+    library = "fa"
+  ),
+  "Cercano" = makeAwesomeIcon(
+    icon = "arrow-down",
+    markerColor = "red",
+    iconColor = "black",
+    library = "fa"
+  )
+)
+
+#Ploteamos el mapa con la ubicación del usuario y el refugio más cercano
+map_refugio_cercano <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addTiles() %>%  
+  addAwesomeMarkers(lng = refugio_mas_cercano$LON, 
+                    lat = refugio_mas_cercano$LAT, 
+                    icon = userIcons["Cercano"],
+                    popup = paste(
+                      paste('<b>','Refugio:','</b>',refugio_mas_cercano$REFUGIO),
+                      paste('<b>','Capacidad de personas:','</b>',refugio_mas_cercano$CAPACIDAD_DE_PERSONAS),
+                      paste('<b>','Teléfono:','</b>',refugio_mas_cercano$TELEFONO),
+                      sep = '<br/>'),
+                    label = "Refugio más cercano") %>%  
+  addAwesomeMarkers(lng = user_point[1],  
+                    lat = user_point[2], 
+                    icon = userIcons["Persona"],
+                    label = "Usted se encuentra aquí",
+                    popup = paste(
+                      paste('<b>','Longitud:','</b>', user_point[1]),
+                      paste('<b>','Latitud:','</b>', user_point[2]),
+                      sep = '<br/>')) 
+map_refugio_cercano
+```
+
