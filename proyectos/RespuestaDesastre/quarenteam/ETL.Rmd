@@ -6,24 +6,28 @@ output:
   html_document:
     toc: yes
     toc_depth: 2
-    toc_float: true
+    toc_float: yes
     theme: spacelab
+  '''''': default
 ---
 
 ```{r Carga librerías a usar, include = F}
 knitr::opts_chunk$set(echo = T, error = F, message = F, warning = F)
-library(dplyr)
-library(readxl)
-library(ggplot2)
-library(ggthemes)
-#library(shiny)
-library(leaflet)
-library(rgdal)
-library(parzer)
-library(tidyverse)
-library(geosphere)
-library(fontawesome)
+
+rm(list = ls())
+
+instalar <- function(paquete) {
+    if (!suppressPackageStartupMessages(require(paquete,character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE))) {
+        install.packages(as.character(paquete), dependecies = TRUE, repos = "http://cran.us.r-project.org")
+        suppressPackageStartupMessages(library(paquete, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE))
+    }
+}
+
+paquetes <- c('tidyverse', 'readxl', 'ggthemes', 'leaflet', 'rgdal',
+              'parzer', 'geosphere', 'fontawesome')
+lapply(paquetes, instalar)
 ```
+
 
 ```{r Carga de datos, echo = FALSE, message = FALSE, warning = FALSE}
 #Cargamos los datos de todas las hojas del documentos, quitamos las filas con
@@ -33,15 +37,20 @@ path <- 'data/refugios_nayarit.xlsx'
 
 data_raw <- path %>% 
   excel_sheets() %>% 
-  set_names() %>% 
+  purrr::set_names() %>% 
   map_dfr(read_excel, path=path, skip=3) %>%    #No toma en cuenta las primeras 3 filas
   drop_na()                                     #Quita filas con valores NA del dataframe
+  #filter(!(is.na(`COORDENADAS GEOGRAFICAS`) | is.na(...9) | is.na(...10))) %>% 
+  #filter(!(`COORDENADAS GEOGRAFICAS` == 'N')) #%>% 
+  #filter(!(`COORDENADAS GEOGRAFICAS` == 'LATITUD'))#| ...9 == 'w' | ...10 == 'MSNM')))
+
 glimpse(data_raw)
+
 ```
 
-```{r Limpieza encabezado, echo = FALSE, message = FALSE, warning = FALSE}
-#Hacemos limpieza en el encabezado únicamente
+```{r Limpieza , echo = FALSE, message = FALSE, warning = FALSE}
 
+#Hacemos limpieza en el encabezado únicamente
 refugios <- data_raw %>%                           
   rename_with(~ gsub('[[:punct:]]', '', .x)) %>%   #Quita signos de puntuación en encabezado
   rename_with(~ chartr('ÁÉÍÓÚ', 'AEIOU', .x)) %>%  #Quita acentos en encabezado
@@ -49,11 +58,43 @@ refugios <- data_raw %>%
   rename(LATITUD = COORDENADAS_GEOGRAFICAS,        #Renombra 3 columnas
         LONGITUD = 9,
         ALTITUD = 10)
+
+glimpse(refugios %>% filter(USO_DEL_INMUEBLE == 'RELIGIOSOS'))
+glimpse(refugios %>% filter(USO_DEL_INMUEBLE  == 'GOBIERNO MUNICIPAL'))
+glimpse(refugios %>% filter(USO_DEL_INMUEBLE  == 'MUNICIPAL'))
+
+# Quitar redundantes
+refugios <- refugios %>% 
+  mutate(USO_DEL_INMUEBLE  = ifelse(USO_DEL_INMUEBLE %in% c("RELIGIOSO","RELIGIOSOS"),"RELIGIOSO", USO_DEL_INMUEBLE))
+refugios <- refugios %>% 
+  mutate(USO_DEL_INMUEBLE  = ifelse(USO_DEL_INMUEBLE %in% c("GOBIERNO MUNICIPAL","MUNICIPAL"),"MUNICIPAL", USO_DEL_INMUEBLE))
+
+# Distribuimos de mejor manera los telefonos
+refugios <- refugios %>%
+  mutate(TELEFONOS = gsub("-","", TELEFONO)) %>%
+  mutate(TELEFONOS = gsub("\\*","",TELEFONOS)) %>%
+  separate(TELEFONOS, into = c("col_1","col_2","col_3","col_4","col_5",
+                               "col_6", "col_7","col_8","col_9","col_10"),
+           fill = "right") %>%
+  mutate(col_1 = as.numeric(col_1), col_2 = as.numeric(col_2), 
+         col_3 = as.numeric(col_3), col_4 = as.numeric(col_4), 
+         col_5 = as.numeric(col_5), col_6 = as.numeric(col_6), 
+         col_7 = as.numeric(col_7), col_8 = as.numeric(col_8), 
+         col_9 = as.numeric(col_9), col_10 = as.numeric(col_10)   ) %>%
+  mutate(TELEFONOS = paste(col_1, col_2, col_3, col_4, col_5, col_6, col_7, 
+                           col_8, col_9, col_10, sep=" // ") ) %>%
+  mutate(TELEFONOS = gsub("NA // ","", TELEFONOS)) %>%
+  mutate(TELEFONOS = gsub(" // NA","", TELEFONOS)) %>%
+  mutate(TELEFONOS = gsub("NA","", TELEFONOS)) %>%
+  select(-TELEFONO, -col_1,-col_2,-col_3,-col_4,-col_5,-col_6,-col_7,-col_8,-col_9,-col_10)
+  
 glimpse(refugios)
 ```
 
 ```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
 #Convertimos el tipo de coordenadas y observamos su distribución
+
+refugios <- refugios %>% filter(!(is.na(LATITUD) | is.na(LONGITUD)))
 
 coords_raw = refugios %>%
   mutate(LAT = parse_lat(LATITUD),         #Usamos la función "parse_lat" del paquete "parzer"
@@ -203,3 +244,8 @@ map_refugio_cercano <- leaflet() %>%
 map_refugio_cercano
 ```
 
+```{r creando archivo RDS}
+
+saveRDS(object = refugios, file = "refugios.rds")
+
+```
