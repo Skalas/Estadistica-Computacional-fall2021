@@ -182,10 +182,35 @@ corregidos$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist
 nayarit_refugios <- corregidos
 municipios_unicos <- nayarit_refugios$Municipio |> unique()
 
+obten_interactivos <- function(lat,lon){
+  ubicacion_actual <- c(lat, lon)
+  
+  
+  aux_dist <- nayarit_refugios |> 
+    mutate(x_actual = ubicacion_actual[1], y_actual = -1*ubicacion_actual[2]) |>
+    select(c("Latitud_Dec", "x_actual" , "Longitud_Dec", "y_actual")) |>
+    rename(x1 = Latitud_Dec, x2 = x_actual, y1 = Longitud_Dec, y2 = y_actual)
+  
+  nayarit_refugios$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
+  
+  #Tomamos los n_closer mas cercanos
+  mas_cercanos <- nayarit_refugios |>
+    arrange(dist) |>
+    head(n_closer)
+  
+  mas_cercanos
+} 
 
+obten_interactivos_df <- function(lat,lon){
+  ubicacion_actual <- c(lat, lon)
+  #Para cualquier caso, lo agregamos a un df para pasarlo al mapa
+  ubicacion_actual_df <- tibble(id = "Ubicacion actual",
+                                lat = ubicacion_actual[1],
+                                lng = -1*ubicacion_actual[2])
+  ubicacion_actual_df
+}
 
 obten_mas_cercanos <- function(lat_D, lat_M, lat_S, lon_D, lon_M, lon_S){
-  
   latitud_actual <- paste(lat_D, "º", lat_M, "'", lat_S, sep = "" )
   longitud_actual <- paste(lon_D, "º", lon_M, "'", lon_S,sep = "" )
   ubicacion_actual <- c(latitud_actual, longitud_actual) |> map_dbl(convert_coordinates)
