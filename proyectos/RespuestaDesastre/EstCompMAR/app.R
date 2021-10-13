@@ -1,8 +1,4 @@
-####################################
-# Data Professor                   #
-# http://youtube.com/dataprofessor #
-# http://github.com/dataprofessor  #
-####################################
+
 
 themeSelector <- function() {
   div(
@@ -65,11 +61,26 @@ library(htmlwidgets)
 
 # Define UI
 ui <- fluidPage(
+  titlePanel("Página oficial para encontrar tu refugio más cercano en Nayarit"),
   navbarPage(
     "Refugios en Nayarit",
-    tabPanel("Home",
-             fluidRow(
-               column(4, themeSelector()))
+    tabPanel("Bienvenido",
+             mainPanel(
+               h2("¿Cómo navegar en la página?"),
+               br(),
+               h4("1. Escoge el tema que más te guste en esta pestaña, 'choose a theme'."),
+               fluidRow(
+                 column(4, themeSelector(),align = "center"), align = "left"),
+               h4("2. En la pestaña Ubicación coordenadas, podrás escoger el refugio más cercano a ti."),
+               h4("3. En la pestaña Municipios, podrás encontrar el refugio más cercano de tu municipio."),
+               h4("4. En caso de no conocer tus coordenadas, apóyate de la pestaña 'Ubícate en el mapa'."),
+               br(),
+               h5("En caso de tener alguna duda o comentario, podrás comunicarte con:"),
+               h5("Adrián Tame Jacobo"),
+               h5("Miguel Calvo Valente"),
+               h5("Rodrigo Juárez Jaramillo"),
+               
+             )
     ),
     tabPanel("Ubicacion por Coordenadas",
              sidebarPanel(
@@ -138,8 +149,8 @@ server <- function(input, output) {
   output$mymap <- renderLeaflet({
     
     #Para cualquier caso, lo agregamos a un df para pasarlo al mapa
-    ubicacion_actual_df <- obten_ubicacion_actual_df(input$lat_D, input$lat_M, input$lat_S,
-                                                     input$lon_D, input$lon_M, input$lon_S)#estaria bueno parametrizarlo
+    ubicacion_actual_df <- obten_ubicacion_actual_df(input$lat_D, input$lat_M, ifelse(length(input$lat_S) == 0, .01, input$lat_S),
+                                                     input$lon_D, input$lon_M, ifelse(length(input$lon_S) == 0, .01, input$lon_S))#estaria bueno parametrizarlo
     
     #Tomamos los n_closer mas cercanos
     mas_cercanos <- obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
@@ -182,22 +193,17 @@ server <- function(input, output) {
       setView(lng = -104.8947, lat = 21.5040, zoom = 8) |>  
       onRender(
         "function(el,x){
-                    this.on('mousemove', function(e) {
+                    this.on('click', function(e) {
                         var lat = e.latlng.lat;
                         var lng = e.latlng.lng;
                         var coord = [lat, lng];
                         Shiny.onInputChange('hover_coordinates', coord)
                     });
-                    this.on('mouseout', function(e) {
-                        Shiny.onInputChange('hover_coordinates', null)
-                    })
+                    
                 }"
       )
     
   })
-  
-  
-  
   
   output$tbl = renderDT(
     obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,

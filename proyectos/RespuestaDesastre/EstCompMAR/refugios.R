@@ -102,10 +102,14 @@ convert_coordinates <- function(x){
   # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo regex
   matches <- regmatches(x, gregexpr("[[:digit:]]+", x))
   matches <- as.numeric(unlist(matches))
-  
   D <- matches[1]
   M <- matches[2]
-  S <- matches[3] +  matches[4]/100
+  if(is.na(matches[4]) == T) {
+    S <- matches[3] 
+  } else {
+    S <- matches[3] +  matches[4]/100
+  }
+  # S <- matches[3] +  matches[4]/100
   
   D + M/60 + S/3600
 }
