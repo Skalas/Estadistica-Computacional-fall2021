@@ -16,11 +16,11 @@ library(leaflet)
 library(htmlwidgets)
 
 # Nombres de las cada hoja del excel 
-hojas <- excel_sheets('refugios_nayarit.xlsx')
+hojas <- excel_sheets('data/refugios_nayarit.xlsx')
 
 # Lista con cada uno de los refugios 
 lista_refugios <- lapply(hojas, function(x)
-    read_excel('refugios_nayarit.xlsx', sheet = x, skip = 5))
+    read_excel('data/refugios_nayarit.xlsx', sheet = x, skip = 5))
 
 # Dataframe a utilizar
 refugios <- do.call('rbind' ,lista_refugios)
