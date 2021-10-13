@@ -60,11 +60,6 @@ my_icon = makeAwesomeIcon(
   iconColor = 'white'
 )
 
-pal <- colorFactor(
-  palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
-  domain = unique(data$uso_cat)
-)
-
 
 #### Valores Constantes ####
 
@@ -146,5 +141,8 @@ data <- data_coord %>%
   relocate(cvegeo, .before = cvegeoloc) %>% 
   mutate(rankid = row_number()) 
   
-
+pal <- colorFactor(
+  palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
+  domain = unique(data$uso_cat)
+)
 
