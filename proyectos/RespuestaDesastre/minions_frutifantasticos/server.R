@@ -187,7 +187,7 @@ shinyServer(function(input, output, session) {
     
     prev_row <- reactiveVal()
     
-    observe(print(input$map_gps_located))
+    observe(print(input$map_gps_located$coordinates))
     
     observeEvent(input$search, {
         sendSweetAlert(

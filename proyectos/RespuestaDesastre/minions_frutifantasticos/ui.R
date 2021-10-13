@@ -22,7 +22,7 @@ dashboardPage(
         ),
     dashboardSidebar(
         loadingLogo(
-            href = 'http://mycompanyishere.com', 
+            href = 'https://www.nayarit.gob.mx/', 
             src = 'nayarit-logo.png', 
             #loadingsrc = 'http://northerntechmap.com/assets/img/loading-dog.gif',
             #loadingsrc = "https://i.imgur.com/pKV7YwY.gif",
@@ -34,18 +34,41 @@ dashboardPage(
         tags$br(),
         menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar"),
             radioButtons(
-                inputId = "boton_plot", 
+                inputId = "button_plot", 
                 label = "Tipo de gráfico",
                 choices = c("Municipio", "Refugios", "Ocupación Gral"),
                 selected = "Municipio"
             )),
         tags$br(),
         menuItem("Buscar", icon = icon(name = "search"), startExpanded = T,
-            numericInput("lng", label = "Longitud", value = -104.898492, step = 0.000001),
-            numericInput("lat", label = "Latitud", value = 21.507156, step = 0.000001)
+            shinyWidgets::prettyRadioButtons(
+                inputId = "button_coord",
+                label = "Seleccione método",
+                choices = c("Dirección" = "dir", 
+                            "GPS" = "gps", 
+                            "Coordenadas" = "coord"),
+                selected = "gps",
+                bigger = T,
+                animation = "smoth"
+                ),
+            conditionalPanel("input.button_coord == 'coord'",
+                numericInputIcon("lng", label = "Longitud", value = -104.898492, step = 0.01, 
+                                 icon = icon("arrow-left")),
+                numericInputIcon("lat", label = "Latitud", value = 21.507156, step = 0.01, 
+                                 icon = icon("arrow-up"))
+            ),
+            conditionalPanel("input.button_coord == 'dir'",
+                shinyWidgets::textInputAddon(
+                    inputId = "calle", 
+                    label = "Ingrese ubicación", 
+                    placeholder = "Calle num, cp",
+                    addon = icon("map"),
+                    width = "95%"
+                )
+             )
         ),
         tags$br(),
-        actionButton(inputId = "search", label = "Buscar coordenadas", icon = icon("map-pin"))
+        actionButton(inputId = "search", label = "Localizar", icon = icon("fas fa-street-view"))
     ),
     dashboardBody(
         tags$head(tags$style(HTML(

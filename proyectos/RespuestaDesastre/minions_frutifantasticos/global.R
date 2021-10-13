@@ -55,7 +55,7 @@ icons <- function(color){
 }
 
 my_icon = makeAwesomeIcon(
-  icon = 'flag', 
+  icon = 'home', 
   markerColor = 'red', 
   iconColor = 'white'
 )
