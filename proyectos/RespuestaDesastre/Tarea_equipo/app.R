@@ -7,13 +7,8 @@
 #    http://shiny.rstudio.com/
 #
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr)
+pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr, shiny, shinyWidgets, DT, leaflet, htmlwidgets, shinydashboard)
 
-library(shiny)
-library(shinyWidgets)
-library(DT)
-library(leaflet)
-library(htmlwidgets)
 
 # Nombres de las cada hoja del excel 
 hojas <- excel_sheets('data/refugios_nayarit.xlsx')
@@ -106,13 +101,22 @@ for (i in 1:a){
     }
 }
 
+# Se cambia los valores a numerico de las coordenadas
 refugios_ubicacion$Longitud <- -as.numeric(refugios_ubicacion$Longitud)
 refugios_ubicacion$Latitud <- as.numeric(refugios_ubicacion$Latitud)
 
+# Columna para utilizar como texto popup para marcadores
+refugios_ubicacion <- refugios_ubicacion %>% 
+    mutate(popup_text =paste("<h3 style ='color: blue'>", refugios_ubicacion$No, refugios_ubicacion$Refugio, '</h3>',
+                             '<b>Dirección:</b>', refugios_ubicacion$Direccion, '<br>',
+                             '<b>Capacidad:</b>', refugios_ubicacion$`Capacidad de personas`, '<br>', 
+                             '<b>Contacto:</b>', refugios_ubicacion$Responsable, refugios_ubicacion$Telefono))
+                         
 # UI 
 ui <- fluidPage(
-
+# 
    navbarPage('Refugios Nayarit', id='nav',
+              # Tab para la exploración de los datos
               tabPanel('Información de refugios',
                        fluidRow( column(3,
                                         selectInput('municipios', 'Municipio',
@@ -128,7 +132,7 @@ ui <- fluidPage(
                        ),
               hr(),
               DT::dataTableOutput('refugios')),
-              
+              # Tab para localizar refugios
               tabPanel('Ubicación de refugios',
                        leafletOutput('mexico', width = 10000, height = 10000),
                        
@@ -149,30 +153,40 @@ ui <- fluidPage(
 
 # Define server logic required 
 server <- function(input, output, session) {
-    
-    refugios_mun <- reactive({
-        if(input$umunicipios == 'Todos los municipios' ){
+    # Verifica el input para localizar refugios
+    refugios_mun<- reactive({
+        if (input$umunicipios == "Todos los municipios") {
             refugios_ubicacion
         } else {
             filter(refugios_ubicacion, Municipio == input$umunicipios)
         }
     })
     
+    #Se crea mapa
     output$mexico <- renderLeaflet({
-        leaflet(refugios_ubicacion) %>% 
-            addTiles() %>% 
-            addMarkers(refugios_ubicacion$Longitud,
-                       refugios_ubicacion$Latitud, 
-                       popup = paste ("<h3 style ='color: blue'>", refugios_ubicacion$No,refugios_ubicacion$Refugio, '</h3>',
-                                      '<b>Dirección:</b>', refugios_ubicacion$Direccion, '<br>',
-                                      '<b>Capcidad:</b>', refugios_ubicacion$`Capacidad de personas`, '<br>', 
-                                      '<b>Contacto:</b>', refugios_ubicacion$Responsable, refugios_ubicacion$Telefono), 
-                       label = refugios_ubicacion$Municipio,
-            )
+        leaflet(refugios_mun()) %>% 
+            addProviderTiles(providers$CartoDB.Positron) %>% 
+            addMarkers(lng=~Longitud,
+                       lat = ~Latitud, 
+                       popup = ~popup_text, 
+                       label = ~Municipio,
+                       icon = makeIcon('refugio.png', 20, 20))
+    })        
+    
+    # Observe para cambiar las marcas de acuerdo al input de refugios seleccionados
+    observe({
+        leafletProxy('mexico', data = refugios_mun()) %>% 
+            clearShapes() %>% 
+            addMarkers(~Longitud,
+                       ~Latitud, 
+                       popup = ~popup_text,
+                       icon = makeIcon('refugio.png', 20, 20)
+                       ) 
+                       
+    
     })
     
-    
-    
+    # Observe para filtar información de municipios
     observe({
         direccion <- if (is.null(input$municipios)) character(0) else {
             filter(refugios_ubicacion, Municipio %in% input$municipios) %>%
@@ -185,6 +199,7 @@ server <- function(input, output, session) {
                              selected = stillSelected, server = TRUE)
     })
     
+    # Observe para filtar información de dirección y uso de inmueble
     observe({
         inmueble <- if (is.null(input$municipios)) character(0) else {
             refugios_ubicacion %>%
@@ -199,6 +214,7 @@ server <- function(input, output, session) {
                              selected = stillSelected, server = TRUE)
     })
     
+    # Se filtra la información a partir de los inputs de direccion, municipio e inmueble
     output$refugios <- DT::renderDataTable({
         df <- refugios_ubicacion %>% 
             filter(
@@ -206,6 +222,7 @@ server <- function(input, output, session) {
                 is.null(input$direccion) | Direccion %in% input$direccion,
                 is.null(input$inmueble) | `Uso del Inmueble` %in% input$inmueble
             )
+        df <- df[-13]
         action <- DT::dataTableAjax(session, df, outputId = "refugios")
         
         DT::datatable(df, options = list(ajax = list(url = action)), escape = FALSE)
