@@ -58,11 +58,11 @@ dashboardPage(
                                  icon = icon("arrow-up"))
             ),
             conditionalPanel("input.button_coord == 'dir'",
-                shinyWidgets::textInputAddon(
+                shinyWidgets::textInputIcon(
                     inputId = "calle", 
                     label = "Ingrese ubicación", 
                     placeholder = "Calle num, cp",
-                    addon = icon("map"),
+                    icon =  icon("map"),
                     width = "95%"
                 )
              )
