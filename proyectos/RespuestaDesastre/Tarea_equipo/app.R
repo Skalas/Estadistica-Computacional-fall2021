@@ -188,6 +188,8 @@ server <- function(input, output, session) {
     observeEvent(input$mexico_click, {
         click = input$mexico_click
         leafletProxy('mexico')%>%
+            setView(click$lng, click$lat, zoom = 8) %>% 
+            clearMarkers() %>% 
             addMarkers(lng = click$lng, lat = click$lat,
                        label = paste(click$lng, click$lat))
         
