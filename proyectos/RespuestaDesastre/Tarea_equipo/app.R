@@ -134,7 +134,7 @@ ui <- fluidPage(
               DT::dataTableOutput('refugios')),
               # Tab para localizar refugios
               tabPanel('Ubicación de refugios',
-                       leafletOutput('mexico', width = 10000, height = 10000),
+                       leafletOutput('mexico', width = '100%', height = 1000),
                        
                        absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                      draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
@@ -166,6 +166,7 @@ server <- function(input, output, session) {
     output$mexico <- renderLeaflet({
         leaflet(refugios_mun()) %>% 
             addProviderTiles(providers$CartoDB.Positron) %>% 
+            setView(-105.3, 21.6, zoom = 9) %>% 
             addMarkers(lng=~Longitud,
                        lat = ~Latitud, 
                        popup = ~popup_text, 
