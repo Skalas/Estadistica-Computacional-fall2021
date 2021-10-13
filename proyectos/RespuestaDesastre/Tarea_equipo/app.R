@@ -144,8 +144,10 @@ ui <- fluidPage(
                                      
                                      pickerInput('umunicipios', label = 'Selecciona municipios: ',
                                                  choices = c('Todos los municipios', unique(refugios_ubicacion$Municipio)), 
-                                                 options = list(`live-search` = TRUE))
+                                                 options = list(`live-search` = TRUE)),
+                                     actionButton('borrar', 'Borrar')
                                     )
+                       
                       )
              )
 )
@@ -170,8 +172,7 @@ server <- function(input, output, session) {
             addMarkers(lng=~Longitud,
                        lat = ~Latitud, 
                        popup = ~popup_text, 
-                       label = ~Municipio,
-                       icon = makeIcon('refugio.png', 20, 20))
+                       label = ~Municipio)
     })        
     
     # Observe para cambiar las marcas de acuerdo al input de refugios seleccionados
@@ -180,11 +181,21 @@ server <- function(input, output, session) {
             clearShapes() %>% 
             addMarkers(~Longitud,
                        ~Latitud, 
-                       popup = ~popup_text,
-                       icon = makeIcon('refugio.png', 20, 20)
+                       popup = ~popup_text
                        ) 
-                       
-    
+    })
+    # Añade marcador al mapa
+    observeEvent(input$mexico_click, {
+        click = input$mexico_click
+        leafletProxy('mexico')%>%
+            addMarkers(lng = click$lng, lat = click$lat,
+                       label = paste(click$lng, click$lat))
+        
+    })
+    # Borra los todos los marcadores
+    observeEvent(input$borrar,{
+        proxy <- leafletProxy('mexico')
+        if (input$borrar){ proxy %>% clearMarkers()}
     })
     
     # Observe para filtar información de municipios
