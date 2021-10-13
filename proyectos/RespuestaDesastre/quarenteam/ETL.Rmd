@@ -1,15 +1,33 @@
 ---
-title: "ETL Refugies Nayarit"
-author: "Cecilia Avilés, Leonardo Ceja"
+title: "Proyecto intermedio Estadística Computacional"
+author: "Cecilia Avilés, Leonardo Ceja, Luz Hernández, Ita Santiago"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document:
+    highlight: haddock
+    number_sections: no
+    theme: flatly
     toc: yes
-    toc_depth: 2
-    toc_float: yes
-    theme: spacelab
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    df_print: paged
   '''''': default
 ---
+# ETL Refugies Nayarit
+
+## Comprensión del negocio
+
+#### Antecedentes
+
+La Dirección de Protección Civil y Bomberos del estado de Nayarit, concentraron la informacion 
+de diversos refugios del estado.
+
+#### Objetivo
+
+A fin de tener la informacion disponible revisaremos la base de datos para despues ubicarla en un
+mapa
+
 
 ```{r Carga librerías a usar, include = F}
 knitr::opts_chunk$set(echo = T, error = F, message = F, warning = F)
@@ -28,26 +46,27 @@ paquetes <- c('tidyverse', 'readxl', 'ggthemes', 'leaflet', 'rgdal',
 lapply(paquetes, instalar)
 ```
 
+## Los datos 
+
+Cargamos los datos de todas las hojas del documentos y los asignamos a la variable data_raw
+
 
 ```{r Carga de datos, echo = FALSE, message = FALSE, warning = FALSE}
-#Cargamos los datos de todas las hojas del documentos, quitamos las filas con
-#valores NA y los asignamos a la variable data_raw
-
 path <- 'data/refugios_nayarit.xlsx'
 
 data_raw <- path %>% 
   excel_sheets() %>% 
   purrr::set_names() %>% 
-  map_dfr(read_excel, path=path, skip=3) %>%    #No toma en cuenta las primeras 3 filas
-  drop_na()                                     #Quita filas con valores NA del dataframe
-  #filter(!(is.na(`COORDENADAS GEOGRAFICAS`) | is.na(...9) | is.na(...10))) %>% 
-  #filter(!(`COORDENADAS GEOGRAFICAS` == 'N')) #%>% 
-  #filter(!(`COORDENADAS GEOGRAFICAS` == 'LATITUD'))#| ...9 == 'w' | ...10 == 'MSNM')))
-
+  map_dfr(read_excel, path=path, skip=3) #No toma en cuenta las primeras 3 filas
+  
+data_raw <- data_raw[!is.na(data_raw$No.),] #Quita filas con valores NA de la col 'no.'
+  
 glimpse(data_raw)
 
 ```
+Como se puede observar no solo los titulos estan mal, sino que tambien tenemos datos con `NAs`, a continuacion vamos a revisar y en su caso limpiar los valores que podamos limpiar
 
+A continuacion mostramos las primeras filas.
 ```{r Limpieza , echo = FALSE, message = FALSE, warning = FALSE}
 
 #Hacemos limpieza en el encabezado únicamente
@@ -58,10 +77,6 @@ refugios <- data_raw %>%
   rename(LATITUD = COORDENADAS_GEOGRAFICAS,        #Renombra 3 columnas
         LONGITUD = 9,
         ALTITUD = 10)
-
-glimpse(refugios %>% filter(USO_DEL_INMUEBLE == 'RELIGIOSOS'))
-glimpse(refugios %>% filter(USO_DEL_INMUEBLE  == 'GOBIERNO MUNICIPAL'))
-glimpse(refugios %>% filter(USO_DEL_INMUEBLE  == 'MUNICIPAL'))
 
 # Quitar redundantes
 refugios <- refugios %>% 
@@ -88,12 +103,39 @@ refugios <- refugios %>%
   mutate(TELEFONOS = gsub("NA","", TELEFONOS)) %>%
   select(-TELEFONO, -col_1,-col_2,-col_3,-col_4,-col_5,-col_6,-col_7,-col_8,-col_9,-col_10)
   
-glimpse(refugios)
+head(refugios)
+```
+## Los datos faltantes
+Vamos tambien a revisar si los datos `NAs` son relevantes o podemos prescindir de ellos.
+
+```{r visualizando nas, echo = FALSE, message = FALSE, warning = FALSE}
+col_names <- names(refugios)
+#col_names
+
+NAs <- refugios %>% filter(is.na(No) | is.na(REFUGIO)| is.na(MUNICIPIO)| 
+                             is.na(DIRECCION)| is.na(USO_DEL_INMUEBLE)| 
+                             is.na(SERVICIOS)| is.na(CAPACIDAD_DE_PERSONAS)| 
+                             is.na(LATITUD)| is.na(LONGITUD)| 
+                             is.na(ALTITUD)| is.na(RESPONSABLE)| is.na(TELEFONOS))
+
+NAs
+```
+vemos que de los 11 registros con `NAs`, solamente 4 tienen coordenadas, por lo tanto, las demas las vamos a eliminar
+
+```{r eliminando nas, echo = FALSE, message = FALSE, warning = FALSE}
+refugios <- refugios %>% 
+  filter(!(is.na(LATITUD)| is.na(LONGITUD)| is.na(ALTITUD))) 
+
 ```
 
-```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
-#Convertimos el tipo de coordenadas y observamos su distribución
+Con esto nos quedamos con los datos que si tienen coordenadas.
 
+## Exploración coordenadas
+
+Convertimos el tipo de coordenadas y observamos su distribución
+Observamos distribución de Latitud y Longitud
+
+```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
 refugios <- refugios %>% filter(!(is.na(LATITUD) | is.na(LONGITUD)))
 
 coords_raw = refugios %>%
@@ -101,7 +143,7 @@ coords_raw = refugios %>%
          LON = parse_lon(LONGITUD)) %>%    #Usamos la función "parse_lon" del paquete "parzer"
   select(LAT,LON)
 
-#Observamos distribución de Latitud y Longitud
+
 ggplot(data = coords_raw, aes(x=LAT)) +
   geom_boxplot() +
   ggtitle("Distribución Latitud")
@@ -110,10 +152,13 @@ ggplot(data = coords_raw, aes(x=LON)) +
   geom_boxplot() +
   ggtitle("Distribución Longitud")
 ```
-```{r Imputación de datos, echo = FALSE, message = FALSE, warning = FALSE}
-#Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos
+## Imputación de datos
 
-#Como son pocos datos, nos permitimos corregir cada uno
+Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos
+Como son pocos datos, nos permitimos corregir cada uno y a continuacion volvemos a revisar su distribucion
+
+```{r Imputación de datos, echo = FALSE, message = FALSE, warning = FALSE}
+
 refugios <- replace(refugios, refugios=="104ª29'01\"57\"", "104ª29'01.57\"")    #Error en poner " en lugar de .
 refugios <- replace(refugios, refugios=="22°04'13-26\"", "22°04'13.26\"")       #Error en poner - en lugar de .
 refugios <- replace(refugios, refugios=="48'39.95", "21°48'39.95\"")            #Error al faltar unidad de grados
@@ -142,10 +187,12 @@ ggplot(data = refugios, aes(x=LON)) +
   geom_boxplot() +
   ggtitle("Distribución corregida Longitud")
 ```
+## Categorizando refugios
+
+Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa
 
 ```{r Creación rangos de capacidad, echo = FALSE, message = FALSE, warning = FALSE}
 
-#Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa
 refugios <- refugios %>%
   mutate(Rango_Capacidad = case_when(CAPACIDAD_DE_PERSONAS <= 100 ~ 'Máximo 100',
                                      CAPACIDAD_DE_PERSONAS > 100 & CAPACIDAD_DE_PERSONAS <= 300 ~ '101 a 300',
@@ -190,6 +237,8 @@ map_refugios <- leaflet() %>%
             opacity = 1)
 map_refugios
 ```
+## Mapa de refugio más cercano
+Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario
 
 ```{r Mapa de refugio más cercano, echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -244,6 +293,8 @@ map_refugio_cercano <- leaflet() %>%
 map_refugio_cercano
 ```
 
+
+Guardando la base de datos para el `shiny`
 ```{r creando archivo RDS}
 
 saveRDS(object = refugios, file = "refugios.rds")
