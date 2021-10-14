@@ -15,7 +15,7 @@
 
 ### Pasos a seguir 📋
 
-De manera loca, en la carpeta data hay que colocar el archivo que se encuentra en [esta liga](https://docs.google.com/spreadsheets/d/0Bw4a10rhk2QqaTZkUmQwaXU4aEE/edit?usp=sharing&ouid=101036910978943156470&resourcekey=0-RQa9gRpFX0x3z5bSJGn0Dg&rtpof=true&sd=true) **con el mismo nombre**
+De manera local, en la carpeta data hay que colocar el archivo que se encuentra en [esta liga](https://docs.google.com/spreadsheets/d/0Bw4a10rhk2QqaTZkUmQwaXU4aEE/edit?usp=sharing&ouid=101036910978943156470&resourcekey=0-RQa9gRpFX0x3z5bSJGn0Dg&rtpof=true&sd=true) **con el mismo nombre**
 
 Es importante, antes de comenzar el archivo [`ETL.Rmd`](https://github.com/LuzVerde23/Estadistica-Computacional-fall2021/blob/main/proyectos/RespuestaDesastre/quarenteam/ETL.Rmd) se deberá de correr de forma local. Este archivo nos genera otro archivo `.rds`, este último es el que alimentará nuestra interfaz de `shiny`
 
