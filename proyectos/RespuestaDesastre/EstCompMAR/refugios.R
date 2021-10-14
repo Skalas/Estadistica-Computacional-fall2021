@@ -32,9 +32,6 @@ library(readxl)
 # library(highcharter)
 
 ### Mejoras:
-# 1. Estamos quitando todos los NA. Tal vez seria mejor solo quitar los
-# renglones con NA en Nombre, Latitud y/o Longitud
-# 3. Corregir el renglon que tiene volteada la Latitud y Longitud (434)
 # 4. Hay algunas coordenadas que se repiten (p.ej. 414, 415 y 416). Entonces,
 # hay que determinar que hacer. Al momento, se estan sobrescribiendo, pero una
 # idea podria ser mostrar todos los valores en el popup.
@@ -65,8 +62,11 @@ for(i in 2:n_hojas){
   datos <- rbind(datos,pagina_k)
 }
 
-### Quitamos los NA
-datos <- datos |> drop_na()
+### Quitamos los NA, dejamos en municipio y refugio por si hay datos nuevos con valores NA ahí
+datos <- datos[!is.na(datos$Latitud), ]
+datos <- datos[!is.na(datos$Longitud), ]
+datos <- datos[!is.na(datos$Refugio), ]
+datos <- datos[!is.na(datos$Municipio), ]
 
 ### Agregamos los primeros dos valores si es que los 
 
@@ -130,8 +130,7 @@ datos |> filter(No.  %in%  problematic_Lon) |> pull(Longitud)
 corregidos <- datos |>
                 mutate(Latitud_Dec =  map_dbl(Latitud, convert_coordinates),
                        Longitud_Dec =  map_dbl(Longitud, convert_coordinates)) |>
-                select(-c("Latitud", "Longitud")) |>
-                drop_na()
+                select(-c("Latitud", "Longitud"))
 
 ### Notamos que existe un valor para el cual la Latitud y Longitud estan
 ### volteadas (puede ser que haya mas para los NA que quitamos).
@@ -142,11 +141,12 @@ corregidos |>
   select(c("No.", "Latitud_Dec", "Longitud_Dec"))
 
 corregidos <- corregidos |>
-                filter(Latitud_Dec < 30)
+  filter(Latitud_Dec < 30)
 
 ### La Longitud debe estar negativo (si no los grafica del otro lado del mundo)
 corregidos <- corregidos |>
                mutate(Longitud_Dec = ifelse(Longitud_Dec > 0, -1*Longitud_Dec, Longitud_Dec))
+
 
 
 #Estas cuatro lineas son un ejemplo de lo que se haria si se ingresan en coordenadas

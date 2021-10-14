@@ -64,7 +64,7 @@ ui <- fluidPage(
   titlePanel("Página oficial para encontrar tu refugio más cercano en Nayarit"),
   navbarPage(
     "Refugios en Nayarit",
-    tabPanel("Bienvenido",
+    tabPanel("Bienvenido", # sidebarPanel
              mainPanel(
                h2("¿Cómo navegar en la página?"),
                br(),
@@ -73,13 +73,17 @@ ui <- fluidPage(
                  column(4, themeSelector(),align = "center"), align = "left"),
                h4("2. En la pestaña Ubicación coordenadas, podrás escoger el refugio más cercano a ti."),
                h4("3. En la pestaña Municipios, podrás encontrar el refugio más cercano de tu municipio."),
-               h4("4. En caso de no conocer tus coordenadas, apóyate de la pestaña 'Ubícate en el mapa'."),
+               h4("4. En caso de no conocer tus coordenadas, apóyate con el siguiente mapa."),
+               verbatimTextOutput("out"),
+               h4("Selecciona..."),
+               # verbatimTextOutput("ubicacion_actual"),
+               leafletOutput("mymap_interactive"),
+               DTOutput('tbl_interactive'),
                br(),
                h5("En caso de tener alguna duda o comentario, podrás comunicarte con:"),
                h5("Adrián Tame Jacobo"),
                h5("Miguel Calvo Valente"),
                h5("Rodrigo Juárez Jaramillo"),
-               
              )
     ),
     tabPanel("Ubicacion por Coordenadas",
@@ -116,24 +120,11 @@ ui <- fluidPage(
                DTOutput('tbl_municipio'),
              ) # mainPanel
              
-    ),
-    tabPanel("Ubícate (Amiga) en el Mapa", # sidebarPanel
-             mainPanel(
-               h1("Busqueda por Municipio"),
-               verbatimTextOutput("out"),
-               h4("Selecciona..."),
-               # verbatimTextOutput("ubicacion_actual"),
-               leafletOutput("mymap_interactive"),
-               DTOutput('tbl_interactive'),
-             ) # mainPanel
-             
     )
     
-  ), # navbarPage
-  # leafletOutput("mymap"),
-  # DTOutput('tbl'),
+  ),
   p()
-) # fluidPage
+)
 
 
 # Define server function  
@@ -202,7 +193,6 @@ server <- function(input, output) {
                     
                 }"
       )
-    
   })
   
   output$tbl = renderDT(
