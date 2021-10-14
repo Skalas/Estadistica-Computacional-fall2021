@@ -26,9 +26,9 @@ Para este proyecto contamos con la información proporcionada por la Dirección 
 
 	1. Primero se realizó la carga de estos.
 	2. Una breve visualización de los datos para irlos conociendo, 
-	3. Posteriormente hacer una limpieza de estos mismos: corrección de escritura de coordenadas o "volteadas", `NAs`. etc.
+	3. Posteriormente hacer una limpieza de estos mismos: corrección de escritura de coordenadas o estas estaban volteadas, `NAs`. etc.
 	4. Breve visualización de estos: Boxplot y mapa.
-	5. Interfaz de **`shiny`**
+	5. Interfaz de `shiny`
 
 Todo esto se puede visualizar en el archivo [`ETL.Rmd`](https://github.com/LuzVerde23/Estadistica-Computacional-fall2021/blob/main/proyectos/RespuestaDesastre/quarenteam/ETL.Rmd)
 
