@@ -256,6 +256,50 @@ obten_municipios <- function(municipio){
     filter(Municipio == municipio_actual)
 }
 
+#20.9        -105.
+
+            
+  
+
+descripciones_popups <- function(datos){
+  
+  
+  unique_coords <- datos |>
+                    mutate(lat_lon = paste(Latitud_Dec, Longitud_Dec)) |>
+                    group_by(lat_lon) |>
+                    summarise(n = n()) |>
+                    pull(lat_lon)
+  
+  new_aux <- datos |> mutate(lat_lon = "", popup = "") |> head(1)
+  
+  for (coord in unique_coords){
+    
+    popup <- paste(datos |>
+                      mutate(lat_lon = paste(Latitud_Dec, Longitud_Dec),
+                             popup = paste(Refugio, Telefono)) |>
+                      filter(lat_lon == coord) |>
+                      pull(popup), collapse = "\n"
+                    # pull(popup), collapse = " ", sep = " \n"
+                  )
+
+    new_aux <- rbind(new_aux, datos |>
+                                mutate(lat_lon = paste(Latitud_Dec, Longitud_Dec)) |>
+                                filter(lat_lon == coord) |>
+                                head(1) |>
+                                mutate(popup = popup))
+        }
+  
+  new_aux[-1,]
+}
+  
+
+# nayarit_refugios |>
+#   filter(No. %in% c(412, 413, 414, 415, 416) == T) |>
+#   select(c(Latitud_Dec, Longitud_Dec)) |
+#   descripciones_popups() |>
+#   select(popup)
+# 
+
 
 # #Tomamos los n_closer mas cercanos
 # mas_cercanos <- nayarit_refugios |>

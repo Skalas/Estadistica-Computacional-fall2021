@@ -147,11 +147,13 @@ server <- function(input, output) {
     mas_cercanos <- obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
                                        input$lon_D, input$lon_M, input$lon_S)#estaria bueno parametrizarlo
     
+    #Modificamos los mas cercanos para que nos devuelva agrupados por lat y lon
+    mas_cercanos <- descripciones_popups(mas_cercanos)
     
     leaflet() |>
       addTiles() |>
       addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-                 popup = ~paste(Refugio, Telefono, sep="\n")) |>
+                 popup = ~popup) |>
       addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id,
                         icon  = awesomeIcons(iconColor = 'black',markerColor = "orange")) 
     
