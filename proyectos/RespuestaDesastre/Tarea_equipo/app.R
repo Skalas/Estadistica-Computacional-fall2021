@@ -7,7 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr, shiny, shinyWidgets, DT, leaflet, htmlwidgets, shinydashboard)
+pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr, shiny, shinyWidgets, DT, leaflet, htmlwidgets, shinydashboard, geosphere)
 
 
 # Nombres de cada una de las hojas del excel 
