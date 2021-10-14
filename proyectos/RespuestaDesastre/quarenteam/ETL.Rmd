@@ -1,6 +1,6 @@
 ---
-title: "Proyecto intermedio Estadística Computacional"
-author: "Cecilia Avilés, Leonardo Ceja, Luz Hernández, Ita Santiago"
+title: "Proyecto Intermedio Estadística Computacional"
+author: "**Quarenteam**: Cecilia Avilés, Luz Hernández, Ita Santiago, Leonardo Ceja"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   html_document:
@@ -14,19 +14,19 @@ output:
     df_print: paged
   '''''': default
 ---
-# ETL Refugies Nayarit
+# ETL Refugios Nayarit
 
 ## Comprensión del negocio
 
-#### Antecedentes
+#### **Antecedentes**
 
-La Dirección de Protección Civil y Bomberos del estado de Nayarit, concentraron la informacion 
+La Dirección de Protección Civil y Bomberos del estado de Nayarit, concentraron la información 
 de diversos refugios del estado.
 
-#### Objetivo
+#### **Objetivo**
 
-A fin de tener la informacion disponible revisaremos la base de datos para despues ubicarla en un
-mapa
+A fin de tener la información disponible revisaremos la base de datos para después presentarla en un
+mapa.
 
 
 ```{r Carga librerías a usar, include = F}
@@ -48,8 +48,7 @@ lapply(paquetes, instalar)
 
 ## Los datos 
 
-Cargamos los datos de todas las hojas del documentos y los asignamos a la variable data_raw
-
+Cargamos los datos de todas las hojas del documento y los asignamos a la variable **`data_raw`**:
 
 ```{r Carga de datos, echo = FALSE, message = FALSE, warning = FALSE}
 path <- 'data/refugios_nayarit.xlsx'
@@ -64,9 +63,10 @@ data_raw <- data_raw[!is.na(data_raw$No.),] #Quita filas con valores NA de la co
 glimpse(data_raw)
 
 ```
-Como se puede observar no solo los titulos estan mal, sino que tambien tenemos datos con `NAs`, a continuacion vamos a revisar y en su caso limpiar los valores que podamos limpiar
+Como se puede observar no solo los títulos están mal, sino que también tenemos datos con `NAs`, a continuación vamos a revisar y en su caso limpiar los valores que podamos limpiar.
 
-A continuacion mostramos las primeras filas.
+A continuación mostramos las primeras filas:
+
 ```{r Limpieza , echo = FALSE, message = FALSE, warning = FALSE}
 
 #Hacemos limpieza en el encabezado únicamente
@@ -84,7 +84,7 @@ refugios <- refugios %>%
 refugios <- refugios %>% 
   mutate(USO_DEL_INMUEBLE  = ifelse(USO_DEL_INMUEBLE %in% c("GOBIERNO MUNICIPAL","MUNICIPAL"),"MUNICIPAL", USO_DEL_INMUEBLE))
 
-# Distribuimos de mejor manera los telefonos
+# Distribuimos de mejor manera los teléfonos
 refugios <- refugios %>%
   mutate(TELEFONOS = gsub("-","", TELEFONO)) %>%
   mutate(TELEFONOS = gsub("\\*","",TELEFONOS)) %>%
@@ -106,7 +106,7 @@ refugios <- refugios %>%
 head(refugios)
 ```
 ## Los datos faltantes
-Vamos tambien a revisar si los datos `NAs` son relevantes o podemos prescindir de ellos.
+Vamos también a revisar si los datos `NAs` son relevantes o podemos prescindir de ellos:
 
 ```{r visualizando nas, echo = FALSE, message = FALSE, warning = FALSE}
 col_names <- names(refugios)
@@ -120,7 +120,7 @@ NAs <- refugios %>% filter(is.na(No) | is.na(REFUGIO)| is.na(MUNICIPIO)|
 
 NAs
 ```
-vemos que de los 11 registros con `NAs`, solamente 4 tienen coordenadas, por lo tanto, las demas las vamos a eliminar
+Vemos que de los 11 registros con `NAs`, solamente 4 tienen coordenadas, por lo tanto, las demás las vamos a eliminar.
 
 ```{r eliminando nas, echo = FALSE, message = FALSE, warning = FALSE}
 refugios <- refugios %>% 
@@ -128,12 +128,11 @@ refugios <- refugios %>%
 
 ```
 
-Con esto nos quedamos con los datos que si tienen coordenadas.
+Con esto nos quedamos con los datos que sí tienen coordenadas.
 
-## Exploración coordenadas
+## Exploración de coordenadas
 
-Convertimos el tipo de coordenadas y observamos su distribución
-Observamos distribución de Latitud y Longitud
+Convertimos el tipo de coordenadas y observamos la distribución de Latitud y Longitud:
 
 ```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
 refugios <- refugios %>% filter(!(is.na(LATITUD) | is.na(LONGITUD)))
@@ -152,10 +151,11 @@ ggplot(data = coords_raw, aes(x=LON)) +
   geom_boxplot() +
   ggtitle("Distribución Longitud")
 ```
+
 ## Imputación de datos
 
-Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos
-Como son pocos datos, nos permitimos corregir cada uno y a continuacion volvemos a revisar su distribucion
+Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos.
+Como son pocos datos, nos permitimos corregir uno a uno y a continuación volvemos a revisar su distribución:
 
 ```{r Imputación de datos, echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -187,9 +187,10 @@ ggplot(data = refugios, aes(x=LON)) +
   geom_boxplot() +
   ggtitle("Distribución corregida Longitud")
 ```
+
 ## Categorizando refugios
 
-Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa
+Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa:
 
 ```{r Creación rangos de capacidad, echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -237,8 +238,9 @@ map_refugios <- leaflet() %>%
             opacity = 1)
 map_refugios
 ```
+
 ## Mapa de refugio más cercano
-Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario
+Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario:
 
 ```{r Mapa de refugio más cercano, echo = FALSE, message = FALSE, warning = FALSE}
 
@@ -294,7 +296,7 @@ map_refugio_cercano
 ```
 
 
-Guardando la base de datos para el `shiny`
+Guardando la base de datos para el **`Shiny`**:
 ```{r creando archivo RDS}
 
 saveRDS(object = refugios, file = "refugios.rds")
