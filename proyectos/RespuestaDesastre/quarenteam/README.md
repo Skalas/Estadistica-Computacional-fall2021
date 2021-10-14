@@ -3,7 +3,7 @@
 
 # Proyecto Respuesta Desastres
 	
-** Intergantes del equipo  🚀
+### Intergantes del equipo  🚀
 	
 
 | Nombre                           |     CU | Mail                     | Usuario Gh |
@@ -13,14 +13,14 @@
 | Ita-Andehui Santiago Castillejos | 174134 | isantia2@itam.mx         | sancas96 |
 | Leonardo Ceja Pérez              | 197818 | lcejaper@itam.mx         | lecepe00   |
 
-** Pasos a seguir 📋
+### Pasos a seguir 📋
 
 De manera loca, en la carpeta data hay que colocar el archivo que se encuentra en [esta liga](https://docs.google.com/spreadsheets/d/0Bw4a10rhk2QqaTZkUmQwaXU4aEE/edit?usp=sharing&ouid=101036910978943156470&resourcekey=0-RQa9gRpFX0x3z5bSJGn0Dg&rtpof=true&sd=true) ** con el mismo nombre **
 
 Es importante, antes de comenzar el archivo [`ETL.Rmd`](https://github.com/LuzVerde23/Estadistica-Computacional-fall2021/blob/main/proyectos/RespuestaDesastre/quarenteam/ETL.Rmd) se deberá de correr de forma local. Este archivo nos genera otro archivo `.rds`, este último es el que alimentará nuestra interfaz de `shiny`
 
 
-** Explicación breve de lo que se hizo ✒️
+### Explicación breve de lo que se hizo ✒️
 
 Para este proyecto contamos con la información proporcionada por la Dirección de Protección Civil y Bomberos del estado de Nayarit, los cuales concentraron datos como ubicación, capacidad, responsable entre otros. Los pasos que se siguieron a manerade resumen fueron los siguientes:
 
@@ -34,7 +34,7 @@ Todo esto se puede visualizar en el archivo [`ETL.Rmd`](https://github.com/LuzVe
 
 Por su parte la interfaz de `shiny` generar un motor sencillo que indica el refugio más cercano a una coordenada dada. También, genera un dashboard que ayuda a identificar por localidad los refugios existentes.
 
-** Dificultades ⚙️
+### Dificultades ⚙️
 
 Hablando del ETL las dificultadas que se afrontaron fueron las relacionadadas a dos puntos:
 
@@ -45,7 +45,7 @@ Para los puntos anteriores fue importante investigar, leer y entender las paquet
 
 Por su parte el reto de implementar el `shiny` los retos importantea resaltar fue poder hacer el `dashbord` que no sólo nos mostrara el mapa, sino que también que desde este mismo se tomara como `input` las coordenadas que le ingra el **usuario**
 
-** Conclusiones 📄
+### Conclusiones 📄
 
 Aunque nos queda claro que hay mucho que aprender para la implementación de un `dashbord` mucho más robusto es importante resaltar que no quisimos ser redundantes y ostentosos con las tareas que se solicitan, ya que al ser inexpertos en el tema, a la hora de investigar herramientas que nos ayuden en la implementación es fácil perderse en el mar de información que se puede encontrar.
 
