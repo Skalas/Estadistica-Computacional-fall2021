@@ -31,10 +31,7 @@ library(readxl)
 # library(jsonlite)
 # library(highcharter)
 
-### Mejoras:
-# 4. Hay algunas coordenadas que se repiten (p.ej. 414, 415 y 416). Entonces,
-# hay que determinar que hacer. Al momento, se estan sobrescribiendo, pero una
-# idea podria ser mostrar todos los valores en el popup.
+###Creamos lista de municipios del Estado de Nayarit
 
 municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
                    "AMATLAN DE CAÑAS"="AMATLAN DE CAÑAS","COMPOSTELA" ="COMPOSTELA",
@@ -48,14 +45,16 @@ municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
                    "IXTLAN DEL RIO"="IXTLAN DEL RIO","JALA"="JALA","ROSAMORADA"="ROSAMORADA",
                    "BAHIA DE BANDERAS"="BAHIA DE BANDERAS")
 
-
+###Creamos filepath para leer los datos
 filepath <-"data/refugios_nayarit.xlsx"
 n_hojas <- length(excel_sheets(filepath))
 n_closer <- 5
 
+###Leemos los datos
 datos <- read_excel(filepath, skip = 6, col_names = c("No.", "Refugio", "Municipio", "Direccion", "Uso del Inmueble", "Servicios", "Capacidad de Personas", "Latitud", "Longitud", "Altitud", "Responsable", "Telefono"), na = "na")
 datos <- datos[-dim(datos)[1],]
 
+###Leemos las hojas del excel
 for(i in 2:n_hojas){
   pagina_k <- read_excel(filepath, skip = 6, col_names = c("No.", "Refugio", "Municipio", "Direccion", "Uso del Inmueble", "Servicios", "Capacidad de Personas", "Latitud", "Longitud", "Altitud", "Responsable", "Telefono"), sheet = i)
   pagina_k <- pagina_k[-dim(pagina_k)[1],]
@@ -68,37 +67,9 @@ datos <- datos[!is.na(datos$Longitud), ]
 datos <- datos[!is.na(datos$Refugio), ]
 datos <- datos[!is.na(datos$Municipio), ]
 
-### Agregamos los primeros dos valores si es que los 
-
-# convert_coordinates <- function(x){
-#   ### Segun Wikipedia: D_dec = D + M/60 + S/3600
-#   
-#   # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo splits
-#   coords <- x |>
-#             strsplit(split = "°") |> 
-#             unlist() |> 
-#             strsplit(split = "º") |> 
-#             unlist() |> 
-#             strsplit(split = "ª") |> 
-#             unlist() |> 
-#             # strsplit(split = "|") |> 
-#             # unlist() |> 
-#             strsplit(split = "'") |> 
-#             unlist() |> 
-#             strsplit(split = "\"") |> 
-#             unlist() |>
-#             as.numeric()
-#             
-#   D <- coords[1]
-#   M <- coords[2]
-#   S <- coords[3]
-#   
-#   D + M/60 + S/3600
-# }
-
+###Convertimos coordenadas
 convert_coordinates <- function(x){
   ### Segun Wikipedia: D_dec = D + M/60 + S/3600
-  
   # Obtenemos las 3 componentes (degrees, minutes, and seconds) haciendo regex
   matches <- regmatches(x, gregexpr("[[:digit:]]+", x))
   matches <- as.numeric(unlist(matches))
@@ -109,14 +80,11 @@ convert_coordinates <- function(x){
   } else {
     S <- matches[3] +  matches[4]/100
   }
-  # S <- matches[3] +  matches[4]/100
-  
   D + M/60 + S/3600
 }
 
 ### Aqui podemos ver aquellos valores problematicos. En general, se
 ### puede robustecer la funcion convert_coordinates para que los cache.
-
 aux <- map_dbl(datos$Latitud, convert_coordinates)
 problematic_Lat <- datos$No.[aux |> is.na()]
 datos |> filter(No.  %in%  problematic_Lat) |> pull(Latitud)
@@ -126,7 +94,6 @@ problematic_Lon <- datos$No.[aux |> is.na()]
 datos |> filter(No.  %in%  problematic_Lon) |> pull(Longitud)
 
 ### Trabajamos con los datos asi por el momento, quitando NA
-
 corregidos <- datos |>
                 mutate(Latitud_Dec =  map_dbl(Latitud, convert_coordinates),
                        Longitud_Dec =  map_dbl(Longitud, convert_coordinates)) |>
@@ -135,19 +102,15 @@ corregidos <- datos |>
 ### Notamos que existe un valor para el cual la Latitud y Longitud estan
 ### volteadas (puede ser que haya mas para los NA que quitamos).
 ### Dejamos esta correccion para despues, por el momento lo quitamos
-
 corregidos |>
   filter(Latitud_Dec > 30) |>
   select(c("No.", "Latitud_Dec", "Longitud_Dec"))
 
 corregidos <- corregidos |>
   filter(Latitud_Dec < 30)
-
 ### La Longitud debe estar negativo (si no los grafica del otro lado del mundo)
 corregidos <- corregidos |>
                mutate(Longitud_Dec = ifelse(Longitud_Dec > 0, -1*Longitud_Dec, Longitud_Dec))
-
-
 
 #Estas cuatro lineas son un ejemplo de lo que se haria si se ingresan en coordenadas
 #De esta forma, podemos forzar en el input a que se agreguen los caracteres º, ' y ".
@@ -156,8 +119,6 @@ ubicacion_actual <- ubicacion_actual |> map_dbl(convert_coordinates)
 ubicacion_actual <- c("21º56'52.71", "105º08'40.55")
 ubicacion_actual <- ubicacion_actual |> map_dbl(convert_coordinates)
 
-###### 
-
 #Esto seria si ya se le pasa el vector en coordenadas decimales
 ubicacion_actual <- c(21, -105)
 
@@ -165,7 +126,6 @@ ubicacion_actual <- c(21, -105)
 ubicacion_actual_df <- tibble(id = "Ubicacion actual",
                               lat = ubicacion_actual[1],
                               lng = ubicacion_actual[2])
-
 
 ### Funcion para calcular distancias entre coordenadas
 distancia <- function(x1, x2, y1, y2){
@@ -182,10 +142,11 @@ aux_dist <- corregidos |>
 
 corregidos$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
 
-
+###Pasamos los corregidos
 nayarit_refugios <- corregidos
 municipios_unicos <- nayarit_refugios$Municipio |> unique()
 
+###Obtenemos interactivos
 obten_interactivos <- function(lat,lon){
   ubicacion_actual <- c(lat, lon)
   
@@ -214,33 +175,33 @@ obten_interactivos_df <- function(lat,lon){
   ubicacion_actual_df
 }
 
+#Obtenemos los refugios más cercanos
 obten_mas_cercanos <- function(lat_D, lat_M, lat_S, lon_D, lon_M, lon_S){
   latitud_actual <- paste(lat_D, "º", lat_M, "'", lat_S, sep = "" )
   longitud_actual <- paste(lon_D, "º", lon_M, "'", lon_S,sep = "" )
   ubicacion_actual <- c(latitud_actual, longitud_actual) |> map_dbl(convert_coordinates)
   
-  
-  aux_dist <- nayarit_refugios |> 
+#Normalizamos   
+aux_dist <- nayarit_refugios |> 
     mutate(x_actual = ubicacion_actual[1], y_actual = -1*ubicacion_actual[2]) |>
     select(c("Latitud_Dec", "x_actual" , "Longitud_Dec", "y_actual")) |>
     rename(x1 = Latitud_Dec, x2 = x_actual, y1 = Longitud_Dec, y2 = y_actual)
   
-  nayarit_refugios$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
+nayarit_refugios$dist <- pmap_dbl(list(aux_dist$x1, aux_dist$x2, aux_dist$y1, aux_dist$y2), distancia)
   
   #Tomamos los n_closer mas cercanos
   mas_cercanos <- nayarit_refugios |>
     arrange(dist) |>
     head(n_closer)
-  
   mas_cercanos
 }  
 
+#Obtenemos ubicación actual a partir de coordenadas
 obten_ubicacion_actual_df <- function(lat_D, lat_M, lat_S, lon_D, lon_M, lon_S){
   
   latitud_actual <- paste(lat_D, "º", lat_M, "'", lat_S, sep = "" )
   longitud_actual <- paste(lon_D, "º", lon_M, "'", lon_S,sep = "" )
   ubicacion_actual <- c(latitud_actual, longitud_actual) |> map_dbl(convert_coordinates)
-  
   #Para cualquier caso, lo agregamos a un df para pasarlo al mapa
   ubicacion_actual_df <- tibble(id = "Ubicacion actual",
                                 lat = ubicacion_actual[1],
@@ -256,22 +217,14 @@ obten_municipios <- function(municipio){
     filter(Municipio == municipio_actual)
 }
 
-#20.9        -105.
-
-            
-  
-
+### En caso que haya ubicaciones repetidas, los popups, muestran los datos de los refugios
 descripciones_popups <- function(datos){
-  
-  
   unique_coords <- datos |>
                     mutate(lat_lon = paste(Latitud_Dec, Longitud_Dec)) |>
                     group_by(lat_lon) |>
                     summarise(n = n()) |>
                     pull(lat_lon)
-  
   new_aux <- datos |> mutate(lat_lon = "", popup = "") |> head(1)
-  
   for (coord in unique_coords){
     
     popup <- paste(datos |>
@@ -279,89 +232,15 @@ descripciones_popups <- function(datos){
                              popup = paste(Refugio, Telefono)) |>
                       filter(lat_lon == coord) |>
                       pull(popup), collapse = "\n"
-                    # pull(popup), collapse = " ", sep = " \n"
                   )
-
     new_aux <- rbind(new_aux, datos |>
                                 mutate(lat_lon = paste(Latitud_Dec, Longitud_Dec)) |>
                                 filter(lat_lon == coord) |>
                                 head(1) |>
                                 mutate(popup = popup))
         }
-  
   new_aux[-1,]
 }
   
-
-# nayarit_refugios |>
-#   filter(No. %in% c(412, 413, 414, 415, 416) == T) |>
-#   select(c(Latitud_Dec, Longitud_Dec)) |
-#   descripciones_popups() |>
-#   select(popup)
-# 
-
-
-# #Tomamos los n_closer mas cercanos
-# mas_cercanos <- nayarit_refugios |>
-#                   arrange(dist) |>
-#                   head(n_closer)
-# 
-# 
-# ### Por municipios (en la implementacion, dar a elegir de una lista)
-# municipio_actual <- "ROSAMORADA"
-# por_municipio <- nayarit_refugios |>
-#                   filter(Municipio == municipio_actual)
-# 
-# ########## Algunas pruebas para colorear por municipio
-# 
-# # nayarit_map <- rgdal::readOGR("data/estado18.json")
-# # 
-# # nayarit_map <- nayarit_map |>
-# #                 mutate(state_code=as.factor(as.numeric(as.character(state_code))),
-# #                        mun_code=as.factor(as.numeric(as.character(mun_code))))
-# # 
-# # nay_new <- spTransform(nayarit_map, CRS("+proj=longlat +init=epsg:4326"))
-# # 
-# # leaflet() %>%
-# #   addProviderTiles("CartoDB.Positron", options= providerTileOptions(opacity = 0.99)) %>%
-# #   addPolygons(data = nay_new,
-# #               stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5
-# #   )
-# 
-# ##########
-# 
-# # leaflet() |>
-# #   addTiles() |>
-# #   # addPolygons(data = nayarit_map_2, 
-# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-# #   #             # fillColor = ~pal(log10(pop)),
-# #   #             label = ~mun_name) |>
-# #   addMarkers(data = corregidos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-# #              popup = ~paste(Refugio, Telefono, sep="\n")) |>
-# #   addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
-# #                     icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
-# # 
-# # leaflet() |>
-# #   addTiles() |>
-# #   # addPolygons(data = nayarit_map_2, 
-# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-# #   #             # fillColor = ~pal(log10(pop)),
-# #   #             label = ~mun_name) |>
-# #   addMarkers(data = mas_cercanos, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-# #              popup = ~paste(Refugio, Telefono, sep="\n")) |>
-# #   addAwesomeMarkers(data = ubicacion_actual_df, lat = ~lat, lng = ~lng, popup = ~id, 
-# #                     icon  = awesomeIcons(iconColor = 'black',markerColor = "orange"))
-# # 
-# # leaflet() |>
-# #   addTiles() |>
-# #   # addPolygons(data = nayarit_map_2, 
-# #   #             stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-# #   #             # fillColor = ~pal(log10(pop)),
-# #   #             label = ~mun_name) |>
-# #   addMarkers(data = por_municipio, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-# #              popup = ~paste(Refugio, Telefono, sep="\n"))
-# # 
-# 
-# 
 # #### Referencias
 # # http://rstudio-pubs-static.s3.amazonaws.com/327743_a932d7ebdce548dfa7c7ca2b3ff6e038.html

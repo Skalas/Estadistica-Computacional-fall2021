@@ -52,17 +52,19 @@ themeSelector <- function() {
 library(shiny)
 library(shinythemes)
 library(DT)
-source("refugios.R")
-
 library(leaflet)
 library(htmltools)
 library(htmlwidgets)
+
+#Llamamos el R script de refugios
+source("refugios.R")
 
 
 # Define UI
 ui <- fluidPage(
   titlePanel("Página oficial para encontrar tu refugio más cercano en Nayarit"),
   navbarPage(
+    ###Panel de Bienvenida
     "Refugios en Nayarit",
     tabPanel("Bienvenido", # sidebarPanel
              mainPanel(
@@ -74,6 +76,8 @@ ui <- fluidPage(
                h4("2. En la pestaña Ubicación coordenadas, podrás escoger el refugio más cercano a ti."),
                h4("3. En la pestaña Municipios, podrás encontrar el refugio más cercano de tu municipio."),
                h4("4. En caso de no conocer tus coordenadas, apóyate con el siguiente mapa."),
+               
+               #Mapa con el que se obtienen las coordenadas
                verbatimTextOutput("out"),
                h4("Selecciona..."),
                # verbatimTextOutput("ubicacion_actual"),
@@ -86,6 +90,8 @@ ui <- fluidPage(
                h5("Rodrigo Juárez Jaramillo"),
              )
     ),
+    ###En este tabPanel, el usuario colocará las
+    ###coordenadas de su ubicación para encontrar los refugios más cercanos
     tabPanel("Ubicacion por Coordenadas",
              sidebarPanel(
                tags$h3("Ingresa coordenadas en N & W:"),
@@ -104,7 +110,7 @@ ui <- fluidPage(
                DTOutput('tbl'),
              ) # mainPanel
              
-    ), # Navbar 1, tabPanel
+    ), # TabPanel en el que se escoge un municipio y se obtienen los refugios más cercanos
     tabPanel("Ubicacion por Municipio",
              sidebarPanel(
                tags$h3("Input:"),
@@ -119,17 +125,14 @@ ui <- fluidPage(
                leafletOutput("mymap_municipio"),
                DTOutput('tbl_municipio'),
              ) # mainPanel
-             
     )
-    
   ),
   p()
 )
 
-
 # Define server function  
 server <- function(input, output) {
-  
+  #Normalizamos las coordenadas
   output$ubicacion_actual <- renderText({
     latitud_actual <- paste(input$lat_D, "º", input$lat_M, "'", input$lat_S, sep = "" )
     longitud_actual <- paste(input$lon_D, "º", input$lon_M, "'", input$lon_S,sep = "" )
@@ -145,7 +148,7 @@ server <- function(input, output) {
     
     #Tomamos los n_closer mas cercanos
     mas_cercanos <- obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
-                                       input$lon_D, input$lon_M, input$lon_S)#estaria bueno parametrizarlo
+                                       input$lon_D, input$lon_M, input$lon_S)
     
     #Modificamos los mas cercanos para que nos devuelva agrupados por lat y lon
     mas_cercanos <- descripciones_popups(mas_cercanos)
@@ -163,8 +166,8 @@ server <- function(input, output) {
     
     # 20º56'15.28"	105º08'41.47"
     
+    #Obtener municipios
     por_municipio <- obten_municipios(input$municipio)
-    
     
     leaflet() |>
       addTiles() |>
@@ -180,7 +183,6 @@ server <- function(input, output) {
   })
   
   output$mymap_interactive <- renderLeaflet({
-    
     leaflet() |>
       addTiles() |>
       setView(lng = -104.8947, lat = 21.5040, zoom = 8) |>  
@@ -199,7 +201,7 @@ server <- function(input, output) {
   
   output$tbl = renderDT(
     obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
-                       input$lon_D, input$lon_M, input$lon_S),#estaria bueno parametrizarlo
+                       input$lon_D, input$lon_M, input$lon_S),
     options = list(lengthChange = FALSE))
   
   
@@ -220,11 +222,6 @@ server <- function(input, output) {
   
   
 } # server
-
-
-
-
-
 
 nayarit_refugios <- corregidos
 
