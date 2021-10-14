@@ -1,7 +1,8 @@
 # <p align = "center"> QUARENTEAM
 ## <p align = "center"> Estadística Computacional (Otoño 2021)
 
-* Proyecto Respuesta Desastres
+# Proyecto Respuesta Desastres
+	
 ** Intergantes del equipo  🚀
 	
 
