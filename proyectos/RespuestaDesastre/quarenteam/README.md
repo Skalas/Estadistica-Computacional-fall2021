@@ -4,14 +4,14 @@
 ## Proyecto Respuesta Desastres
 	
 ### Intergantes del equipo  🚀
-	
 
 | Nombre                           |  CU    | Mail                     | Usuario Gh |
-|----------------------------------+--------+--------------------------+------------|
+|----------------------------------|--------|--------------------------|------------|
 | Cecilia Avilés Robles	           | 197817 | cavilesr@itam.mx         | cecyar     |
 | Luz Aurora Hernández Martínez    | 178831 | lhern123@itam.mx         | LuzVerde23 |
 | Ita-Andehui Santiago Castillejos | 174134 | isantia2@itam.mx         | sancas96 |
 | Leonardo Ceja Pérez              | 197818 | lcejaper@itam.mx         | lecepe00   |
+
 
 ### Pasos a seguir 📋
 
