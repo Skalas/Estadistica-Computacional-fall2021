@@ -10,7 +10,7 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr, shiny, shinyWidgets, DT, leaflet, htmlwidgets, shinydashboard)
 
 
-# Nombres de las cada hoja del excel 
+# Nombres de cada una de las hojas del excel 
 hojas <- excel_sheets('data/refugios_nayarit.xlsx')
 
 # Lista con cada uno de los refugios 
