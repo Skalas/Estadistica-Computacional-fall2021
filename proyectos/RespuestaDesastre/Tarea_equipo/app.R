@@ -144,13 +144,26 @@ ui <- fluidPage(
                                      
                                      pickerInput('umunicipios', label = 'Selecciona municipios: ',
                                                  choices = c('Todos los municipios', unique(refugios_ubicacion$Municipio)), 
-                                                 options = list(`live-search` = TRUE)),
-                                     actionButton('borrar', 'Borrar')
+                                                 options = list(`live-search` = TRUE))
+                                     
                                     )
                        
-                      )
-             )
-)
+                      ),
+              # Tab con la función que indica donde cual(es) son los refugios más cercanos
+              tabPanel('Refugio más cercano',
+                       leafletOutput('mexico2', width = '100%', height = 1000),
+                       absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                     draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                                     width = 330, height = "auto",
+                                     
+                                     h2("Ubicaciones"),
+                                     
+                                     
+                                     actionButton('borrar', 'Borrar'),
+                                     actionButton('encontrar', 'Encontrar Refugio'))
+                       )
+              )
+    )
                          
 
 # Define server logic required 
@@ -175,6 +188,13 @@ server <- function(input, output, session) {
                        label = ~Municipio)
     })        
     
+    #Se crea otro mapa
+    output$mexico2 <- renderLeaflet({
+        leaflet() %>% 
+            addProviderTiles(providers$CartoDB.Positron) %>% 
+            setView(-105.3, 21.6, zoom = 9) 
+    })    
+    
     # Observe para cambiar las marcas de acuerdo al input de refugios seleccionados
     observe({
         leafletProxy('mexico', data = refugios_mun()) %>% 
@@ -185,18 +205,33 @@ server <- function(input, output, session) {
                        ) 
     })
     # Añade marcador al mapa
-    observeEvent(input$mexico_click, {
-        click = input$mexico_click
-        leafletProxy('mexico')%>%
+    observeEvent(input$mexico2_click, {
+        click = input$mexico2_click
+        leafletProxy('mexico2')%>%
             setView(click$lng, click$lat, zoom = 8) %>% 
             clearMarkers() %>% 
             addMarkers(lng = click$lng, lat = click$lat,
-                       label = paste(click$lng, click$lat))
+                       popup = paste("<h3>", 'Tu ubicación es: ', '</h3>',
+                                     'Long: ', round(click$lng, 4), 'Lat: ', round(click$lat,4)))
         
+    })
+    
+    # Encuentra refugio mas cercano
+    observeEvent(input$encontrar,{
+        click = input$mexico2_click
+        refugio = refugios_ubicacion %>%
+            rowwise() %>%
+            mutate(distance = distHaversine(c(Longitud, Latitud),c(click$lng, click$lat))) %>%
+            arrange(distance) %>%
+            head(1)
+        leafletProxy('mexico2')%>%
+            setView(refugio$Longitud, refugio$Latitud, zoom = 13) %>% 
+            addMarkers(lng = refugio$Longitud, lat = refugio$Latitud,
+                       popup  =  refugio$popup_text)
     })
     # Borra los todos los marcadores
     observeEvent(input$borrar,{
-        proxy <- leafletProxy('mexico')
+        proxy <- leafletProxy('mexico2')
         if (input$borrar){ proxy %>% clearMarkers()}
     })
     
