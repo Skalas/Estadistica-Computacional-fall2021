@@ -1,5 +1,6 @@
-## <p align = "center"> Estadística Computacional (Otoño 2021)
 # <p align = "center"> QUARENTEAM
+## <p align = "center"> Estadística Computacional (Otoño 2021)
+
 ---
 
 
