@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.1",
+    "Version": "4.0.4",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -9,6 +9,13 @@
     ]
   },
   "Packages": {
+    "BH": {
+      "Package": "BH",
+      "Version": "1.75.0-0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e4c04affc2cac20c8fec18385cd14691"
+    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.1.1",
@@ -324,6 +331,20 @@
       "Repository": "CRAN",
       "Hash": "3c9209bce1b10900155ea37ce954cf30"
     },
+    "googlePolylines": {
+      "Package": "googlePolylines",
+      "Version": "0.8.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "6b811143f8e8b18ef4bd6ee4b38b4a9b"
+    },
+    "googleway": {
+      "Package": "googleway",
+      "Version": "2.7.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "35c321bc4c4ee030eb6ced16ceec51ed"
+    },
     "gridExtra": {
       "Package": "gridExtra",
       "Version": "2.3",
@@ -386,6 +407,20 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "7ab57a6de7f48a8dc84910d1eca42883"
+    },
+    "jpeg": {
+      "Package": "jpeg",
+      "Version": "0.1-9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "441ee36360a57b363f4fa3df0c364630"
+    },
+    "jqr": {
+      "Package": "jqr",
+      "Version": "1.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b8a2e63d67833aa65c6592cfc0fa8f65"
     },
     "jquerylib": {
       "Package": "jquerylib",
