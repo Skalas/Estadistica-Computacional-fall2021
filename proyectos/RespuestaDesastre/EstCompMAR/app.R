@@ -203,8 +203,16 @@ server <- function(input, output) {
     if(is.null(input$hover_coordinates)) {
       "Mouse outside of map"
     } else {
-      paste0("Lat: ", input$hover_coordinates[1], 
-             "\nLng: ", abs(input$hover_coordinates[2]))
+      lat <- inverse_coordinates(input$hover_coordinates[1])
+      lon <- inverse_coordinates(input$hover_coordinates[2])
+      paste0("Latitud: ", input$hover_coordinates[1],
+             " D: ", lat[1], 
+             " M: ", lat[2], 
+             " S: ", lat[3], 
+             "\nLongitud: ", -input$hover_coordinates[2],
+             " D: ", -lon[1], 
+             " M: ", lon[2], 
+             " S: ", lon[3] )
     }
   })
   

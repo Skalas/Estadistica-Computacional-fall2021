@@ -63,6 +63,14 @@ convert_coordinates <- function(x){
   D + M/60 + S/3600
 }
 
+inverse_coordinates <- function(x){
+  D <- trunc(x)
+  M <- trunc(60*(x - D))
+  S <- 3600*abs(x - D)-60*M
+  
+  c(D, M, S)
+}
+
 ### Convertimos las coordenadas
 corregidos <- datos |>
                 mutate(Latitud_Dec =  map_dbl(Latitud, convert_coordinates),
