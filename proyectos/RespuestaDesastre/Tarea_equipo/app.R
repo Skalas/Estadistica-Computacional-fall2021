@@ -157,6 +157,7 @@ ui <- fluidPage(
                                      width = 330, height = "auto",
                                      
                                      h2("Ubicaciones"),
+                                     h6("Para utilizar la aplicación es necesario primero seleccionar un punto en el mapa y seleccionar el botón Encontrar Refugio", align = "left"),
                                      
                                      
                                      actionButton('borrar', 'Borrar'),
