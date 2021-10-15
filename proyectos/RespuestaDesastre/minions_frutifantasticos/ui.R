@@ -108,7 +108,7 @@ dashboardPage(
             column(
                 width = 5,
                 box(
-                    title = "Número de refugios en municipios y localidades colindantes",
+                    title = "Número de refugios en municipios colindantes y sus localidades",
                     width = NULL,
                     #background = "black",
                     solidHeader = T,

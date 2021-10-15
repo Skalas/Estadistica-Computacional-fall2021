@@ -212,35 +212,42 @@ circle_bar_plot <- function(data, shape, municipio, mtx_adj) {
       plot.margin = unit(rep(-.5,5), "cm") ) +
     coord_polar() + 
     geom_text(data = label_data, aes(x = id, y = n+.5, label = localidad, hjust = hjust), 
-              color = "black", fontface = "bold",alpha = 0.6, size = 1.9, 
+              color = "black", fontface = "bold",alpha = 0.6, size = 3, 
               angle = label_data$angle, inherit.aes = FALSE ) +
     # Add base line information
     geom_segment(data=base_data, aes(x = start - 0.5, y = -5, xend = end + 0.5, yend = -5), 
                  colour = "black", alpha = 0.8, size = 0.6 , inherit.aes = FALSE) +
     geom_text(data=base_data, aes(x = title+.5, y = -15, label=municipio), 
-              colour = "black", alpha = 0.8, size = 2, fontface = "bold", inherit.aes = FALSE)
+              colour = "black", alpha = 0.8, size = 3, fontface = "bold", inherit.aes = FALSE)
   
   return(plot)
 }
 
 dis_graph <- function(data) {
-  
   grafica <- data %>% 
     head(10) %>%
     select(refugio, capacidad, disponibilidad) %>% 
     mutate(ocupacion = capacidad - disponibilidad) %>% 
     select(-capacidad) %>% 
     pivot_longer(!refugio, names_to = "Capacidad" ) %>% 
-    ggplot(aes(x = reorder(refugio, -desc(value)), y= value, z = Capacidad, fill= Capacidad )) +
+    arrange(value) %>% 
+    ggplot(aes(x = reorder(refugio, -desc(value)) , y= value, z = Capacidad, fill= Capacidad )) +
     geom_bar(position="stack", stat="identity", col="black")  +
+    theme(legend.position="bottom")+
     scale_fill_manual(values= (c("forestgreen", "darkgrey"))) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
     xlab("") +
-    ylab("")+
+    ylab("Capacidad de personas")+
     coord_flip() +
     scale_y_continuous(n.breaks = 10)
+    
+  a<- ggplotly(grafica) %>% 
+    layout(legend = list(orientation = "h",   # show entries horizontally
+                                             xanchor = "center",  # use center of legend as anchor
+                                             x =.5, 
+                                            y =-.5))  
   
-  return(grafica)
+  return(a)
 }
 
 pal <- colorFactor(
