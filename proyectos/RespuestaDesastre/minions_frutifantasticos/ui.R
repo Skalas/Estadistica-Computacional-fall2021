@@ -3,6 +3,8 @@ library(shinydashboard)
 library(shinyWidgets)
 library(leaflet)
 library(DT)
+library(ggplot2)
+library(plotly)
 
 dashboardPage(
     skin = "black",
@@ -83,7 +85,7 @@ dashboardPage(
                 box(
                     width = NULL,
                     solidHeader = T,
-                    leafletOutput("map", height = 400)
+                    leafletOutput("map", height = 350)
                 )
             ),
             column(
@@ -91,7 +93,19 @@ dashboardPage(
                 box(
                     width = NULL,
                     solidHeader = T,
-                    div(dataTableOutput("table", height = 400), style = "font-size:57.5%")
+                    div(dataTableOutput("table", height = 350), style = "font-size:70.0%")
+                )
+            )
+        ),
+        fluidRow(
+            column(
+                width = 5,
+                box(
+                    title = "Número de refugios en municipios y localidades cercanos",
+                    width = NULL,
+                    background = "black",
+                    solidHeader = T,
+                    plotOutput("circle_bar_plot", height = 300)
                 )
             )
         )

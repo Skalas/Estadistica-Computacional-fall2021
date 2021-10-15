@@ -6,6 +6,9 @@ library(leaflet.extras)
 library(purrr)
 library(DT)
 library(geosphere)
+library(ggplot2)
+library(plotly)
+library(rgeos)
 
 shinyServer(function(input, output, session) {
     
@@ -29,7 +32,7 @@ shinyServer(function(input, output, session) {
             return(df)
         })
     })
-
+    
     output$map <- renderLeaflet({
         
         split_data <- split(datum(), datum()$uso_cat)
@@ -44,7 +47,7 @@ shinyServer(function(input, output, session) {
             addProviderTiles("CartoDB.Positron", group = "CartoDB") %>%
             addPolygons(
                 color = "black", 
-                fillColor = "lightblue", 
+                fillColor = "transparent", 
                 weight = 2,
                 dashArray = "4",
                 highlightOptions = highlightOptions(
@@ -166,6 +169,7 @@ shinyServer(function(input, output, session) {
         datatable(
         datum(),
         rownames = F,
+        class = "display nowrap",
         extensions = c('Buttons', 'Scroller', "FixedColumns"),
         selection = "single",
         options = list(
@@ -173,21 +177,36 @@ shinyServer(function(input, output, session) {
             #scroller = TRUE,
             scrollX = TRUE,
             #scrollY = 330,
-            pageLength = 5,
-         lengthMenu = c(5, 10, 15, 20),
+            pageLength = 8,
+            lengthMenu = c(8, 10, 15, 20),
             fixedColumns = list(leftColumns = 3),
-            dom = 'Bfrtip',
+            dom = 'lBfrtip',
             buttons = c('copy', 'excel', 'pdf', 'print'),
             initComplete = JS(
                 "function(settings, json) {",
                 "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
                 "}")
-        ))
+        )) 
+    })
+    
+    output$circle_bar_plot <- renderPlot({
+        
+        circle_bar_plot(
+            data = datum(), 
+            shape = shp_mun, 
+            municipio = if_else(
+                condition = is.null(prev_row()$municipio), 
+                true = "Tepic", 
+                false = prev_row()$municipio
+            )
+        )
     })
     
     prev_row <- reactiveVal()
     
     observe(print(input$map_gps_located$coordinates))
+    
+    # observe(print(prev_row()))
     
     observeEvent(input$search, {
         sendSweetAlert(
@@ -199,18 +218,44 @@ shinyServer(function(input, output, session) {
     })
     
     observeEvent(input$table_rows_selected, {
+        
         row_selected = datum()[input$table_rows_selected,]
+        
+        mun = row_selected$municipio
+        
+
         proxy <- leafletProxy('map')
+        #adj <- rownames(mtx_adj)[mtx_adj[, rownames(mtx_adj) == mun]]
+        #partial_shp <- shp_mun[shp_mun@data$municipio %in% adj, ]
+        
         proxy %>%
             addAwesomeMarkers(
                 layerId = as.character(row_selected$no),
                 lng=row_selected$lng, 
                 lat=row_selected$lat,
                 icon = my_icon
+            ) %>% 
+            addPolygons(
+                layerId = as.character(row_selected$no),
+                #data = partial_shp,
+                data = shp_mun[shp_mun@data$municipio == mun,],
+                color = "black",
+                fillColor = "blue",
+                weight = 2,
+                dashArray = "4",
+                highlightOptions = highlightOptions(
+                    weight = 3,
+                    color = "black",
+                    dashArray = "",
+                    #fillOpacity = 0.5,
+                    bringToFront = F
+                )
             )
         
         if(!is.null(prev_row())) {
-            proxy %>% removeMarker(layerId = as.character(prev_row()$no))
+            proxy %>% 
+                removeMarker(layerId = as.character(prev_row()$no)) %>% 
+                removeShape(layerId = prev_row()$no)
         }
         prev_row(row_selected)
     })
