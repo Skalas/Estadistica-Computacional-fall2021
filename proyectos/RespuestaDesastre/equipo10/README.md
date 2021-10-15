@@ -51,7 +51,7 @@ Para ejecutar el dashboard es necesario realizar lo siguiente:
 ### 4. Entregable
 Se anexa imagen del Dashboard en shiny con los refugios encontrados por municipio y los refugios más cercanos dado una corrdenada geoespacial.
 
-<img src="https://github.com/yefovar/estcomp_proyecto1/blob/main/image/shiny_dashboard.png">
+<img src="https://github.com/yefovar/Estadistica-Computacional-fall2021/blob/main/proyectos/RespuestaDesastre/equipo10/image/shiny_dashboard.png">
 
 
 
