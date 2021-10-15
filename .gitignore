@@ -149,5 +149,3 @@ dmypy.json
 *.xlsx
 *.xls
 
-# Key and passwords
-auth/
