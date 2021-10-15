@@ -7,94 +7,14 @@ library(purrr)
 library(tidyr)
 library(geosphere)
 library(spatialEco)
-
-
-#### Funciones ####
-loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt = NULL) {
- tagList(
-  tags$head(
-   tags$script(
-    "setInterval(function(){
-      if ($('html').attr('class')=='shiny-busy') {
-      $('div.busy').show();
-      $('div.notbusy').hide();
-      } else {
-      $('div.busy').hide();
-      $('div.notbusy').show();
-      }
-    },100)")
-  ),
-  tags$a(href=href,
-         div(class = "busy",  
-             img(src=loadingsrc,height = height, width = width, alt = alt)),
-         div(class = 'notbusy',
-             img(src = src, height = height, width = width, alt = alt))
-  )
- )
-}
-
-distance_compute <- function(data, lat_input, lon_input){ 
-  # This function returns the distance of a vector vs the inputs of nayarit in kilometers
-  
-  data <- data %>% rowwise() %>% 
-    mutate(distance = as.vector(
-      round(distm(c(lng, lat), c(lon_input,lat_input), fun=distGeo)/1000, 3)
-      )
-    ) %>% 
-    ungroup()
-  
-  return(data) 
-}
-
-icons <- function(color){
-  awesomeIcons(
-    icon = 'ios-close',
-    iconColor = 'black',
-    library = 'ion',
-    markerColor = color
-  )
-}
-
-my_icon = makeAwesomeIcon(
-  icon = 'home', 
-  markerColor = 'red', 
-  iconColor = 'white'
-)
-
-
-
-
-dis_graph <- function(data) {
-  
-  grafica <- data %>% 
-    head(10) %>%
-    select(refugio, capacidad, disponibilidad) %>% 
-    mutate(ocupacion = capacidad - disponibilidad) %>% 
-    select(-capacidad) %>% 
-    pivot_longer(!refugio, names_to = "Capacidad" ) %>% 
-    ggplot(aes(x = reorder(refugio, -desc(value)), y= value, z = Capacidad, fill= Capacidad )) +
-    geom_bar(position="stack", stat="identity", col="black")  +
-    scale_fill_manual(values= (c("forestgreen", "darkgrey"))) +
-    ggtitle("Disponibilidad y ocupación por refugio") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-    xlab("") +
-    ylab("")+
-    coord_flip() +
-    scale_y_continuous(n.breaks = 10)
-  
-  return(grafica)
-}
-
-
-#### Valores Constantes ####
-
-opacity = 0.9
-
 library(ggplot2)
 library(rgeos)
+library(yaml)
 
 
 #### Datos ####
+
+api_key <- yaml.load_file("auth/api_key.yaml")
 
 shp_mun<- readOGR("data/municipal.shp") %>% 
   spTransform(CRS("+proj=longlat +datum=WGS84"))
@@ -218,15 +138,7 @@ icons <- function(color){
   )
 }
 
-circle_bar_plot <- function(data, shape, municipio) {
-  
-  #Locating the neighbor municipalities
-  #mtx_adj <- gTouches(shape, byid = TRUE)
-  
-  #Change matrix diagonal for TRUE
-  #for(i in 1:ncol(mtx_adj)) {mtx_adj[i,i] <- T}
-  #Naming the municipalities in the matrix
-  #rownames(mtx_adj) <- shape@data$municipio
+circle_bar_plot <- function(data, shape, municipio, mtx_adj) {
   
   #List of neighbor municipalities of chosen municipality
   adj <- rownames(mtx_adj)[mtx_adj[, rownames(mtx_adj) == municipio]]
@@ -238,8 +150,7 @@ circle_bar_plot <- function(data, shape, municipio) {
     replace_na(list(localidad = "Desconocido", municipio = "Desconocido")) %>% 
     filter(municipio %in% adj)%>%
     arrange(municipio, n) %>% 
-    mutate(etiqueta = paste(n, localidad, sep = ", "), 
-           localidad = as.factor(localidad),
+    mutate(localidad = as.factor(localidad),
            municipio = as.factor(municipio))
   
   empty_bar <- 2
@@ -312,24 +223,36 @@ circle_bar_plot <- function(data, shape, municipio) {
   return(plot)
 }
 
+dis_graph <- function(data) {
+  
+  grafica <- data %>% 
+    head(10) %>%
+    select(refugio, capacidad, disponibilidad) %>% 
+    mutate(ocupacion = capacidad - disponibilidad) %>% 
+    select(-capacidad) %>% 
+    pivot_longer(!refugio, names_to = "Capacidad" ) %>% 
+    ggplot(aes(x = reorder(refugio, -desc(value)), y= value, z = Capacidad, fill= Capacidad )) +
+    geom_bar(position="stack", stat="identity", col="black")  +
+    scale_fill_manual(values= (c("forestgreen", "darkgrey"))) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    xlab("") +
+    ylab("")+
+    coord_flip() +
+    scale_y_continuous(n.breaks = 10)
+  
+  return(grafica)
+}
+
 pal <- colorFactor(
   palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
   domain = unique(data$uso_cat)
 )
-
-
-#dis_graph(data)
-
-
-
-
 
 my_icon = makeAwesomeIcon(
   icon = 'home', 
   markerColor = 'red', 
   iconColor = 'white'
 )
-
 
 #### Valores Constantes ####
 
@@ -338,11 +261,5 @@ mtx_adj <- gTouches(shp_mun, byid = TRUE)
 for(i in 1:ncol(mtx_adj)) {mtx_adj[i,i] <- T}
 rownames(mtx_adj) <- shp_mun@data$municipio
 
-# Shows Map
-
-# leaflet() %>%
-# addTiles() %>%
-# addPolygons(data = shp_mun, color = "black") %>%
-# addPolygons(data = shp_mun[mtx_adj[rownames(mtx_adj) == "Tepic",],])
 
 

@@ -32,16 +32,6 @@ dashboardPage(
             height = "70%",
             width = "100%"),
         tags$br(),
-        #menuItem("Filtros", tabName = "Filtros", icon = icon("filter")),
-        #tags$br(),
-        menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar"),
-            radioButtons(
-                inputId = "button_plot", 
-                label = "Tipo de gráfico",
-                choices = c("Municipio", "Refugios", "Ocupación Gral"),
-                selected = "Municipio"
-            )),
-        tags$br(),
         menuItem("Buscar", icon = icon(name = "search"), startExpanded = T,
             shinyWidgets::prettyRadioButtons(
                 inputId = "button_coord",
@@ -64,9 +54,8 @@ dashboardPage(
                 )
              ),
             conditionalPanel("input.button_coord == 'gps'",
-                #tags$div(HTML('<i class="leaflet-control-gps leaflet-control" style = outline: none;></i> Instrucciones')),
                 tags$h4("Instrucciones:"),
-                tags$h5("Utilice el botón de GPS ubicado 
+                tags$h5("Utilice el botón de GPS ubicado en
                         el mapa para detectar su ubicación")
             ),
             conditionalPanel("input.button_coord == 'coord'",
@@ -119,14 +108,22 @@ dashboardPage(
             column(
                 width = 5,
                 box(
-                    title = "Número de refugios en municipios y localidades cercanos",
+                    title = "Número de refugios en municipios y localidades colindantes",
                     width = NULL,
-                    background = "black",
+                    #background = "black",
                     solidHeader = T,
-                    plotOutput("circle_bar_plot", height = 300)
+                    plotOutput("count_refugios_mun_loc", height = 300)
+                )
+            ),
+            column(
+                width = 7,
+                box(
+                    title = "Disponibilidad y ocupación por refugio",
+                    width = NULL,
+                    solidHeader = T,
+                    plotlyOutput("availability_plot", height = 300)
                 )
             )
         )
-        
     )
 )

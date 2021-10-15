@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
                         address = input$calle,
                         language = "es",
                         region = "mx",
-                        key = "AIzaSyC4CWHxehmC8_z-solHZ8YqKIGdNn6Bh3g"
+                        key = api_key$google_api$api_token
                     )
                     
                     if(request$status == "OK"){
@@ -143,7 +143,7 @@ shinyServer(function(input, output, session) {
                 destination <- c(datum()[1,]$lat, datum()[1,]$lng)
                 
                 dir <- google_directions(
-                    key = "AIzaSyC4CWHxehmC8_z-solHZ8YqKIGdNn6Bh3g",
+                    key = api_key$google_api$api_token,
                     origin = origin(),
                     destination = destination,
                     region = "mx",
@@ -245,7 +245,7 @@ shinyServer(function(input, output, session) {
         )) 
     })
     
-    output$circle_bar_plot <- renderPlot({
+    output$count_refugios_mun_loc <- renderPlot({
         
         circle_bar_plot(
             data = datum(), 
@@ -254,8 +254,15 @@ shinyServer(function(input, output, session) {
                 condition = is.null(prev_row()$municipio), 
                 true = "Tepic", 
                 false = prev_row()$municipio
-            )
+            ),
+            mtx_adj = mtx_adj
         )
+    })
+    
+    
+    output$availability_plot <- renderPlotly({
+        
+        dis_graph(datum())
     })
     
     prev_row <- reactiveVal()
