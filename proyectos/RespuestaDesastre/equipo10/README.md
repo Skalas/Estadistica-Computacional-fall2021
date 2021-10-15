@@ -1,38 +1,3 @@
-
-
-
-
-
-
-
-                                [ Read 6 lines ]
-^G Get Help  ^O WriteOut  ^R Read File ^Y Prev Page ^K Cut Text  ^C Cur Pos
-^X Exit      ^J Justify   ^W Where Is  ^V Next Page ^U UnCut Text^T To Spell
-Maestria Ciencia de Datos
-Yedam
-Zoom
- yedam@MacBook-Pro-de-Yedam  ~/Documents  cd Maestria\ Ciencia\ de\ Datos/
- yedam@MacBook-Pro-de-Yedam  ~/Documents/Maestria Ciencia de Datos  ls
-Calificaciones.xlsx Estancia            Propedeutico        Tercer Semestre
-Documentos          Primer Semestre     Segundo Semestre    Tesis
- yedam@MacBook-Pro-de-Yedam  ~/Documents/Maestria Ciencia de Datos  cd Tercer\ Semestre
- yedam@MacBook-Pro-de-Yedam  ~/Documents/Maestria Ciencia de Datos/Tercer Semestre  ls
-Baja de materias.pdf               brain-theory-2021
-Estadistica-Computacional-fall2021 braintheory
-ITAM_MCC                           estcomp_proyecto1
-Teoria del cerebro
- yedam@MacBook-Pro-de-Yedam  ~/Documents/Maestria Ciencia de Datos/Tercer Semestre cd estcomp_proyecto1
- yedam@MacBook-Pro-de-Yedam  ~/Documents/Maestria Ciencia de Datos/Tercer Semestre/estcomp_proyecto1   main ±  ls
-README.md               image                   renv.lock
-data                    notebook                src
-estcomp_proyecto1.Rproj renv
-  GNU nano 2.0.6              File: README.md
-
----
-output:
-  html_document: default
-  pdf_document: default
----
 # Estadística Computacional
 
 ## Tarea 1
