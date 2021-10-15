@@ -38,7 +38,7 @@ Este directorio contiene la tarea #1 de los siguientes integrantes
 Para ejecutar el dashboard es necesario realizar lo siguiente:
 1. Clonar el repositorio
 2. Colocar la información referente a los refugios dentro de la carpeta con el siguiente nombre ``` data/refugios_nayarit.xlsx ```
-3. Abrir el repositorio como un proyecto de rstudio (e.g. doble click sobre estcomp_proyecto1.Rproj) y definir la raiz del repositorio como directorio activo
+3. Abrir el repositorio como un proyecto de rstudio (e.g. doble click sobre equipo10.Rproj) y definir la raiz del repositorio como directorio activo
 4. Instalar el paquete de renv. ```install.packages("renv")```
 5. Se utilizó un ambiente de R para poder replicar los resultados, para ello es necesario tener como directorio activo este repositorio y ejecutar ```renv::restore()```
 6. Ejecutar la aplicación que se encuentra en la liga
