@@ -1,15 +1,11 @@
 # Proyecto Respuesta Desastres
 ## Intergantes del equipo
 
-\begin{table}[]
-\begin{tabular}{|l|l|l|l|}
-\hline
-\multicolumn{1}{|c|}{\textbf{Nombre}} & \multicolumn{1}{c|}{\textbf{CU}} & \multicolumn{1}{c|}{\textbf{e-mail}} & \multicolumn{1}{c|}{\textbf{usuario github}} \\ \hline
-Miguel Calvo Valente                  & 203129                           & mcalvova@itam.mx                     & mig-calval                                   \\ \hline
-Adrian Tame Jacobo                    & 142235                           & atamejac@itam.mx                     & AdrianTJ                                     \\ \hline
-Rodrigo Juárez Jaramillo              & 145804                           & rjuarezj@itam.mx                     & ro-juja                                      \\ \hline
-\end{tabular}
-\end{table}
+|          Nombre          |   CU   |      e-mail      | usuario github |
+|:------------------------:|:------:|:----------------:|:--------------:|
+| Miguel Calvo Valente     | 203129 | mcalvova@itam.mx | mig-calval     |
+| Adrian Tame Jacobo       | 142235 | atamejac@itam.mx | adriantj       |
+| Rodrigo Juárez Jaramillo | 145804 | rjuarezj@itam.mx | ro-juja        |
 
 ## Explicación breve de lo que se hizo
 Hicimos una interfaz con Shiny para poder ubicar los refugios más cercanos dada una ubicación en coordenadas o dentro de un municipio. Agregamos también una página de inicio donde pusimos un mapa donde se hacer click para facilitar encontrar la unicación de un usuario en caso de no saberla. 
