@@ -299,6 +299,6 @@ map_refugio_cercano
 Guardando la base de datos para el **`Shiny`**:
 ```{r creando archivo RDS}
 
-saveRDS(object = refugios, file = "refugios.rds")
+saveRDS(object = refugios, file = "data/refugios.rds")
 
 ```

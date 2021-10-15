@@ -5,7 +5,7 @@ library(tidyverse)
 library(geosphere)
 
 #Cargamos los datos
-refugios <- readRDS("refugios.rds")
+refugios <- readRDS("data/refugios.rds")
 
 if (interactive()) {
   ui <- fluidPage(
