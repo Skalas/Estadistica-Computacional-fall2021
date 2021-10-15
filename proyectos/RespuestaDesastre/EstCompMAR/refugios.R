@@ -1,35 +1,15 @@
-# install.packages("leaflet")
 if (!require("devtools")) {
   install.packages("devtools")
 }
-# devtools::install_github("diegovalle/mxmaps")
-# install.packages("geosphere")
 library(geosphere)
-
-# install.packages("tidymodels")
 library(tidymodels)
 
 library(leaflet)
 library(magrittr)
 library(sp)
-# library(mxmaps)
 library(stringr)
 library(readxl)
 
-### Algunas usadas para los mapas
-# install.packages("rgdal")
-# install.packages("geojsonio")
-# install.packages("spdplyr")
-# install.packages("rmapshaper")
-# install.packages("jsonlite")
-# install.packages("highcharter")
-# 
-# library(rgdal)
-# library(geojsonio)
-# library(spdplyr)
-# library(rmapshaper)
-# library(jsonlite)
-# library(highcharter)
 
 ###Creamos lista de municipios del Estado de Nayarit
 
@@ -83,17 +63,7 @@ convert_coordinates <- function(x){
   D + M/60 + S/3600
 }
 
-### Aqui podemos ver aquellos valores problematicos. En general, se
-### puede robustecer la funcion convert_coordinates para que los cache.
-aux <- map_dbl(datos$Latitud, convert_coordinates)
-problematic_Lat <- datos$No.[aux |> is.na()]
-datos |> filter(No.  %in%  problematic_Lat) |> pull(Latitud)
-
-aux <- map_dbl(datos$Longitud, convert_coordinates)
-problematic_Lon <- datos$No.[aux |> is.na()]
-datos |> filter(No.  %in%  problematic_Lon) |> pull(Longitud)
-
-### Trabajamos con los datos asi por el momento, quitando NA
+### Convertimos las coordenadas
 corregidos <- datos |>
                 mutate(Latitud_Dec =  map_dbl(Latitud, convert_coordinates),
                        Longitud_Dec =  map_dbl(Longitud, convert_coordinates)) |>
@@ -102,15 +72,28 @@ corregidos <- datos |>
 ### Notamos que existe un valor para el cual la Latitud y Longitud estan
 ### volteadas (puede ser que haya mas para los NA que quitamos).
 ### Dejamos esta correccion para despues, por el momento lo quitamos
-corregidos |>
+
+aux_vals <- corregidos |>
   filter(Latitud_Dec > 30) |>
-  select(c("No.", "Latitud_Dec", "Longitud_Dec"))
+  mutate(dummy = Longitud_Dec, Longitud_Dec = Latitud_Dec, Latitud_Dec = dummy) |> 
+  select(-dummy)
+
+corregidos <- rbind(
+corregidos |> 
+  filter(No. %in% aux_vals$No. == FALSE), aux_vals) |> 
+  arrange(by = No.) |>
+  filter(Latitud_Dec >= 20) |> 
+  filter(Latitud_Dec <= 23) |> 
+  filter( Longitud_Dec >= 103) |> 
+  filter(Longitud_Dec <= 106)
 
 corregidos <- corregidos |>
   filter(Latitud_Dec < 30)
 ### La Longitud debe estar negativo (si no los grafica del otro lado del mundo)
 corregidos <- corregidos |>
                mutate(Longitud_Dec = ifelse(Longitud_Dec > 0, -1*Longitud_Dec, Longitud_Dec))
+
+
 
 #Estas cuatro lineas son un ejemplo de lo que se haria si se ingresan en coordenadas
 #De esta forma, podemos forzar en el input a que se agreguen los caracteres º, ' y ".

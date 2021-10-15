@@ -4,13 +4,15 @@
 |          Nombre          |   CU   |      e-mail      | usuario github |
 |:------------------------:|:------:|:----------------:|:--------------:|
 | Miguel Calvo Valente     | 203129 | mcalvova@itam.mx | mig-calval     |
-| Adrian Tame Jacobo       | 142235 | atamejac@itam.mx | adriantj       |
+| Adrian Tame Jacobo       | 142235 | atamejac@itam.mx | AdrianTJ       |
 | Rodrigo Juárez Jaramillo | 145804 | rjuarezj@itam.mx | ro-juja        |
 
 ## Explicación breve de lo que se hizo
 Hicimos una interfaz con Shiny para poder ubicar los refugios más cercanos dada una ubicación en coordenadas o dentro de un municipio. Agregamos también una página de inicio donde pusimos un mapa donde se hacer click para facilitar encontrar la unicación de un usuario en caso de no saberla. 
 Además de esto, implementamos una interfaz pequeña para hacer un cambio de tema. 
 La limpieza de datos está hecha en otro archivo llamado `refugios.R`, donde incuimos también varias funciones que utilizamos en la aplicación. 
+
+## Decisiones que Tomamos
 
 ## Dificultades
 Tuvimos muchas. Inicialmente, lo más complicado para nosotros fue entender Shiny. Nunca habíamos trabajado con Shiny, ni con leaflet, entonces nos tomó algo de tiempo acostumbrarnos a la interfaz y poder manejarla con algo de confianza. 

@@ -1,5 +1,3 @@
-
-
 themeSelector <- function() {
   div(
     div(
@@ -37,16 +35,6 @@ themeSelector <- function() {
     )
   )
 }
-
-
-
-# Modified from Winston Chang, 
-# https://shiny.rstudio.com/gallery/shiny-theme-selector.html
-
-# Concepts about Reactive programming used by Shiny, 
-# https://shiny.rstudio.com/articles/reactivity-overview.html
-
-# install.packages("DT")
 
 # Load R packages
 library(shiny)
@@ -216,7 +204,7 @@ server <- function(input, output) {
       "Mouse outside of map"
     } else {
       paste0("Lat: ", input$hover_coordinates[1], 
-             "\nLng: ", input$hover_coordinates[2])
+             "\nLng: ", abs(input$hover_coordinates[2]))
     }
   })
   
