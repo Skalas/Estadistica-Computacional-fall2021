@@ -1,0 +1,63 @@
+---
+title: "ETL"
+author: "Jesús Enrique Miranda Blanco"
+date: "10/7/2021"
+output: html_document
+---
+```{r}
+library(naniar)
+```
+
+
+```{r}
+source("../src/etl.R")
+source("../src/nearest_location.R")
+```
+
+
+```{r}
+df <- etl("../data/refugios_nayarit.xlsx")
+df
+```
+
+```{r}
+df %>%
+  filter((abs(as.numeric(str_extract(LATITUD_, regex("(\\d+)")))) > 90) |  
+         (abs(as.numeric(str_extract(LONGITUD_, regex("(\\d+)")))) > 180)) %>% 
+  select(-LATITUD_, -LATITUD)
+```
+
+
+```{r}
+glimpse(df)
+```
+
+
+```{r}
+vis_miss(df)
+```
+
+
+```{r}
+n_var_miss(df)
+gg_miss_upset(df, nsets = n_var_miss(df))
+```
+
+```{r}
+df %>% filter(duplicated(cbind(LATITUD, LONGITUD))) 
+```
+
+```{r}
+nearest_points <- nearest_location(df, -105.28,20.98, 40)
+nearest_points
+```
+
+
+```{r}
+nearest_points %>%
+  arrange(DISTANCE) %>%
+  head(4)
+```
+
+
+
