@@ -11,38 +11,10 @@ Este directorio contiene la tarea #1 de los siguientes integrantes
 
 ### 1. Objetivo:
 
-1. Un [Etl](https://en.wikipedia.org/wiki/Extract,_transform,_load) en R que to$
-2. Generar un motor sencillo que me indique el refugio más cercano a una coorde$
-                               [ Read 59 lines ]
-^G Get Help  ^O WriteOut  ^R Read File ^Y Prev Page ^K Cut Text  ^C Cur Pos
-^X Exit      ^J Justify   ^W Where Is  ^V Next Page ^U UnCut Text^T To Spell
-  GNU nano 2.0.6                 File: README.md
-
----
-output:
-  html_document: default
-  pdf_document: default
----
-# Estadística Computacional
-
-## Tarea 1
-Este directorio contiene la tarea #1 de los siguientes integrantes
-
-|User | Nombre Completo|
-|:---:|:---:|
-|@vserranoc|Valeria|
-|@jesusmb230795|Enrique Miranda|
-|@yefovar|Yedam Fortiz|
-
-### 1. Objetivo:
-
-1. Un [Etl](https://en.wikipedia.org/wiki/Extract,_transform,_load) en R que tome los d$
-2. Generar un motor sencillo que me indique el refugio más cercano a una coordenada dad$
-3. Generar un dashboard que me ayude a identificar por localidad los refugios existente$
-
-^G Get Help   ^O WriteOut   ^R Read File  ^Y Prev Page  ^K Cut Text   ^C Cur Pos
-^X Exit       ^J Justify    ^W Where Is   ^V Next Page  ^U UnCut Text ^T To Spell
-  GNU nano 2.0.6                                                       File: README.md
+1. Un [Etl](https://en.wikipedia.org/wiki/Extract,_transform,_load) en R que tome los datos del formato en Excel y los transforme en un Data Frame que sea utilizable para análisis. (Ojo, el ETL tiene que asumir que puede pasar que le agreguen hojas al archivo de excel.)
+2. Generar un motor sencillo que me indique el refugio más cercano a una coordenada dada.
+3. Generar un dashboard que me ayude a identificar por localidad los refugios existentes.
+4. Generar que el input de las coordenadas se maneje desde el dashboard.
 
 ### 2. Estructura del repositorio
 
