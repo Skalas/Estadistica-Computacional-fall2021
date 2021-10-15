@@ -243,18 +243,14 @@ my_icon = makeAwesomeIcon(
 #### Valores Constantes ####
 
 opacity = 0.9
-mtx_adj <- gTouches(shape, byid = TRUE)
+mtx_adj <- gTouches(shp_mun, byid = TRUE)
 for(i in 1:ncol(mtx_adj)) {mtx_adj[i,i] <- T}
-rownames(mtx_adj) <- shape@data$municipio
-
-
-
+rownames(mtx_adj) <- shp_mun@data$municipio
 
 # Shows Map
 
-# shp_mun[mtx_adj[rownames(mtx_adj) == "Tepic",],] %>% 
-# leaflet() %>% 
-# addTiles() %>% 
-# addPolygons(data = shp_mun, color = "black") %>% 
-# addPolygons()
+# leaflet() %>%
+# addTiles() %>%
+# addPolygons(data = shp_mun, color = "black") %>%
+# addPolygons(data = shp_mun[mtx_adj[rownames(mtx_adj) == "Tepic",],])
 

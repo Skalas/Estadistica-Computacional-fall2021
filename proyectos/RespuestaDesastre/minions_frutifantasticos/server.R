@@ -12,6 +12,45 @@ library(rgeos)
 
 shinyServer(function(input, output, session) {
     
+    origin <- reactive({
+        
+        lat_long <- c(lat = 21.507156, lng = -104.898492)
+        
+        if (input$search != 0){
+            input$search
+            isolate({
+                
+                if(input$button_coord == "gps"){
+                    
+                    lat <- input$map_gps_located$coordinates$lat
+                    lng <- input$map_gps_located$coordinates$lng
+                    lat_long <- c(lat = lat, lng = lng)
+                    
+                }else if(input$button_coord == "dir"){
+                    
+                    request <- googleway::google_geocode(
+                        address = input$calle,
+                        language = "es",
+                        region = "mx",
+                        key = "AIzaSyC4CWHxehmC8_z-solHZ8YqKIGdNn6Bh3g"
+                    )
+                    
+                    if(request$status == "OK"){
+                        lat_long <- c(lat = request$results$geometry$location$lat,
+                          lng = request$results$geometry$location$lng)
+                    }else lat_long <- c(lat = 21.507156, lng = -104.898492)
+                        
+                    print(lat_long)
+                    
+                    }else({
+                        lat_long <- c(lat = input$lat, lng = input$lng)
+                    })
+                })
+        }
+        
+        return(lat_long)
+    })
+    
     datum <- reactive({
         
         df <- data
@@ -21,8 +60,8 @@ shinyServer(function(input, output, session) {
         isolate({
             df %<>% 
                 distance_compute(
-                    lat_input = input$lat, 
-                    lon_input = input$lng) %>% 
+                    lat_input = origin()["lat"], 
+                    lon_input = origin()["lng"]) %>% 
                 arrange(distance) %>% 
                 mutate(rankid = row_number()) %>% 
                 relocate(distance, .after = no) %>% 
@@ -101,19 +140,36 @@ shinyServer(function(input, output, session) {
             input$search
             isolate({
                 
-                map %<>% 
+                destination <- c(datum()[1,]$lat, datum()[1,]$lng)
+                
+                dir <- google_directions(
+                    key = "AIzaSyC4CWHxehmC8_z-solHZ8YqKIGdNn6Bh3g",
+                    origin = origin(),
+                    destination = destination,
+                    region = "mx",
+                    mode = input$medio_transporte,
+                    simplify = T,
+                    alternatives = F
+                )
+
+                ruta <- dir$routes$overview_polyline$points %>%
+                    decode_pl() %>%
+                    as_tibble()
+                
+                map %<>%
                     addAwesomeMarkers(
-                        lng = input$lng, 
-                        lat = input$lat,
+                        lng = ruta$lon[1],
+                        lat = ruta$lat[1],
                         icon = icons("blue"),
                         label = "Mi ubicación"
-                    ) %>% 
+                    ) %>%
                     addAwesomeMarkers(
                         lng = datum()[1,]$lng,
-                        lat = datum()[1,]$lat + 0.00025,
+                        lat = datum()[1,]$lat + 0.000075,
                         icon = icons("green"),
                         label = "Refugio más cercano"
-                    )
+                    ) %>%
+                    addPolylines(lng = ruta$lon, lat = ruta$lat, color = "blue")
             })
         }
         
@@ -140,7 +196,7 @@ shinyServer(function(input, output, session) {
                 toggleDisplay = TRUE, 
                 width = 85, 
                 height = 85, 
-                minimized = T) %>% 
+                minimized = F) %>% 
             addLegendFactor(
                 title = "Uso de inmueble",
                 position = "bottomleft",
@@ -204,10 +260,6 @@ shinyServer(function(input, output, session) {
     
     prev_row <- reactiveVal()
     
-    observe(print(input$map_gps_located$coordinates))
-    
-    # observe(print(prev_row()))
-    
     observeEvent(input$search, {
         sendSweetAlert(
             session = session,
@@ -223,7 +275,6 @@ shinyServer(function(input, output, session) {
         
         mun = row_selected$municipio
         
-
         proxy <- leafletProxy('map')
         #adj <- rownames(mtx_adj)[mtx_adj[, rownames(mtx_adj) == mun]]
         #partial_shp <- shp_mun[shp_mun@data$municipio %in% adj, ]
@@ -237,7 +288,7 @@ shinyServer(function(input, output, session) {
             ) %>% 
             addPolygons(
                 layerId = as.character(row_selected$no),
-                #data = partial_shp,
+                #data = shp_mun[mtx_adj[rownames(mtx_adj) == mun,],],
                 data = shp_mun[shp_mun@data$municipio == mun,],
                 color = "black",
                 fillColor = "blue",
@@ -266,9 +317,11 @@ shinyServer(function(input, output, session) {
             selectRows(which(datum()$no == clickId)) %>%
             selectPage(ceiling(
                 datum()[which(datum()$no == clickId),]$rankid / input$table_state$length)
-                )
+            )
     })
 
+    # observe(print(prev_row()))
+    # observe(print(input$map_gps_located$coordinates))
 })
 
 

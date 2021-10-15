@@ -5,6 +5,7 @@ library(leaflet)
 library(DT)
 library(ggplot2)
 library(plotly)
+library(googleway)
 
 dashboardPage(
     skin = "black",
@@ -26,14 +27,13 @@ dashboardPage(
         loadingLogo(
             href = 'https://www.nayarit.gob.mx/', 
             src = 'nayarit-logo.png', 
-            #loadingsrc = 'http://northerntechmap.com/assets/img/loading-dog.gif',
             #loadingsrc = "https://i.imgur.com/pKV7YwY.gif",
             loadingsrc = 'https://c.tenor.com/7NX24XoJX0MAAAAC/loading-fast.gif',
             height = "70%",
             width = "100%"),
         tags$br(),
-        menuItem("Filtros", tabName = "Filtros", icon = icon("filter")),
-        tags$br(),
+        #menuItem("Filtros", tabName = "Filtros", icon = icon("filter")),
+        #tags$br(),
         menuItem("Gráficas", tabName = "Graficas", icon = icon("fas fa-chart-bar"),
             radioButtons(
                 inputId = "button_plot", 
@@ -49,25 +49,43 @@ dashboardPage(
                 choices = c("Dirección" = "dir", 
                             "GPS" = "gps", 
                             "Coordenadas" = "coord"),
-                selected = "gps",
+                selected = "coord",
                 bigger = T,
                 animation = "smoth"
                 ),
-            conditionalPanel("input.button_coord == 'coord'",
-                numericInputIcon("lng", label = "Longitud", value = -104.898492, step = 0.01, 
-                                 icon = icon("arrow-left")),
-                numericInputIcon("lat", label = "Latitud", value = 21.507156, step = 0.01, 
-                                 icon = icon("arrow-up"))
-            ),
+            
             conditionalPanel("input.button_coord == 'dir'",
                 shinyWidgets::textInputIcon(
                     inputId = "calle", 
                     label = "Ingrese ubicación", 
-                    placeholder = "Calle num, cp",
+                    placeholder = "Calle num, C.P.",
                     icon =  icon("map"),
                     width = "95%"
                 )
-             )
+             ),
+            conditionalPanel("input.button_coord == 'gps'",
+                #tags$div(HTML('<i class="leaflet-control-gps leaflet-control" style = outline: none;></i> Instrucciones')),
+                tags$h4("Instrucciones:"),
+                tags$h5("Utilice el botón de GPS ubicado 
+                        el mapa para detectar su ubicación")
+            ),
+            conditionalPanel("input.button_coord == 'coord'",
+                numericInputIcon("lng", label = "Longitud", value = -104.898492, step = 0.01, 
+                              icon = icon("arrow-left")),
+                numericInputIcon("lat", label = "Latitud", value = 21.507156, step = 0.01, 
+                              icon = icon("arrow-up"))
+            ),
+            shinyWidgets::prettyRadioButtons(
+                inputId = "medio_transporte",
+                label = "Seleccione método de transporte",
+                choices = c("Automóvil" = "driving", 
+                            "Bicicleta" = "bicycling", 
+                            "Caminando" = "walking",
+                            "Transporte Público" = "transit"),
+                selected = "driving",
+                bigger = T,
+                animation = "smoth"
+            )
         ),
         tags$br(),
         actionButton(inputId = "search", label = "Localizar", icon = icon("fas fa-street-view"))
