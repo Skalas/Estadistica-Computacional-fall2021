@@ -61,6 +61,29 @@ my_icon = makeAwesomeIcon(
 )
 
 
+
+
+dis_graph <- function(data) {
+  
+  grafica <- data %>% 
+    head(10) %>%
+    select(refugio, capacidad, disponibilidad) %>% 
+    mutate(ocupacion = capacidad - disponibilidad) %>% 
+    select(-capacidad) %>% 
+    pivot_longer(!refugio, names_to = "Capacidad" ) %>% 
+    ggplot(aes(x = reorder(refugio, -desc(value)), y= value, z = Capacidad, fill= Capacidad )) +
+    geom_bar(position="stack", stat="identity", col="black")  +
+    scale_fill_manual(values= (c("forestgreen", "darkgrey"))) +
+    ggtitle("Disponibilidad y ocupación por refugio") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    xlab("") +
+    ylab("")+
+    coord_flip() +
+    scale_y_continuous(n.breaks = 10)
+  
+  return(grafica)
+}
+
 #### Valores Constantes ####
 
 opacity = 0.9
@@ -145,4 +168,10 @@ pal <- colorFactor(
   palette = c("#9f51dc","#8edc51","#dc5951","#51d3dc"), 
   domain = unique(data$uso_cat)
 )
+
+
+#dis_graph(data)
+
+
+
 
