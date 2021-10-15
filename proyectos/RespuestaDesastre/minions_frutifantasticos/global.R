@@ -7,7 +7,7 @@ library(purrr)
 library(tidyr)
 library(geosphere)
 library(spatialEco)
-<<<<<<< HEAD
+
 
 #### Funciones ####
 loadingLogo <- function(href, src, loadingsrc, height = NULL, width = NULL, alt = NULL) {
@@ -85,13 +85,14 @@ dis_graph <- function(data) {
   return(grafica)
 }
 
+
 #### Valores Constantes ####
 
 opacity = 0.9
-=======
+
 library(ggplot2)
 library(rgeos)
->>>>>>> afedf7692fb3463167411f631f1b3c1175570f97
+
 
 #### Datos ####
 
@@ -316,14 +317,13 @@ pal <- colorFactor(
   domain = unique(data$uso_cat)
 )
 
-<<<<<<< HEAD
 
 #dis_graph(data)
 
 
 
 
-=======
+
 my_icon = makeAwesomeIcon(
   icon = 'home', 
   markerColor = 'red', 
@@ -334,9 +334,9 @@ my_icon = makeAwesomeIcon(
 #### Valores Constantes ####
 
 opacity = 0.9
-mtx_adj <- gTouches(shape, byid = TRUE)
+mtx_adj <- gTouches(shp_mun, byid = TRUE)
 for(i in 1:ncol(mtx_adj)) {mtx_adj[i,i] <- T}
-rownames(mtx_adj) <- shape@data$municipio
+rownames(mtx_adj) <- shp_mun@data$municipio
 
 
 
@@ -349,4 +349,4 @@ rownames(mtx_adj) <- shape@data$municipio
 # addPolygons(data = shp_mun, color = "black") %>% 
 # addPolygons()
 
->>>>>>> afedf7692fb3463167411f631f1b3c1175570f97
+
