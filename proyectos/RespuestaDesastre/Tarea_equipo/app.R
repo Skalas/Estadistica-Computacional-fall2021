@@ -130,17 +130,19 @@ ui <- fluidPage(
                                         )
                                  
                        ),
+                       h2("Explorador de refugios"),
               hr(),
               DT::dataTableOutput('refugios')),
               # Tab para localizar refugios
               tabPanel('Ubicación de refugios',
-                       leafletOutput('mexico', width = '100%', height = 1000),
+                       leafletOutput('mexico', width = '100%', height = 800),
                        
                        absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                                     draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                                     draggable = TRUE, top = 100, left = "auto", right = 1000, bottom = "auto",
                                      width = 330, height = "auto",
                                      
                                      h2("Localizador de Refugios"),
+                                     h6("Aquí podrás localizar los refugios por municipio. ", align = "left"),
                                      
                                      pickerInput('umunicipios', label = 'Selecciona municipios: ',
                                                  choices = c('Todos los municipios', unique(refugios_ubicacion$Municipio)), 
@@ -151,13 +153,14 @@ ui <- fluidPage(
                       ),
               # Tab con la función que indica donde cual(es) son los refugios más cercanos
               tabPanel('Refugio más cercano',
-                       leafletOutput('mexico2', width = '100%', height = 1000),
+                       leafletOutput('mexico2', width = '100%', height = 800),
                        absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                                     draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                                     draggable = TRUE, top = 100, left = "auto", right = 1000, bottom = "auto",
                                      width = 330, height = "auto",
                                      
-                                     h2("Ubicaciones"),
-                                     h6("Para utilizar la aplicación es necesario primero seleccionar un punto en el mapa y seleccionar el botón Encontrar Refugio", align = "left"),
+                                     h2("Encuentra tu refugio más cercano"),
+                                     h6("Para utilizar la aplicación es necesario primero seleccionar un punto en el mapa y seleccionar el botón Encontrar Refugio. 
+                                        Da click sobre las marcas y encontrarás más información de tu localización y sobre el refugio más cercano.", align = "left"),
                                      
                                      
                                      actionButton('borrar', 'Borrar'),
@@ -182,7 +185,7 @@ server <- function(input, output, session) {
     output$mexico <- renderLeaflet({
         leaflet(refugios_mun()) %>% 
             addProviderTiles(providers$CartoDB.Positron) %>% 
-            setView(-105.3, 21.6, zoom = 9) %>% 
+            setView(-105.3, 21.6, zoom = 8.2) %>% 
             addMarkers(lng=~Longitud,
                        lat = ~Latitud, 
                        popup = ~popup_text, 
@@ -193,7 +196,7 @@ server <- function(input, output, session) {
     output$mexico2 <- renderLeaflet({
         leaflet() %>% 
             addProviderTiles(providers$CartoDB.Positron) %>% 
-            setView(-105.3, 21.6, zoom = 9) 
+            setView(-105.3, 21.6, zoom = 8) 
     })    
     
     # Observe para cambiar las marcas de acuerdo al input de refugios seleccionados
@@ -209,8 +212,9 @@ server <- function(input, output, session) {
     observeEvent(input$mexico2_click, {
         click = input$mexico2_click
         leafletProxy('mexico2')%>%
-            setView(click$lng, click$lat, zoom = 8) %>% 
+            setView(click$lng, click$lat, zoom = 8.2) %>% 
             clearMarkers() %>% 
+            clearShapes() %>% 
             addMarkers(lng = click$lng, lat = click$lat,
                        popup = paste("<h3>", 'Tu ubicación es: ', '</h3>',
                                      'Long: ', round(click$lng, 4), 'Lat: ', round(click$lat,4)))
@@ -227,13 +231,16 @@ server <- function(input, output, session) {
             head(1)
         leafletProxy('mexico2')%>%
             setView(refugio$Longitud, refugio$Latitud, zoom = 13) %>% 
+            addPolylines(lng = c(refugio$Longitud, click$lng), lat = c(refugio$Latitud, click$lat)) %>% 
             addMarkers(lng = refugio$Longitud, lat = refugio$Latitud,
                        popup  =  refugio$popup_text)
     })
     # Borra los todos los marcadores
     observeEvent(input$borrar,{
         proxy <- leafletProxy('mexico2')
-        if (input$borrar){ proxy %>% clearMarkers()}
+        if (input$borrar){ proxy %>% clearMarkers() %>%  
+                setView(-105.3, 21.6, zoom = 8.2) %>% 
+                clearShapes()}
     })
     
     # Observe para filtar información de municipios
