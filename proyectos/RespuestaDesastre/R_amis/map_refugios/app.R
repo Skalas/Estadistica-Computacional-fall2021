@@ -34,8 +34,7 @@ ui <- fluidPage(
                             
                             tags$head(
                               # Include our custom CSS
-                              includeCSS("styles.css"),
-                              includeScript("gomap.js")
+                              includeCSS("styles.css")
                             ),
                             
                             # 
@@ -86,7 +85,7 @@ server <- function(input, output, session) {
       points <- eventReactive(input$mymap_click, {
         refugios %>% ref_cerc(ifelse(is.null(input$mymap_click$lng)==TRUE,input$lngtd,input$mymap_click$lng),
                               ifelse(is.null(input$mymap_click$lat)==TRUE,input$lttd,input$mymap_click$lat)) %>%
-          select(longitud, latitud) %>% as.matrix()
+          select(longitud, latitud, direccion, telefono, refugio, capacidad) %>% as_tibble()
       }, ignoreNULL = FALSE)
       
        
@@ -112,13 +111,12 @@ server <- function(input, output, session) {
                                          refugios$telefono),
                           label = paste0("Refugio: ",refugios$refugio, "; Capacidad: ",
                                          refugios$capacidad)) %>%
-        addAwesomeMarkers(data = points(),
+        addAwesomeMarkers(data = cbind(points()$longitud,points()$latitud),
                           icon = icons_ref_n,
-                          popup = "Usted está aquí también, ya se chingó!",
-                          label = "Usted está aquí!"
-                         ) %>%
-
-        
+                          popup = paste0("Dirección: ", points()$direccion,"; Teléfono: ",
+                                         points()$telefono),
+                          label = paste0("Refugio: ",points()$refugio, "; Capacidad: ",
+                                         points()$capacidad)) %>%
         addAwesomeMarkers(data = cbind(ifelse(is.null(input$mymap_click$lng)==TRUE,input$lngtd,input$mymap_click$lng),
                                        ifelse(is.null(input$mymap_click$lat)==TRUE,input$lttd,input$mymap_click$lat)), #Punto de Referencia (rojo)
                           icon = icons_ref_a,
