@@ -1,41 +1,3 @@
-themeSelector <- function() {
-  div(
-    div(
-      selectInput("shinytheme-selector", "Choose a theme",
-                  c("default", shinythemes:::allThemes()),
-                  selectize = FALSE
-      )
-    ),
-    tags$script(
-      "$('#shinytheme-selector')
-        .on('change', function(el) {
-        var allThemes = $(this).find('option').map(function() {
-        if ($(this).val() === 'default')
-        return 'bootstrap';
-        else
-        return $(this).val();
-        });
-        // Find the current theme
-        var curTheme = el.target.value;
-        if (curTheme === 'default') {
-        curTheme = 'bootstrap';
-        curThemePath = 'shared/bootstrap/css/bootstrap.min.css';
-        } else {
-        curThemePath = 'shinythemes/css/' + curTheme + '.min.css';
-        }
-        // Find the <link> element with that has the bootstrap.css
-        var $link = $('link').filter(function() {
-        var theme = $(this).attr('href');
-        theme = theme.replace(/^.*\\//, '').replace(/(\\.min)?\\.css$/, '');
-        return $.inArray(theme, allThemes) !== -1;
-        });
-        // Set it to the correct path
-        $link.attr('href', curThemePath);
-        });"
-    )
-  )
-}
-
 # Load R packages
 library(shiny)
 library(shinythemes)
@@ -58,12 +20,12 @@ ui <- fluidPage(
              mainPanel(
                h2("¿Cómo navegar en la página?"),
                br(),
-               h4("1. Escoge el tema que más te guste en esta pestaña, 'choose a theme'."),
+               h4("1. Escoge el tema que más te guste en esta pestaña, 'Choose a theme'."),
                fluidRow(
                  column(4, themeSelector(),align = "center"), align = "left"),
-               h4("2. En la pestaña Ubicación coordenadas, podrás escoger el refugio más cercano a ti."),
-               h4("3. En la pestaña Municipios, podrás encontrar el refugio más cercano de tu municipio."),
-               h4("4. En caso de no conocer tus coordenadas, apóyate con el siguiente mapa."),
+               h4("2. En la pestaña Ubicación por Coordenadas, podrás escoger el refugio más cercano a ti."),
+               h4("3. En la pestaña Ubicación por Municipio, podrás encontrar todos los refugios de tu municipio."),
+               h4("4. En caso de no conocer tus coordenadas, apóyate con el siguiente mapa:"),
                
                #Mapa con el que se obtienen las coordenadas
                verbatimTextOutput("out"),
@@ -90,7 +52,7 @@ ui <- fluidPage(
                numericInput("lat_S", "Latitud (S):", 56.06, min = 0, max = 60, step = NA),
                numericInput("lon_D", "Longitud (D):", 105, min = 0, max = 180, step = 1),
                numericInput("lon_M", "Longitud (M):", 21, min = 0, max = 60, step = 1),
-               numericInput("lon_S", "Longitud (S):", 37.27, min = 0, max = 60, step = NA)
+               numericInput("lon_S", "Longitud (S):", 41.54, min = 0, max = 60, step = NA)
              ), # sidebarPanel
              mainPanel(
                h1(""),
@@ -196,14 +158,14 @@ server <- function(input, output) {
     obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
                        input$lon_D, input$lon_M, input$lon_S)|>
     select(-c("Latitud_Dec", "Longitud_Dec", "dist",
-                "Altitud", "No.", "Municipio")),
+                "Altitud", "No.", "Uso del Inmueble")),
     options = list(lengthChange = FALSE))
   
   
   output$tbl_municipio = renderDT(
     obten_municipios(input$municipio)|>
       select(-c("Latitud_Dec", "Longitud_Dec", "dist",
-                "Altitud", "No.", "Municipio")),
+                "Altitud", "No.", "Municipio", "Uso del Inmueble")),
     options = list(lengthChange = FALSE))
   
   output$out <- renderText({

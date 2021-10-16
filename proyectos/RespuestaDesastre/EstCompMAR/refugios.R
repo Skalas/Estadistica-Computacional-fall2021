@@ -11,20 +11,6 @@ library(stringr)
 library(readxl)
 
 
-###Creamos lista de municipios del Estado de Nayarit
-
-# municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
-#                    "AMATLAN DE CAÑAS"="AMATLAN DE CAÑAS","COMPOSTELA" ="COMPOSTELA",
-#                    "COMPOSTELA"="COMPOSTELA","RUIZ"="RUIZ",
-#                    "SAN BLAS"="SAN BLAS", "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS",
-#                    "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS", 
-#                    "SANTA MARIA DEL ORO"="SANTA MARIA DEL ORO",
-#                    "SANTIAGO IXCUINTLA"="SANTIAGO IXCUINTLA",
-#                    "TECUALA"="TECUALA","TEPIC"="TEPIC","TUXPAN"="TUXPAN",
-#                    "LA YESCA"="LA YESCA","XALISCO"="XALISCO","HUAJICORI"="HUAJICORI",
-#                    "IXTLAN DEL RIO"="IXTLAN DEL RIO","JALA"="JALA","ROSAMORADA"="ROSAMORADA",
-#                    "BAHIA DE BANDERAS"="BAHIA DE BANDERAS") 
-
 ###Creamos filepath para leer los datos
 filepath <-"data/refugios_nayarit.xlsx"
 n_hojas <- length(excel_sheets(filepath))
@@ -240,6 +226,47 @@ descripciones_popups <- function(datos){
         }
   new_aux[-1,]
 }
+
+
+### Funcion auxiliar para los temas de shiny
+themeSelector <- function() {
+  div(
+    div(
+      selectInput("shinytheme-selector", "Choose a theme",
+                  c("default", shinythemes:::allThemes()),
+                  selectize = FALSE
+      )
+    ),
+    tags$script(
+      "$('#shinytheme-selector')
+        .on('change', function(el) {
+        var allThemes = $(this).find('option').map(function() {
+        if ($(this).val() === 'default')
+        return 'bootstrap';
+        else
+        return $(this).val();
+        });
+        // Find the current theme
+        var curTheme = el.target.value;
+        if (curTheme === 'default') {
+        curTheme = 'bootstrap';
+        curThemePath = 'shared/bootstrap/css/bootstrap.min.css';
+        } else {
+        curThemePath = 'shinythemes/css/' + curTheme + '.min.css';
+        }
+        // Find the <link> element with that has the bootstrap.css
+        var $link = $('link').filter(function() {
+        var theme = $(this).attr('href');
+        theme = theme.replace(/^.*\\//, '').replace(/(\\.min)?\\.css$/, '');
+        return $.inArray(theme, allThemes) !== -1;
+        });
+        // Set it to the correct path
+        $link.attr('href', curThemePath);
+        });"
+    )
+  )
+}
+
   
 # #### Referencias
 # # http://rstudio-pubs-static.s3.amazonaws.com/327743_a932d7ebdce548dfa7c7ca2b3ff6e038.html
