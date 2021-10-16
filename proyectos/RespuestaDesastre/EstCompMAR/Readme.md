@@ -13,44 +13,28 @@ Además de esto, implementamos una interfaz pequeña para hacer un cambio de tem
 La limpieza de datos está hecha en otro archivo llamado `refugios.R`, donde incuimos también varias funciones que utilizamos en la aplicación. 
 
 ## Decisiones que Tomamos
+Eliminamos todos los renglones en los que no hay latitud, longitud o municipio. Una mejora que podría implementarse más adelante, sería recuperar los municipios faltantes a partir de las coordenadas con las que contamos.
+Quitamos los casos en los que las coordenadas no estaban en formato correcto. Se filtró de acuerdo al rango que detectamos que pertenecían los municipios de Nayarit.
+Decidimos mostrar los 5 refugios más cercanos dada una ubicación. En caso que hubiera coordenadas repetidas, en los popus se muestran los datos de dichos refugios con coordenadas repetidas.
+Decidimos que el usuario ingresara las coordenadas en D (Degrees), M (Minutes) y S(Seconds) en vez de en decimal. Para facilitar la adquisición de las coordenadas en este formato, la ubicación que se elije en el mapa interactivo se muestra tanto en formato decimal como en D-M-S.
 
 ## Dificultades
 Tuvimos muchas. Inicialmente, lo más complicado para nosotros fue entender Shiny. Nunca habíamos trabajado con Shiny, ni con leaflet, entonces nos tomó algo de tiempo acostumbrarnos a la interfaz y poder manejarla con algo de confianza. 
 
-Tuvimos varios problemas con datos `NA`, pero los logramos solucionar. Lo único que hacemos es quitar los datos que no tienen coordenadas, nombre o municipio. Esto ya que los usamos en los cálculos, y si en algún evento se agregaran más datos a el excel original, nos gustaría no tener problemas en el futuro de que se rompa la aplicación. 
+Tuvimos varios problemas con datos `NA`. Lo que hicimos fue quitar los datos que no tenian coordenadas o municipio. Esto ya que, sin estos valores, no nos es posible ubicarlos en el mapa. Una mejora podría ser que a partir del nombre del refugio y de alguna API pudieramos recuperar las coordenadas.
 
-Encontramos que habían varios refugios con las mismas coordenadas, y decimimos que el mejor proceso era mostrarlas todas en la tabla que enseña estos refugios, pero en el mapa queríamos mostrarlos todos. Esto tomó un esfuerzo bastante considerable. 
+Encontramos que habían varios refugios con las mismas coordenadas, pero en los popups solo aparecia uno. Para solucionarlo, modificamos los dataframes para que se mostraran ya todos los refugios y telefonos tanto en el popup como en la tabla.
 
-Otro problema que tuvimos es con el mapa de la página de inicio. Este originalmente queríamos que fuera de picarlo y que te regresara las coordenadas y los refugios más cercanos, pero no lo logramos. Esto ya que los daba que la posición inicial del mouse era `NA`, y por lo tanto, no funcionaba.
+Otro problema que tuvimos fue con el mapa de la página de inicio. Este originalmente queríamos que fuera interactivo tal que al darle click, te regresara las coordenadas y los refugios más cercanos. Sin embargo, no lo logramos. Esto ya que la posición inicial del mouse era `NA`, y al momento de que se cargara la App, nos marcaba un error y el mapa ya no se desplegaba. No obstante, logramos que se mostraran las coordenadas una vez se le diera click para que el usuario las copie y pegue.
 
-Los temas originalmente queríamos que fuera un *dark mode*, pero, no pudimos implementarlo de manera completa. Decidimos mejor usar una solución existente de un paquete para implementar el cambio de tema, y nos resultó un buen cambio, ya que pudimos intentar con varios de ellos, y no solo oscuro o claro. 
+Los temas originalmente queríamos que fuera un *dark mode*, pero no pudimos implementarlo de manera completa. Decidimos mejor usar una solución existente de un paquete para implementar el cambio de tema, y de esta forma el usuario pueda elegirlo y tener una experiencia personalizada.
 
-Las coordenadas también entraban como texto al modelo. La primera vez que nos juntamos a trabajar, pasamos el tiempo completo haciendo lectura de los datos y limpiándolos, y pasándolos a un formato más legible numérico. Esto resultó bueno, ya que lo usamos varias veces en distintos lugares para hacer cálculos. 
+Las coordenadas inicialmente no estaban en un formato listo para ocuparse. Se requirió manipulaciones y transformaciones a través del uso de expresiones regulares para poder utilizarlas. De igual forma, la limpieza y estandarización de la base resultó desafiante.
 
-Finalmente, intentamos colorear el mapa por Municipio. Tristemente, no lo logramos. Intentamos de varias formas pero creemos que nuestro entendimiento de las funciones detrás de cómo hacerlo es bajo, y requeriríamos más experiencia o más tiempo para pdoer hacerlo. Independientemente de esto, nos dmucho gusto que pudimos obtener las coordenadas en el mapa de municipios. 
+Finalmente, intentamos colorear el mapa por Municipio. Intentamos de varias formas, sin embargo consideramos que requeriríamos más conocimiento de los paquetes y de la forma de trabajar con coordenadas geográficas. Se queda como una mejora.
 
 ## Conclusiones
 
-Dejamos algunas cosas en la mesa que podríamos mejorar. Por ejemplo, 
-* Unificar el output de texto, para que todas las coordenadas estén en el mismo formato. 
-* Lo de la coloración del mapa, nos hubiera gustado. 
-* Un diseño de página un poco más fino. 
-* Jalar la coordenada a partir del mapa, para mejorar la experiencia del usuario. 
+Estamos satisfechos con el resultado. Aprendimos a usar Shiny, expresiones regulares, lectura y manipulacion de archivos con estructuras distintas a csv, y en general, un mejor entendimiento de un proceso de datos from scratch. Hay varias mejoras que aún nos gustaría implementar, pero creemos que el resultado cumple con los requerimientos. 
 
-Independientemente de esto, honestamente estamos muy contentos con el resultado. No nos da warnings, que es muy bueno, y aprendimos juntos a usar Shiny. Tal vez hay mejoras grandes que se pueden hacer, pero, creemos que el resultado es completo y cumple su propósito. 
-
-Nos dimos cuenta de la importancia que tiene Shiny para poder presentar resultados. Al haber trabajado y hecho reprotes exclusivamente en RMarkdown, perdemos mucha interactividad con el usuario final, y además, en Shiny, ganamos muchos elementos de diseño visual que no podemos incorporar en RMarkdown. 
-
-No estamos diciendo que es mejor o peor siempre, pero hay casos (como este) donde definitivamente es bueno tener la herramienta de Shiny en la bolsa. 
-
-
-
-
-
-
-
-
-
-
-
-
+Nos dimos cuenta de la importancia que tiene Shiny para poder presentar resultados. Al haber trabajado y hecho reprotes exclusivamente en RMarkdown, perdemos mucha interactividad con el usuario final, y además, en Shiny ganamos muchos elementos de diseño visual que no podemos incorporar en RMarkdown. 
