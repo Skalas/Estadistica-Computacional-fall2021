@@ -82,6 +82,8 @@ ui <- fluidPage(
     ###coordenadas de su ubicación para encontrar los refugios más cercanos
     tabPanel("Ubicacion por Coordenadas",
              sidebarPanel(
+               tags$h3("Coordenadas de la pestaña anterior en N & W:"),
+               verbatimTextOutput("out2"),
                tags$h3("Ingresa coordenadas en N & W:"),
                numericInput("lat_D", "Latitud (D):", 22, min = 0, max = 90, step = 1),
                numericInput("lat_M", "Latitud (M):", 29, min = 0, max = 60, step = 1),
@@ -157,6 +159,9 @@ server <- function(input, output) {
     #Obtener municipios
     por_municipio <- obten_municipios(input$municipio)
     
+    #Modificamos los mas cercanos para que nos devuelva agrupados por lat y lon
+    por_municipio <- descripciones_popups(por_municipio)
+    
     leaflet() |>
       addTiles() |>
       # addPolygons(data = nayarit_map_2,
@@ -164,7 +169,7 @@ server <- function(input, output) {
       #             # fillColor = ~pal(log10(pop)),
       #             label = ~mun_name) |>
       addMarkers(data = por_municipio, lat = ~Latitud_Dec, lng = ~Longitud_Dec,
-                 popup = ~paste(Refugio, Telefono, sep="\n"))
+                 popup = ~popup)
     
     
     
@@ -189,7 +194,9 @@ server <- function(input, output) {
   
   output$tbl = renderDT(
     obten_mas_cercanos(input$lat_D, input$lat_M, input$lat_S,
-                       input$lon_D, input$lon_M, input$lon_S),
+                       input$lon_D, input$lon_M, input$lon_S)|>
+    select(-c("Latitud_Dec", "Longitud_Dec", "dist",
+                "Altitud", "No.", "Municipio")),
     options = list(lengthChange = FALSE))
   
   
@@ -205,14 +212,31 @@ server <- function(input, output) {
     } else {
       lat <- inverse_coordinates(input$hover_coordinates[1])
       lon <- inverse_coordinates(input$hover_coordinates[2])
-      paste0("Latitud: ", input$hover_coordinates[1],
-             " D: ", lat[1], 
+      paste0("Latitud:  ", input$hover_coordinates[1],
+             "     D:  ", lat[1], 
              " M: ", lat[2], 
              " S: ", lat[3], 
              "\nLongitud: ", -input$hover_coordinates[2],
-             " D: ", -lon[1], 
-             " M: ", lon[2], 
-             " S: ", lon[3] )
+             "     D: ", -lon[1], 
+             " M: ", abs(lon[2]), 
+             " S: ", abs(lon[3]/100))
+    }
+  })
+  
+  output$out2 <- renderText({
+    if(is.null(input$hover_coordinates)) {
+      "Mouse outside of map"
+    } else {
+      lat <- inverse_coordinates(input$hover_coordinates[1])
+      lon <- inverse_coordinates(input$hover_coordinates[2])
+      paste0("Latitud:  ", input$hover_coordinates[1],
+             "     D:  ", lat[1], 
+             " M: ", lat[2], 
+             " S: ", lat[3], 
+             "\nLongitud: ", -input$hover_coordinates[2],
+             "     D: ", -lon[1], 
+             " M: ", abs(lon[2]), 
+             " S: ", abs(lon[3]/100))
     }
   })
   

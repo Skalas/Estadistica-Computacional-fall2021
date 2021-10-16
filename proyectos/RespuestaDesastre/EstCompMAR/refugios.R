@@ -13,17 +13,17 @@ library(readxl)
 
 ###Creamos lista de municipios del Estado de Nayarit
 
-municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
-                   "AMATLAN DE CAÑAS"="AMATLAN DE CAÑAS","COMPOSTELA" ="COMPOSTELA",
-                   "COMPOSTELA"="COMPOSTELA","RUIZ"="RUIZ",
-                   "SAN BLAS"="SAN BLAS", "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS",
-                   "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS", 
-                   "SANTA MARIA DEL ORO"="SANTA MARIA DEL ORO",
-                   "SANTIAGO IXCUINTLA"="SANTIAGO IXCUINTLA",
-                   "TECUALA"="TECUALA","TEPIC"="TEPIC","TUXPAN"="TUXPAN",
-                   "LA YESCA"="LA YESCA","XALISCO"="XALISCO","HUAJICORI"="HUAJICORI",
-                   "IXTLAN DEL RIO"="IXTLAN DEL RIO","JALA"="JALA","ROSAMORADA"="ROSAMORADA",
-                   "BAHIA DE BANDERAS"="BAHIA DE BANDERAS")
+# municipios <- list("ACAPONETA"="ACAPONETA","AHUACATLAN"="AHUACATLAN",
+#                    "AMATLAN DE CAÑAS"="AMATLAN DE CAÑAS","COMPOSTELA" ="COMPOSTELA",
+#                    "COMPOSTELA"="COMPOSTELA","RUIZ"="RUIZ",
+#                    "SAN BLAS"="SAN BLAS", "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS",
+#                    "SAN PEDRO LAGUNILLAS"="SAN PEDRO LAGUNILLAS", 
+#                    "SANTA MARIA DEL ORO"="SANTA MARIA DEL ORO",
+#                    "SANTIAGO IXCUINTLA"="SANTIAGO IXCUINTLA",
+#                    "TECUALA"="TECUALA","TEPIC"="TEPIC","TUXPAN"="TUXPAN",
+#                    "LA YESCA"="LA YESCA","XALISCO"="XALISCO","HUAJICORI"="HUAJICORI",
+#                    "IXTLAN DEL RIO"="IXTLAN DEL RIO","JALA"="JALA","ROSAMORADA"="ROSAMORADA",
+#                    "BAHIA DE BANDERAS"="BAHIA DE BANDERAS") 
 
 ###Creamos filepath para leer los datos
 filepath <-"data/refugios_nayarit.xlsx"
@@ -46,6 +46,14 @@ datos <- datos[!is.na(datos$Latitud), ]
 datos <- datos[!is.na(datos$Longitud), ]
 datos <- datos[!is.na(datos$Refugio), ]
 datos <- datos[!is.na(datos$Municipio), ]
+
+
+###Creamos lista de municipios del Estado de Nayarit
+municipios <- datos |> 
+                pull(Municipio) |>
+                unique() |>
+                sort()
+              
 
 ###Convertimos coordenadas
 convert_coordinates <- function(x){
