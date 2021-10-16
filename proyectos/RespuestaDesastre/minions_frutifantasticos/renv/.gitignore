@@ -3,3 +3,7 @@ local/
 lock/
 python/
 staging/
+
+
+#### API KEYS ####
+*.yaml
