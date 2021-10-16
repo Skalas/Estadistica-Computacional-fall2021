@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.0.4",
+    "Version": "4.1.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -109,17 +109,17 @@
     },
     "bslib": {
       "Package": "bslib",
-      "Version": "0.3.0",
+      "Version": "0.3.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "074ebc936dbcecd7115ed8083643b550"
+      "Hash": "56ae7e1987b340186a8a5a157c2ec358"
     },
     "cachem": {
       "Package": "cachem",
-      "Version": "1.0.5",
+      "Version": "1.0.6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "5346f76a33eb7417812c270b04a5581b"
+      "Hash": "648c5b3d71e6a37e3043617489a0a0e9"
     },
     "cellranger": {
       "Package": "cellranger",
@@ -207,10 +207,10 @@
     },
     "deldir": {
       "Package": "deldir",
-      "Version": "0.2-10",
+      "Version": "1.0-5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "6ba6a411bdd4c1b297bd54e2c5c98385"
+      "Hash": "21616af029433799aff53f7b44b1f884"
     },
     "digest": {
       "Package": "digest",
@@ -298,10 +298,10 @@
     },
     "geosphere": {
       "Package": "geosphere",
-      "Version": "1.5-10",
+      "Version": "1.5-14",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "eee36211f74e4dbc80eae9d504b58f0b"
+      "Hash": "1ce6e028f3d056dad1ea9c3c0a5444bf"
     },
     "ggplot2": {
       "Package": "ggplot2",
@@ -326,10 +326,10 @@
     },
     "goftest": {
       "Package": "goftest",
-      "Version": "1.2-2",
+      "Version": "1.2-3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "3c9209bce1b10900155ea37ce954cf30"
+      "Hash": "dbe0201f91eeb15918dd3fbf01ee689a"
     },
     "googlePolylines": {
       "Package": "googlePolylines",
@@ -368,10 +368,10 @@
     },
     "hms": {
       "Package": "hms",
-      "Version": "1.1.0",
+      "Version": "1.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e4bf161ccb74a2c1c0e8ac63bbe332b4"
+      "Hash": "5b8a2dd0fdbe2ab4f6081e6c7be6dfca"
     },
     "htmltools": {
       "Package": "htmltools",
@@ -389,10 +389,10 @@
     },
     "httpuv": {
       "Package": "httpuv",
-      "Version": "1.6.1",
+      "Version": "1.6.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "54344a78aae37bc6ef39b1240969df8e"
+      "Hash": "65e865802fe6dd1bafef1dae5b80a844"
     },
     "httr": {
       "Package": "httr",
@@ -445,10 +445,10 @@
     },
     "later": {
       "Package": "later",
-      "Version": "1.2.0",
+      "Version": "1.3.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b61890ae77fea19fc8acadd25db70aa4"
+      "Hash": "7e7b457d7766bc47f2a5f21cc2984f8e"
     },
     "lattice": {
       "Package": "lattice",
@@ -548,10 +548,10 @@
     },
     "openssl": {
       "Package": "openssl",
-      "Version": "1.4.4",
+      "Version": "1.4.5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f4dbc5a47fd93d3415249884d31d6791"
+      "Hash": "5406fd37ef0bf9b88c8a4f264d6ec220"
     },
     "pillar": {
       "Package": "pillar",
@@ -569,10 +569,10 @@
     },
     "plotly": {
       "Package": "plotly",
-      "Version": "4.9.4.1",
+      "Version": "4.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "af4b92cb3828aa30002e2f945c49c2d7"
+      "Hash": "fbb11e44d057996ca5fe40d959cacfb0"
     },
     "png": {
       "Package": "png",
@@ -632,10 +632,10 @@
     },
     "raster": {
       "Package": "raster",
-      "Version": "3.4-13",
+      "Version": "3.5-2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "4543b272b756a4ff0f80370c886ef90a"
+      "Hash": "c5df27b2de56767e7cfbc74a962ef61c"
     },
     "readxl": {
       "Package": "readxl",
@@ -660,17 +660,17 @@
     },
     "rgdal": {
       "Package": "rgdal",
-      "Version": "1.5-23",
+      "Version": "1.5-27",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "bb6f643247d35c947e9f113567e2bf7a"
+      "Hash": "ab3f3a61eb777b62c1bc0d341fd1f990"
     },
     "rgeos": {
       "Package": "rgeos",
-      "Version": "0.5-5",
+      "Version": "0.5-8",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "94a44c3f0d49ceb80c385610696873ca"
+      "Hash": "2dc04d0e7ab1837094047df37d4fbefc"
     },
     "rlang": {
       "Package": "rlang",
@@ -688,10 +688,10 @@
     },
     "s2": {
       "Package": "s2",
-      "Version": "1.0.6",
+      "Version": "1.0.7",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fb018249cc4b7ae7147d511fd33ddf82"
+      "Hash": "cedf9ef196a446ee8080c14267e69410"
     },
     "sass": {
       "Package": "sass",
@@ -709,10 +709,10 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-1",
+      "Version": "1.0-3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "559b46e3609f1b0dbcf9eada54fb6ee0"
+      "Hash": "efcdd149b21e8948ce31d6d5b7a36729"
     },
     "shiny": {
       "Package": "shiny",
@@ -751,10 +751,10 @@
     },
     "spData": {
       "Package": "spData",
-      "Version": "0.3.10",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "75e1b7deb9f04be66118b5c008c65cb7"
+      "Hash": "5d68152962bb57448336effdcf598d0a"
     },
     "spatialEco": {
       "Package": "spatialEco",
@@ -779,10 +779,10 @@
     },
     "spatstat.geom": {
       "Package": "spatstat.geom",
-      "Version": "2.2-2",
+      "Version": "2.3-0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "abf3bf1c02e9af3be5b6817d463dc064"
+      "Hash": "2d3b807f27c260acb715aa4f94f02428"
     },
     "spatstat.sparse": {
       "Package": "spatstat.sparse",
@@ -800,10 +800,10 @@
     },
     "spdep": {
       "Package": "spdep",
-      "Version": "1.1-8",
+      "Version": "1.1-11",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b4fa4605fe99dd87eaee8230dbdbb0c8"
+      "Hash": "d36a3ef20f2d1920cb50fdcf19d8d381"
     },
     "stringi": {
       "Package": "stringi",
@@ -832,6 +832,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "25cfab6cf405c15bccf7e69ec39df090"
+    },
+    "terra": {
+      "Package": "terra",
+      "Version": "1.4-11",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "12f8a0e6cad73c6c022ff579bbc6d82b"
     },
     "tibble": {
       "Package": "tibble",
@@ -877,10 +884,10 @@
     },
     "viridis": {
       "Package": "viridis",
-      "Version": "0.6.1",
+      "Version": "0.6.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "424d1285b7372d39806abb19467e4df4"
+      "Hash": "ee96aee95a7a563e5496f8991e9fde4b"
     },
     "viridisLite": {
       "Package": "viridisLite",
