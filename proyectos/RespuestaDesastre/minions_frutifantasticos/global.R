@@ -257,7 +257,7 @@ pal <- colorFactor(
 
 my_icon = makeAwesomeIcon(
   icon = 'home', 
-  markerColor = 'red', 
+  markerColor = 'green', 
   iconColor = 'white'
 )
 

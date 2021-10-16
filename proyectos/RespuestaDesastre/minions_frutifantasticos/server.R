@@ -79,11 +79,9 @@ shinyServer(function(input, output, session) {
         map <- datum() %>% 
             leaflet() %>% 
             addTiles() %>% 
-            fitBounds(lng1 = shp_mun@bbox[1, 1], lng2 = shp_mun@bbox[1, 2],
-                      lat1 = shp_mun@bbox[2, 1], lat2 = shp_mun@bbox[2, 2]) %>% 
-            addTiles(group = "OSM (default)") %>%
+            addTiles(group = "OSM") %>%
             addProviderTiles("Esri.WorldImagery", group = "Satellital") %>%
-            addProviderTiles("CartoDB.Positron", group = "CartoDB") %>%
+            addProviderTiles("CartoDB.Positron", group = "CartoDB (default)") %>%
             addPolygons(
                 color = "black", 
                 fillColor = "transparent", 
@@ -140,50 +138,13 @@ shinyServer(function(input, output, session) {
             input$search
             isolate({
                 
-                destination <- c(datum()[1,]$lat, datum()[1,]$lng)
-                
-                dir <- google_directions(
-                    key = api_key$google_api$api_token,
-                    origin = origin(),
-                    destination = destination,
-                    region = "mx",
-                    mode = input$medio_transporte,
-                    simplify = T,
-                    alternatives = F
-                )
-
-                legs <- dir$routes$legs
-                distance_km <- legs[[1]]$distance$text
-                time <- legs[[1]]$duration$text
-                ruta <- dir$routes$overview_polyline$points %>%
-                    decode_pl() %>%
-                    as_tibble()
-                
-                nearest_label <- sprintf(
-                    "<strong> Refugio más cercano: </strong> <br/> %s <br/>
-                     <strong> Distancia: </strong> <br/> %s <br/>
-                     <strong> Tiempo: </strong> <br/> %s <br/>
-                     <strong> Disponibilidad: </strong> <br/> %s lugares",
-                    tolower(datum()[1, ]$refugio), 
-                    tolower(distance_km), 
-                    tolower(time),
-                    tolower(datum()[1,]$disponibilidad)) %>% 
-                    map(htmltools::HTML)
-                
                 map %<>%
                     addAwesomeMarkers(
-                        lng = ruta$lon[1],
-                        lat = ruta$lat[1],
+                        lng = origin()["lng"],
+                        lat = origin()["lat"],
                         icon = icons("blue"),
                         label = "Mi ubicación"
-                    ) %>%
-                    addAwesomeMarkers(
-                        lng = datum()[1,]$lng,
-                        lat = datum()[1,]$lat + 0.000075,
-                        icon = icons("green"),
-                        label = nearest_label
-                    ) %>%
-                    addPolylines(lng = ruta$lon, lat = ruta$lat, color = "blue")
+                    )
             })
         }
         
@@ -273,7 +234,6 @@ shinyServer(function(input, output, session) {
         )
     })
     
-    
     output$availability_plot <- renderPlotly({
         
         dis_graph(datum())
@@ -293,8 +253,36 @@ shinyServer(function(input, output, session) {
     observeEvent(input$table_rows_selected, {
         
         row_selected = datum()[input$table_rows_selected,]
-        
         mun = row_selected$municipio
+        destination <- c(row_selected$lat, row_selected$lng)
+                
+        dir <- google_directions(
+            key = api_key$google_api$api_token,
+            origin = origin(),
+            destination = destination,
+            region = "mx",
+            mode = input$medio_transporte,
+            simplify = T,
+            alternatives = F
+        )
+                
+        legs <- dir$routes$legs
+        distance_km <- legs[[1]]$distance$text
+        time <- legs[[1]]$duration$text
+        ruta <- dir$routes$overview_polyline$points %>%
+            decode_pl() %>%
+            as_tibble()
+                
+        nearest_label <- sprintf(
+            "<strong> Refugio más cercano: </strong> <br/> %s <br/>
+             <strong> Distancia: </strong> <br/> %s <br/>
+             <strong> Tiempo: </strong> <br/> %s <br/>
+             <strong> Disponibilidad: </strong> <br/> %s lugares",
+            tolower(row_selected$refugio), 
+            tolower(distance_km), 
+            tolower(time),
+            tolower(row_selected$disponibilidad)) %>% 
+            map(htmltools::HTML)
         
         proxy <- leafletProxy('map')
         #adj <- rownames(mtx_adj)[mtx_adj[, rownames(mtx_adj) == mun]]
@@ -305,7 +293,8 @@ shinyServer(function(input, output, session) {
                 layerId = as.character(row_selected$no),
                 lng=row_selected$lng, 
                 lat=row_selected$lat,
-                icon = my_icon
+                icon = my_icon,
+                label = nearest_label
             ) %>% 
             addPolygons(
                 layerId = as.character(row_selected$no),
@@ -322,6 +311,12 @@ shinyServer(function(input, output, session) {
                     #fillOpacity = 0.5,
                     bringToFront = F
                 )
+            ) %>%
+            addPolylines(
+                layerId = as.character(row_selected$no),
+                lng = ruta$lon, 
+                lat = ruta$lat, 
+                color = "blue"
             )
         
         if(!is.null(prev_row())) {

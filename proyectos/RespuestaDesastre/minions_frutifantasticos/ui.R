@@ -8,9 +8,15 @@ library(plotly)
 library(googleway)
 
 dashboardPage(
+    title = "Refugios Nayarit",
     skin = "black",
     dashboardHeader(
-        title = "Refugios Temporales",
+        #title = HTML('<div> <img src="red_refugios.jpeg" height="60" width="120"/>'),
+        title = tags$a(href = 'https://www.facebook.com/proteccioncivilnay/',
+                       img(src = 'red_refugios.jpeg', title = "Refugios Nayarit", height = "60px"),
+                       style = "padding-top:50px; padding-bottom:10px; center;",
+                       class = "center"),
+
         tags$li(a(href = 'https://www.facebook.com/proteccioncivilnay/',
                   img(src = 'bomberos-logo.jpg',
                       title = "Bomberos", height = "30px"),
@@ -26,7 +32,7 @@ dashboardPage(
     dashboardSidebar(
         loadingLogo(
             href = 'https://www.nayarit.gob.mx/', 
-            src = 'nayarit-logo.png', 
+            src = 'logoGobiernoDelEstado.png', 
             #loadingsrc = "https://i.imgur.com/pKV7YwY.gif",
             loadingsrc = 'https://c.tenor.com/7NX24XoJX0MAAAAC/loading-fast.gif',
             height = "70%",
