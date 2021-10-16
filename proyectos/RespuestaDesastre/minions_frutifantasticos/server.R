@@ -152,9 +152,23 @@ shinyServer(function(input, output, session) {
                     alternatives = F
                 )
 
+                legs <- dir$routes$legs
+                distance_km <- legs[[1]]$distance$text
+                time <- legs[[1]]$duration$text
                 ruta <- dir$routes$overview_polyline$points %>%
                     decode_pl() %>%
                     as_tibble()
+                
+                nearest_label <- sprintf(
+                    "<strong> Refugio más cercano: </strong> <br/> %s <br/>
+                     <strong> Distancia: </strong> <br/> %s <br/>
+                     <strong> Tiempo: </strong> <br/> %s <br/>
+                     <strong> Disponibilidad: </strong> <br/> %s lugares",
+                    tolower(datum()[1, ]$refugio), 
+                    tolower(distance_km), 
+                    tolower(time),
+                    tolower(datum()[1,]$disponibilidad)) %>% 
+                    map(htmltools::HTML)
                 
                 map %<>%
                     addAwesomeMarkers(
@@ -167,7 +181,7 @@ shinyServer(function(input, output, session) {
                         lng = datum()[1,]$lng,
                         lat = datum()[1,]$lat + 0.000075,
                         icon = icons("green"),
-                        label = "Refugio más cercano"
+                        label = nearest_label
                     ) %>%
                     addPolylines(lng = ruta$lon, lat = ruta$lat, color = "blue")
             })
