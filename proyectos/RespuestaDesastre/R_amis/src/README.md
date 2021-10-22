@@ -18,13 +18,6 @@
 | José Luis Roberto Zárate Cortés | 183347   | jzaratec@itam.mx | [jlrzarcor](https://github.com/jlrzarcor)     |
 
 ---
-
-Nuestro tgrabajo se desarrolló en un  repositorio especial para evitar sobre cargar el repositorio de la materia,
-para lo cual se deberá clonar el repositorio en la siguiente liga y seguir las instrucciones (mismas que están en
-el repositorio):
-
-Liga a repo: [Ramis-prjct1](https://github.com/jlrzarcor/ITAM-ecomp2021-Ramis-prjct1)
-
 ---
 
 ## Tabla de contenido  :floppy_disk:

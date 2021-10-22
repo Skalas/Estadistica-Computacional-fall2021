@@ -1,0 +1,174 @@
+---
+title: "Prac_1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+knit_print.data.frame = function(x, ...) {
+  res = paste(c("", "", knitr::kable(x)), collapse = "\n")
+  knitr::asis_output(res)
+}
+
+registerS3method(
+  "knit_print", "data.frame", knit_print.data.frame,
+  envir = asNamespace("knitr")
+)
+```
+
+# Librerías a utilizar
+
+```{r}
+library(openxlsx)
+library(purrr)
+library(tidyverse)
+library(psych)
+```
+
+
+```{r}
+
+source('~/ITAM-ecomp2021-Ramis-prjct1/src/utils/utils_eda_others.R')
+```
+
+
+
+# Extracción, Transformación y Carga (ETL por sus siglas en inglés)
+
+### Extracción
+
+Declaramos la ruta donde se encuentra ubicado el archivo con los datos de refugios de Nayarit:
+
+```{r}
+Ruta_archivo = "~/ITAM-ecomp2021-Ramis-prjct1/data/refugios_nayarit.xlsx" # <-- Aquí la ruta del archivo
+```
+
+Obtenemos los nombres de las hojas que están en el archivo (posteriormente se utilizarán para indicar a una función que realice un proceso de lectura con base en estas hojas). Si el archivo llega a tener más hojas estas siempre serán actualizadas cuando se ejecute el código.
+
+```{r}
+hojas = getSheetNames(Ruta_archivo)
+```
+
+Se implementa una función que trabaja sobre todos los elementos de la lista "hojas" y lo que hace es: i)leer el archivo .xlsx ii) posicionarse en la fila 7 de cada una de las hojas que tiene la lista "hojas" y pasa esa información a una lista de Data Frames.
+
+Fuente:
+
+https://es.stackoverflow.com/questions/442168/c%c3%b3mo-crear-un-dataframe-en-r-desde-un-excel-con-varias-hojas
+
+```{r}
+lista_df = map(hojas,function(x){
+read.xlsx(Ruta_archivo ,sheet = x, startRow = 7, colNames = FALSE)
+})
+```
+
+Se integran todos los elementos de la lista creada con la función anterior (Data Frames) en uno solo y se les coloca el nombre de las columnas.
+
+```{r}
+df = do.call(rbind,lista_df)
+
+names(df) = c("num","refugio","municipio","direccion","uso_inmueble","servicios","capacidad","lat",
+              "long","altitud","responsable","telefono")
+```
+
+### Transformación
+
+Después de hacer una inspección de la base de datos que se generó nos damos cuenta que existen renglones que se leyeron en cada hoja del archivo que solo contienen los totlales de capacidad de los refugios en cada bloque en que fueron separados pero desconocemos si esta separación es informativa para los interesados. 
+
+```{r}
+df = df[order(df$num,na.last = FALSE),]
+```
+
+Se decide prescindir de esta información por lo que se ordenan los renglones por su número consecutivo en el archivo y se eliminan los registros con los renglones en los que solo se tiene el total de la capacidad de cada grupo de refugios (uno por hoja).
+
+```{r}
+df <- df[!is.na(df$num),]
+```
+
+```{r}
+head(df)
+```
+
+Para trabajar de mejor forma los datos se hace una pequeña trasnformacion las columnas de tipo character se pasan a minusculas y se quitan espacion en blanco al inicio y al final de las cadenas de caracteres
+
+```{r}
+dataclean <- first.transform.data(df)
+dataclean
+```
+Realizamos analisis de los datos Raw y observamos el tipo de dato de cada columna con su cantidad de registros, sus Na's, valores unicos y la moda.
+
+```{r}
+count_data(dataclean)
+```
+
+Podemos observar que contamos con tipo character y numeric hagamos un primer data profiling,
+
+
+
+Data profiling de columnas tipo character donde podemos observar por cada columna su comportamiento.
+```{r}
+data_profiling(dataclean, "character")
+```
+
+Data profiling de columnas numeric donde podemos observar por cada columna su comportamiento con medidas de centralidad. 
+```{r}
+data_profiling(dataclean, "numeric")
+```
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
