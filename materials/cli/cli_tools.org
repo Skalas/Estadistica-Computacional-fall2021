@@ -1,0 +1,1271 @@
+#+TITLE: Herramientas CLI
+#+AUTHOR: Miguel Angel Escalante Serrato
+#+EMAIL:  miguel.escalante@itam.mx
+#+DATE: 26-Oct-2020
+#+LANGUAGE:  es
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_THEME: moon
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_TRANS: cube
+#+REVEAL_SLIDE_NUMBER: t
+#+REVEAL_HEAD_PREAMBLE: <meta name="description" content="Estadística Computacional">
+
+* cut
+Es un programa que toma un caracter que mandemos en el parámetro =-d= y lo imprime a STDOUT.
+** Bytes
+#+begin_src shell
+cat test.log | gcut -b 1-2> test-out.log
+#+end_src
+
+#+RESULTS:
+
+** characters
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | gcut -c 1-8
+#+end_src
+
+#+RESULTS:
+| lol | lel |
+
+** Delimiter, Field.
+=-d=  nos dice qué caracter usaremos para hacer los cortes, y el parámetro =-f= nos dice con qué columnas nos quedaremos.
+
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | gcut -d ',' -f5
+#+end_src
+
+#+RESULTS:
+: lal
+
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | gcut -d ','  -f 4,5,1,2
+#+end_src
+
+#+RESULTS:
+| lol | lel | lul | lal |
+
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | cut -d ','  -f 1-4
+#+end_src
+
+#+RESULTS:
+| lol | lel | lil | lul |
+
+** Complement
+
+Nos da el complemento de las columnas que mandemos :
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | gcut --complement  -d ',' -f 1,2,3
+#+end_src
+
+#+RESULTS:
+| lul | lal |
+
+** Output Delimiter:
+#+begin_src shell
+echo "lol,lel,lil,lul,lal" | gcut --complement  -d ',' -f 1 --output-delimiter="@"
+#+end_src
+
+#+RESULTS:
+: lel@lil@lul@lal
+
+#+begin_src shell
+  cat test.log | cut -d' ' -f 3 | cut -d ':' -f 1| sort | uniq > ejercicio.log
+#+end_src
+
+#+RESULTS:
+
+* sed
+Stream Editor, es un editor de texto /on-the-go/, el uso más común es reemplazar textos, pero puede hacer mucho más.
+
+** Sustitución.
+
+#+begin_src shell
+  rm result.log
+  cat keybagd.log | sed 's/<err>/@HOLA@/g' > result.log
+#+end_src
+
+#+RESULTS:
+
+** Reemplazar la n-ésima ocurrencia en un archivo.
+Sed trabaja línea a línea por lo que para poder reemplazar la n-ésima ocurrencia de un texto, lo hace a nivel línea.
+#+begin_src shell
+  cat keybagd.log | gsed 's/:/@HOLA@/1' > result-n.log
+#+end_src
+
+#+RESULTS:
+concatenando comandos:
+#+begin_src shell
+  cat keybagd.log | gsed 's/:/@HOLA@/2g' > result-n.log
+#+end_src
+
+#+RESULTS:
+
+** Elegit una línea particular a sustituír.
+
+#+begin_src shell
+  rm result-3.log
+  cat keybagd.log | sed '3 s/<err>/@HOLA@/g' > result-3.log
+#+end_src
+
+#+RESULTS:
+
+#+begin_src shell
+  rm result-3.log
+  sed '3 s/<err>/@HOLA/g' keybagd.log > result-3.log
+#+end_src
+
+#+RESULTS:
+
+#+begin_src shell
+  gsed '3 s/:/@HOLA@/3g' < keybagd.log > result-3.log
+#+end_src
+
+#+RESULTS:
+
+** Doble o nada :P
+la bandera =p= al final permite que se reimprima la línea en la cual se sustituyó el texto encontrado, ojo que si encuentra varias sustituciones sólo la repite una vez.
+
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed 's/:/@HOLA@/p' < keybagd.log > result-3.log
+  echo `wc -l result-3.log`
+#+end_src
+
+#+RESULTS:
+| 4830 | keybagd.log  |
+| 9660 | result-3.log |
+
+A menos que sólo quieras generar la impresión de sólo las que tuvieron sustitución.
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed -n '3 s/:/@HOLA@/p' < keybagd.log > result-3.log
+  echo `wc -l result-3.log`
+#+end_src
+
+#+RESULTS:
+| 4830 | keybagd.log  |
+|    1 | result-3.log |
+
+** Rangos sobre las sustituciones
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed -n '10,$ s/:/@HOLA@/p' < keybagd.log > result-3.log
+  echo `wc -l result-3.log`
+#+end_src
+
+#+RESULTS:
+| 4899 | keybagd.log  |
+| 4821 | result-3.log |
+
+**  Borrado de líneas!
+*** Podemos borrar una línea del archivo.
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed  '1d' < keybagd.log > result-d.log
+  echo `wc -l result-d.log`
+#+end_src
+
+#+RESULTS:
+| 4899 | keybagd.log  |
+| 4898 | result-d.log |
+
+*** O la última:
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed  '$d' < keybagd.log > result-d.log
+  echo `wc -l result-d.log`
+#+end_src
+
+#+RESULTS:
+| 4900 | keybagd.log  |
+| 4899 | result-d.log |
+
+*** O un rango:
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed  '1,10d' < keybagd.log > result-d.log
+  echo `wc -l result-d.log`
+#+end_src
+
+#+RESULTS:
+| 4900 | keybagd.log  | 4900 | total |
+|   10 | result-d.log |      |       |
+
+*** O de la n-ésima a la última:
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed  '501,$d' < keybagd.log > result-d.log
+  echo `wc -l result-d.log`
+#+end_src
+
+#+RESULTS:
+| 4830 | keybagd.log  |
+|  500 | result-d.log |
+*** O borramos dado un patrón.
+#+begin_src shell
+  echo `wc -l keybagd.log`
+  sed  '/<err>/d' < keybagd.log > result-d.log
+  echo `wc -l result-d.log`
+
+
+#+end_src
+
+#+RESULTS:
+| 4900 | keybagd.log  |
+|   70 | result-d.log |
+
+* grep / regex
+** ¿Qué es una expresión regular?
+Son una serie de caracteres que especifican patrones. Se usan para hacer búsquedas en textos para extraer diferentes características de los mismos.
+OJO: veremos las bases del lenguaje, ya que hay demasiado material para todo lo que se puede hacer con Regex
+
+| Utility | Regular Expression Type   |
+| -       | -                         |
+| vi      | Basic                     |
+| grep    | Basic                     |
+| awk     | Extended                  |
+| Emacs   | EMACS Regular Expressions |
+| PERL    | PERL Regular Expressions  |
+
+** Caracteres Ancla
+Los caracteres ancla, son caracteres que nos indican por ejemplo el inicio o fin de una línea:
++ =$= es el caracter para el fin de línea.
++ =^= es el caracter lara el inicio de línea.
+  #+begin_src shell
+    wc -l keybagd.log
+    grep "Sep 28" keybagd.log | wc -l
+    grep "^Wed" keybagd.log | wc -l
+    grep "^Thu" keybagd.log | wc -l
+    grep "0$" keybagd.log | wc -l
+  #+end_src
+
+  #+RESULTS:
+  | 4900 | keybagd.log |
+  |  116 |             |
+  |  855 |             |
+  | 1437 |             |
+  |   67 |             |
+
+** "."
+El "." hace match con cualquier caracter.
+Nos filtra todos los renglones que tienen sólo un caracter.
+#+begin_src shell
+grep "^.$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 66
+
+** Rangos de caracteres.
+Puedes hacer filtros con diferentes patrones al encerrarlos en =[]=.
+¿Qué hace este filtro?
+
+#+begin_src shell
+grep "^[0-9]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 10
+
+Podemos usar el guión para establecer rangos
+#+begin_src shell
+ grep "^[3-9]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 7
+
+Funciona también con letras:
+#+begin_src shell
+grep "^[abcdeT]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 6
+
+Y rangos de letras también:
+#+begin_src shell
+grep "^[a-z]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 26
+
+Ojo que hay diferencias con las letras mayúsculas:
+
+#+begin_src shell
+  grep "^[A-Z]$" keybagd.log | wc -l
+  grep "^[A-Za-z]$" keybagd.log | wc -l
+  grep "^[A-Za-z0-9]$" keybagd.log | wc -l
+  grep "^[A-Za-z0-9_\.]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+| 26 |
+| 52 |
+| 62 |
+| 66 |
+** Excepciones
+Líneas con un sólo caracter excepto este set:
+#+begin_src shell
+  grep "^[^A-Z]$" keybagd.log | wc -l
+  grep "^[^A-Z_]$" keybagd.log | wc -l
+  grep "^[^A-Z0-9xs]$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+| 40 |
+| 38 |
+| 28 |
+
+** Repetición:
+podemos pedir que un cierto caracter (o grupo de caracteres se repita cero o más veces).
+#+begin_src shell
+  grep "^[A-Za-z]*$" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+: 58
+
+es importante que en este caso el =*= no es lo mismo que en los wildcards de cuando listamos archivos
+#+begin_src shell
+  ls re*.log
+#+end_src
+
+#+RESULTS:
+| result-3.log  |
+| result-d.log  |
+| result-n.log  |
+| result-ng.log |
+| result.log    |
+
+** Número de ocurrencias.
+delimitar el número de ocurrencias.
+#+begin_src shell
+  grep "^[A-Z]\{2,2\}$" keybagd.log | wc -l
+  grep "^[A-Z].*" keybagd.log | wc -l
+#+end_src
+
+#+RESULTS:
+|    2 |
+| 4861 |
+
+** Matcheo de palabras.
+
+#+begin_src shell
+  grep "\<[Tt]ue\>" keybagd.log | wc -l
+  grep "Thu\{0,1\}\<[Tt]ue\>\{0,1\}" keybagd.log | wc -l
+  grep "\<[TW][ehu][deu]\>" keybagd.log | wc -l
+
+#+end_src
+
+#+RESULTS:
+|  125 |
+|    0 |
+| 2417 |
+
+* CRON
+[[https://skalas.me/first-cron][Checar este link, #shamelesSelf-promotion.]]
+
+* Awk
+** Intro
+Awk es un programa que es excelente para el manejo de información. Como =sed=  y =grep= es una función que ayuda a filtrar. Está en la mayoría de los sistemas UNIX-like.
+
+Como los programas que hemos visitado, =awk= toma información del /stream/ de datos o algún archivo, para ejecutar sus funciones, por ende, tambien se puede hacer parte de un pipeline.
+
+En principio se pensó para programas de una línea (lol), pero es un lenguaje Turing-completo y se pueden hacer scripts bastante complejos.
+
+AWK se creó en los laboratorios Bell y su nombre viene de los nombres de sus creadores:
+- Alfred Aho
+- Peter Weinberger
+- Brian Kernighan
+
+** Estructura
+la estructura base del programa en awk es :
+ - patrón {acción}
+
+   #+begin_src shell
+awk 'BEGIN { print "START" }
+           { print         }
+     END   { print "STOP"  }'
+   #+end_src
+
+   #+RESULTS:
+   | START |
+   | STOP  |
+
+** Basico
+*** Comando Print
+
+#+begin_src shell
+ps | awk '{print}'
+#+end_src
+
+#+RESULTS:
+|   PID | TTY     |    TIME | CMD                                                          |                                                                        |    |           |     |               |
+| 12935 | ttys000 | 0:01.53 | -zsh                                                         |                                                                        |    |           |     |               |
+| 93630 | ttys000 | 0:13.92 | /Users/miguel.escalante/miniconda3/envs/frdr_mktg/bin/python | /Users/miguel.escalante/miniconda3/envs/frdr_mktg/bin/jupyter-notebook |    |           |     |               |
+| 12685 | ttys001 | 0:00.67 | -zsh                                                         |                                                                        |    |           |     |               |
+|  9818 | ttys002 | 0:01.40 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12690 | ttys003 | 0:00.66 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12696 | ttys004 | 0:00.69 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12701 | ttys005 | 0:00.69 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12718 | ttys006 | 0:00.73 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12746 | ttys007 | 0:00.71 | -zsh                                                         |                                                                        |    |           |     |               |
+| 12754 | ttys008 | 0:02.37 | -zsh                                                         |                                                                        |    |           |     |               |
+| 15368 | ttys008 | 0:00.32 | docker                                                       | run                                                                    | -p | 8000:8000 | -it | skalas/ec2021 |
+| 15371 | ttys008 | 0:00.53 | /usr/local/bin/com.docker.cli                                | run                                                                    | -p | 8000:8000 | -it | skalas/ec2021 |
+| 15403 | ttys009 | 0:02.72 | -zsh                                                         |                                                                        |    |           |     |               |
+
+*** Print Cols
+#+begin_src shell
+  ps | awk '{print $2}'
+#+end_src
+
+#+RESULTS:
+| TTY     |
+| ttys000 |
+| ttys000 |
+| ttys001 |
+| ttys002 |
+| ttys003 |
+| ttys004 |
+| ttys005 |
+| ttys006 |
+| ttys007 |
+| ttys008 |
+| ttys008 |
+| ttys008 |
+| ttys009 |
+
+*** Delimitadores
+
+#+begin_src shell
+  cat /etc/passwd | awk -F ":" '{print $5}'
+#+end_src
+
+#+RESULTS:
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+|                       |                |            |           |          |         |
+| Unprivileged          | User           |            |           |          |         |
+| System                | Administrator  |            |           |          |         |
+| System                | Services       |            |           |          |         |
+| Unix                  | to             | Unix       | Copy      | Protocol |         |
+| Task                  | Gate           | Daemon     |           |          |         |
+| Network               | Services       |            |           |          |         |
+| Install               | Assistant      |            |           |          |         |
+| Printing              | Services       |            |           |          |         |
+| Postfix               | Mail           | Server     |           |          |         |
+| Service               | Configuration  | Service    |           |          |         |
+| Certificate           | Enrollment     | Service    |           |          |         |
+| Mac                   | App            | Store      | Service   |          |         |
+| MCX                   | AppLaunch      |            |           |          |         |
+| AppleEvents           | Daemon         |            |           |          |         |
+| Geo                   | Services       | Daemon     |           |          |         |
+| Developer             | Documentation  |            |           |          |         |
+| Seatbelt              |                |            |           |          |         |
+| mDNSResponder         |                |            |           |          |         |
+| Apple                 | Remote         | Desktop    |           |          |         |
+| World                 | Wide           | Web        | Server    |          |         |
+| Apple                 | Events         | User       |           |          |         |
+| CVS                   | Server         |            |           |          |         |
+| SVN                   | Server         |            |           |          |         |
+| MySQL                 | Server         |            |           |          |         |
+| sshd                  | Privilege      | separation |           |          |         |
+| QuickTime             | Streaming      | Server     |           |          |         |
+| Cyrus                 | Administrator  |            |           |          |         |
+| Mailman               | List           | Server     |           |          |         |
+| Application           | Server         |            |           |          |         |
+| ClamAV                | Daemon         |            |           |          |         |
+| AMaViS                | Daemon         |            |           |          |         |
+| Jabber                | XMPP           | Server     |           |          |         |
+| Application           | Owner          |            |           |          |         |
+| WindowServer          |                |            |           |          |         |
+| Spotlight             |                |            |           |          |         |
+| Token                 | Daemon         |            |           |          |         |
+| SecurityAgent         |                |            |           |          |         |
+| Calendar              |                |            |           |          |         |
+| TeamsServer           |                |            |           |          |         |
+| Update                | Sharing        |            |           |          |         |
+| Installer             |                |            |           |          |         |
+| ATS                   | Server         |            |           |          |         |
+| FTP                   | Daemon         |            |           |          |         |
+| Unknown               | User           |            |           |          |         |
+| Software              | Update         | Service    |           |          |         |
+| Core                  | Audio          | Daemon     |           |          |         |
+| Screensaver           |                |            |           |          |         |
+| Location              | Daemon         |            |           |          |         |
+| Trust                 | Evaluation     | Agent      |           |          |         |
+| AutoTimeZoneDaemon    |                |            |           |          |         |
+| Local                 | Delivery       | Agent      |           |          |         |
+| CVMS                  | Root           |            |           |          |         |
+| iPhone                | OS             | Device     | Helper    |          |         |
+| Dovecot               | Administrator  |            |           |          |         |
+| DP                    | Audio          |            |           |          |         |
+| PostgreSQL            | Server         |            |           |          |         |
+| Kerberos              | Ticket         | Granting   | Ticket    |          |         |
+| Kerberos              | Admin          | Service    |           |          |         |
+| Kerberos              | Change         | Password   | Service   |          |         |
+| Device                | Management     | Server     |           |          |         |
+| Web                   | Auth           | Server     |           |          |         |
+| NetBIOS               |                |            |           |          |         |
+| Warm                  | Daemon         |            |           |          |         |
+| Dovecot               | Authentication |            |           |          |         |
+| Network               | Statistics     | Daemon     |           |          |         |
+| Ethernet              | AVB            | Device     | Daemon    |          |         |
+| Open                  | Directory      | Kerberos   | Ticket    | Granting | Ticket  |
+| Open                  | Directory      | Kerberos   | Admin     | Service  |         |
+| Open                  | Directory      | Kerberos   | Change    | Password | Service |
+| Open                  | Directory      | Kerberos   |           |          |         |
+| Open                  | Directory      | Kerberos   | Anonymous |          |         |
+| Asset                 | Cache          | Service    |           |          |         |
+| Core                  | Media          | IO         | Daemon    |          |         |
+| _launchservicesd      |                |            |           |          |         |
+| IconServices          |                |            |           |          |         |
+| DistNote              |                |            |           |          |         |
+| NSURLSession          | Daemon         |            |           |          |         |
+| Display               | Policy         | Daemon     |           |          |         |
+| Astris                | Services       |            |           |          |         |
+| Kerberos              | FAST           | Account    |           |          |         |
+| Game                  | Controller     | Daemon     |           |          |         |
+| Setup                 | User           |            |           |          |         |
+| On                    | Demand         | Resource   | Daemon    |          |         |
+| macOS                 | Server         | Documents  | Service   |          |         |
+| WWW                   | Proxy          |            |           |          |         |
+| MobileAsset           | User           |            |           |          |         |
+| Find                  | My             | Device     | Daemon    |          |         |
+| DataDetectors         |                |            |           |          |         |
+| captiveagent          |                |            |           |          |         |
+| ctkd                  | Account        |            |           |          |         |
+| applepay              | Account        |            |           |          |         |
+| HID                   | Service        | User       |           |          |         |
+| CoreMedia             | IO             | Assistants | User      |          |         |
+| Analytics             | Daemon         |            |           |          |         |
+| FPS                   | Daemon         |            |           |          |         |
+| Time                  | Sync           | Daemon     |           |          |         |
+| Proximity             | and            | Ranging    | Daemon    |          |         |
+| ReportMemoryException |                |            |           |          |         |
+| DriverKit             |                |            |           |          |         |
+| DiskImages            | IO             | Daemon     |           |          |         |
+| Log                   | Daemon         |            |           |          |         |
+| App                   | Install        | Daemon     |           |          |         |
+| Install               | Coordination   | Daemon     |           |          |         |
+| Demo                  | Daemon         |            |           |          |         |
+| Remote                | Management     | Daemon     |           |          |         |
+| Firmware              | Update         | Daemon     |           |          |         |
+| Knowledge             | Graph          | Daemon     |           |          |         |
+| CoreML                | Services       |            |           |          |         |
+| trustd                |                |            |           |          |         |
+| OAH                   | Daemon         |            |           |          |         |
+
+
+
+*** Print enhanced.
+
+**** Diferentes columnas
+#+begin_src shell
+ps -a | awk '{print $1 $2 $3}'
+#+end_src
+
+#+RESULTS:
+| PIDTTYTIME          |
+| 12934ttys0000:00.32 |
+| 12935ttys0000:01.53 |
+| 93630ttys0000:14.01 |
+| 12684ttys0010:00.07 |
+| 12685ttys0010:00.67 |
+| 9817ttys0020:00.07  |
+| 9818ttys0020:01.40  |
+| 12686ttys0030:00.04 |
+| 12690ttys0030:00.66 |
+| 12695ttys0040:00.03 |
+| 12696ttys0040:00.69 |
+| 12698ttys0050:00.04 |
+| 12701ttys0050:00.69 |
+| 12712ttys0060:00.04 |
+| 12718ttys0060:00.73 |
+| 12735ttys0070:00.05 |
+| 12746ttys0070:00.71 |
+| 12747ttys0080:00.05 |
+| 12754ttys0080:02.37 |
+| 15368ttys0080:00.35 |
+| 15371ttys0080:00.57 |
+| 15402ttys0090:00.06 |
+| 15403ttys0090:03.30 |
+
+**** Delimitador de salida
+#+begin_src shell
+ps -a | awk '{print $1" "$2" "$3}'
+#+end_src
+
+#+RESULTS:
+|   PID | TTY     |    TIME |
+| 12934 | ttys000 | 0:00.32 |
+| 12935 | ttys000 | 0:01.53 |
+| 93630 | ttys000 | 0:14.03 |
+| 12684 | ttys001 | 0:00.07 |
+| 12685 | ttys001 | 0:00.67 |
+|  9817 | ttys002 | 0:00.07 |
+|  9818 | ttys002 | 0:01.40 |
+| 12686 | ttys003 | 0:00.04 |
+| 12690 | ttys003 | 0:00.66 |
+| 12695 | ttys004 | 0:00.03 |
+| 12696 | ttys004 | 0:00.69 |
+| 12698 | ttys005 | 0:00.04 |
+| 12701 | ttys005 | 0:00.69 |
+| 12712 | ttys006 | 0:00.04 |
+| 12718 | ttys006 | 0:00.73 |
+| 12735 | ttys007 | 0:00.05 |
+| 12746 | ttys007 | 0:00.71 |
+| 12747 | ttys008 | 0:00.05 |
+| 12754 | ttys008 | 0:02.37 |
+| 15368 | ttys008 | 0:00.36 |
+| 15371 | ttys008 | 0:00.57 |
+| 15402 | ttys009 | 0:00.06 |
+| 15403 | ttys009 | 0:03.30 |
+
+**** Delimitador de salida a priori
+#+begin_src shell
+awk 'BEGIN{FS="/"; OFS="----"} {print $2, $6, $7}' /etc/passwd
+#+end_src
+
+#+RESULTS:
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| --------              |
+| var----false----      |
+| var--------           |
+| var----false----      |
+| var----sbin----uucico |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| Library----false----  |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var--------           |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----false----      |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----false----      |
+| var----bin----false   |
+| var----bin----false   |
+| var----bin----false   |
+| var----false----      |
+| var----false----      |
+| var----false----      |
+
+*** Busqueda
+#+begin_src shell
+  cat /etc/shells | awk -F "/" '/^\// {print $NF}'
+#+end_src
+
+#+RESULTS:
+| bash |
+| csh  |
+| dash |
+| ksh  |
+| sh   |
+| tcsh |
+| zsh  |
+
+**** Ejemplo Anterior:
+#+begin_src shell
+  cat /etc/passwd | awk -F':' '/^[a-z_]/ {print $1"-"$3}'
+#+end_src
+
+#+RESULTS:
+| nobody--2                  |
+| root-0                     |
+| daemon-1                   |
+| _uucp-4                    |
+| _taskgated-13              |
+| _networkd-24               |
+| _installassistant-25       |
+| _lp-26                     |
+| _postfix-27                |
+| _scsd-31                   |
+| _ces-32                    |
+| _appstore-33               |
+| _mcxalr-54                 |
+| _appleevents-55            |
+| _geod-56                   |
+| _devdocs-59                |
+| _sandbox-60                |
+| _mdnsresponder-65          |
+| _ard-67                    |
+| _www-70                    |
+| _eppc-71                   |
+| _cvs-72                    |
+| _svn-73                    |
+| _mysql-74                  |
+| _sshd-75                   |
+| _qtss-76                   |
+| _cyrus-77                  |
+| _mailman-78                |
+| _appserver-79              |
+| _clamav-82                 |
+| _amavisd-83                |
+| _jabber-84                 |
+| _appowner-87               |
+| _windowserver-88           |
+| _spotlight-89              |
+| _tokend-91                 |
+| _securityagent-92          |
+| _calendar-93               |
+| _teamsserver-94            |
+| _update_sharing-95         |
+| _installer-96              |
+| _atsserver-97              |
+| _ftp-98                    |
+| _unknown-99                |
+| _softwareupdate-200        |
+| _coreaudiod-202            |
+| _screensaver-203           |
+| _locationd-205             |
+| _trustevaluationagent-208  |
+| _timezone-210              |
+| _lda-211                   |
+| _cvmsroot-212              |
+| _usbmuxd-213               |
+| _dovecot-214               |
+| _dpaudio-215               |
+| _postgres-216              |
+| _krbtgt-217                |
+| _kadmin_admin-218          |
+| _kadmin_changepw-219       |
+| _devicemgr-220             |
+| _webauthserver-221         |
+| _netbios-222               |
+| _warmd-224                 |
+| _dovenull-227              |
+| _netstatistics-228         |
+| _avbdeviced-229            |
+| _krb_krbtgt-230            |
+| _krb_kadmin-231            |
+| _krb_changepw-232          |
+| _krb_kerberos-233          |
+| _krb_anonymous-234         |
+| _assetcache-235            |
+| _coremediaiod-236          |
+| _launchservicesd-239       |
+| _iconservices-240          |
+| _distnote-241              |
+| _nsurlsessiond-242         |
+| _displaypolicyd-244        |
+| _astris-245                |
+| _krbfast-246               |
+| _gamecontrollerd-247       |
+| _mbsetupuser-248           |
+| _ondemand-249              |
+| _xserverdocs-251           |
+| _wwwproxy-252              |
+| _mobileasset-253           |
+| _findmydevice-254          |
+| _datadetectors-257         |
+| _captiveagent-258          |
+| _ctkd-259                  |
+| _applepay-260              |
+| _hidd-261                  |
+| _cmiodalassistants-262     |
+| _analyticsd-263            |
+| _fpsd-265                  |
+| _timed-266                 |
+| _nearbyd-268               |
+| _reportmemoryexception-269 |
+| _driverkit-270             |
+| _diskimagesiod-271         |
+| _logd-272                  |
+| _appinstalld-273           |
+| _installcoordinationd-274  |
+| _demod-275                 |
+| _rmd-277                   |
+| _fud-278                   |
+| _knowledgegraphd-279       |
+| _coreml-280                |
+| _trustd-282                |
+| _oahd-441                  |
+
+***  Operaciones básicas
+#+begin_src shell
+df -h | awk '/\/dev/ {print $1"\t"$2"\t"$3}'
+#+end_src
+
+#+RESULTS:
+| /dev/disk1s1s1 | 466Gi | 14Gi  |
+| devfs          | 194Ki | 194Ki |
+| /dev/disk1s5   | 466Gi | 9.0Gi |
+| /dev/disk1s3   | 466Gi | 812Mi |
+| /dev/disk1s6   | 466Gi | 1.4Mi |
+| /dev/disk1s2   | 466Gi | 165Gi |
+#+begin_src shell
+df -h | awk '/\/dev/ {print $1"\t"$2+$3}'
+#+end_src
+
+#+RESULTS:
+| /dev/disk1s1s1 |   480 |
+| devfs          |   388 |
+| /dev/disk1s5   |   475 |
+| /dev/disk1s3   |  1278 |
+| /dev/disk1s6   | 467.4 |
+| /dev/disk1s2   |   631 |
+
+#+begin_src shell
+df | awk '/\/dev/ {print $1"-"$2-$3}'
+#+end_src
+
+#+RESULTS:
+| /dev/disk1s1s1-946517576 |
+| devfs-0                  |
+| /dev/disk1s5-957616112   |
+| /dev/disk1s3-974827168   |
+| /dev/disk1s6-976487608   |
+| /dev/disk1s2-631215064   |
+
+*** line length
+#+begin_src shell
+  cat /etc/shells | awk 'length($0) <10'
+#+end_src
+
+#+RESULTS:
+|           |
+| /bin/bash |
+| /bin/csh  |
+| /bin/dash |
+| /bin/ksh  |
+| /bin/sh   |
+| /bin/tcsh |
+| /bin/zsh  |
+*** Ifs!!!
+#+begin_src shell
+  ps -ef | awk '{if ($NF == "/bin/zsh") print $0} '
+#+end_src
+
+#+RESULTS:
+: 505 13258 11495   0  3:39PM ??         0:00.01 /bin/zsh
+*** For.
+#+begin_src shell
+awk 'BEGIN { for (i=1; i<=10; i++) print "El cuadrado de ", i, "es",i*i;}'
+#+end_src
+
+#+RESULTS:
+| El | cuadrado | de |  1 | es |   1 |
+| El | cuadrado | de |  2 | es |   4 |
+| El | cuadrado | de |  3 | es |   9 |
+| El | cuadrado | de |  4 | es |  16 |
+| El | cuadrado | de |  5 | es |  25 |
+| El | cuadrado | de |  6 | es |  36 |
+| El | cuadrado | de |  7 | es |  49 |
+| El | cuadrado | de |  8 | es |  64 |
+| El | cuadrado | de |  9 | es |  81 |
+| El | cuadrado | de | 10 | es | 100 |
+
+*** Rangos
+#+begin_src shell
+  df | awk 'NR==3, NR==5 {print NR, $0}'
+#+end_src
+
+#+RESULTS:
+| 3 | devfs        |       394 |      394 |         0 | 100% |  682 |          0 | 100% | /dev                    |
+| 4 | /dev/disk1s5 | 976490576 | 20971616 | 577018064 |   4% |   10 | 4882452870 |   0% | /System/Volumes/VM      |
+| 5 | /dev/disk1s3 | 976490576 |  1663408 | 577018064 |   1% | 1924 | 4882450956 |   0% | /System/Volumes/Preboot |
+
+*** numero de líneas
+#+begin_src shell
+  awk 'END {print NR}' /etc/passwd
+  wc -l /etc/passwd
+#+end_src
+
+#+RESULTS:
+| 120 |             |
+| 120 | /etc/passwd |
+*** Cuenta las palabras
+#+begin_src shell
+  awk 'BEGIN {
+      FS="[^a-zA-Z]+"
+  }
+  {
+      for (i=1; i<=NF; i++)
+          words[tolower($i)]++
+  }
+  END {
+      for (i in words)
+          print i, words[i]
+  }' test.log
+#+end_src
+
+#+RESULTS:
+| dd                             |    1 |
+| specified                      |    3 |
+| 6655                           |      |
+| de                             |    1 |
+| loginwindow                    |    3 |
+| app                            |    7 |
+| the                            |  392 |
+| df                             |    1 |
+| cdscheduler                    |    1 |
+| queue                          |  108 |
+| legacy                         |    1 |
+| apple                          | 8727 |
+| macos                          |   75 |
+| standard                       |   12 |
+| failed                         | 1797 |
+| out                            |   94 |
+| configurationprofiles          |   75 |
+| login                          |    2 |
+| google                         | 1761 |
+| registered                     |    3 |
+| xb                             |    1 |
+| xc                             |    1 |
+| been                           |  109 |
+| xe                             |    1 |
+| mdworker                       | 4248 |
+| settimeofday                   |   17 |
+| version                        |    1 |
+| due                            | 4236 |
+| eb                             |    1 |
+| helper                         | 1797 |
+| files                          |   12 |
+| undefined                      |  272 |
+| sydjournal                     |   88 |
+| dirhelper                      |    2 |
+| private                        |    1 |
+| those                          |   12 |
+| befa                           |    1 |
+| framework                      |  523 |
+| amsupporturlconnectiondelegate |    3 |
+| syncdefaultsd                  |  352 |
+| splog                          |   75 |
+| emacs                          |    1 |
+| deprecated                     |  432 |
+| bsd                            |    2 |
+| sharing                        |    3 |
+| line                           | 1797 |
+| cac                            |    1 |
+| libamsupport                   |    6 |
+| output                         |    6 |
+| enabled                        |    3 |
+| dispatch                       |  216 |
+| xba                            |    1 |
+| clouddocs                      |    1 |
+| oct                            | 6916 |
+| target                         |  216 |
+| chrome                         | 1761 |
+| caabb                          |    1 |
+| client                         |  216 |
+| fa                             |    1 |
+| statistics                     |  101 |
+| fb                             |    1 |
+| shared                         | 4248 |
+| guard                          |    6 |
+| fe                             |    1 |
+| message                        |  148 |
+| ff                             |    1 |
+| has                            |  109 |
+| contents                       |   75 |
+| source                         |  108 |
+| not                            |   12 |
+| versions                       |  266 |
+| dead                           |    1 |
+| sophososquery                  |    1 |
+| switch                         |    1 |
+| service                        | 4333 |
+| bootstrap                      |    1 |
+| destination                    |    3 |
+| ran                            |   94 |
+| timed                          |   17 |
+| notice                         |   15 |
+| cbb                            |    1 |
+| launch                         |    1 |
+| keybagd                        |    1 |
+| afa                            |    1 |
+| two                            |  272 |
+| module                         |   24 |
+| may                            |   12 |
+| unmanaged                      |    3 |
+| connection                     |  108 |
+| uiserver                       |    3 |
+| fcfa                           |    1 |
+| check                          |    1 |
+| was                            |  108 |
+| register                       | 1800 |
+| authd                          |    5 |
+| changing                       |  216 |
+| endpoint                       |    4 |
+| internal                       |    2 |
+| addressbook                    |   30 |
+| xca                            |    1 |
+| times                          |   70 |
+| system                         |  536 |
+| com                            | 8727 |
+| both                           |  272 |
+| eeb                            |    1 |
+| will                           |  272 |
+| asl                            |  142 |
+| contactsautocomplete           |    1 |
+| xpc                            | 4537 |
+| messages                       |   24 |
+| hierarchy                      |  108 |
+| used                           |  272 |
+| libexec                        |   15 |
+| breakpoint                     |  216 |
+| a                              |  881 |
+| ttys                           |    2 |
+| spotify                        |   36 |
+| b                              |  299 |
+| debug                          |  216 |
+| mx                             | 6768 |
+| c                              |  224 |
+| library                        |  523 |
+| d                              |  334 |
+| e                              |  422 |
+| f                              |  263 |
+| use                            |  216 |
+| remcdchangetrackingstate       |   15 |
+| evicted                        |    6 |
+| iokit                          |    1 |
+| respawn                        |   94 |
+| class                          |  272 |
+| repeated                       |  148 |
+| parameters                     |    3 |
+| user                           |    4 |
+| ad                             |    1 |
+| to                             | 4456 |
+| org                            |    1 |
+| bug                            |  216 |
+| ae                             |    1 |
+| synceddefaults                 |  528 |
+| gnu                            |    1 |
+| libdispatch                    |  216 |
+| activated                      |  217 |
+| launchd                        | 4353 |
+| amsupporturlsession            |    3 |
+| hit                            |    1 |
+| owner                          |    3 |
+| usr                            |   21 |
+| configuration                  |   15 |
+| var                            |    3 |
+| x                              |   29 |
+| selected                       |   12 |
+| through                        |    1 |
+| faa                            |    1 |
+| coalition                      |    7 |
+| last                           |  148 |
+| sigkill                        | 4236 |
+| and                            |  272 |
+| pushing                        |   94 |
+| apis                           |    1 |
+| mobileaccessoryupdater         |    6 |
+| contacts                       |    1 |
+| domain                         |    3 |
+| log                            |   17 |
+| exited                         | 4239 |
+| activatesettings               |    6 |
+| with                           | 1800 |
+| ba                             |    1 |
+| remindd                        |   30 |
+| application                    |    7 |
+| performance                    |    1 |
+| cdb                            |    1 |
+| sydclient                      |   88 |
+| bd                             |    1 |
+| implemented                    |  272 |
+| probabilistic                  |    6 |
+| be                             |  272 |
+| after                          |  216 |
+| lib                            |    6 |
+| time                           |   78 |
+| which                          |  272 |
+| sender                         |  101 |
+| claims                         |   12 |
+| of                             |  380 |
+| support                        |  182 |
+| started                        |    1 |
+| systempolicy                   |  150 |
+| xpcservices                    |   75 |
+| tried                          |    3 |
+| install                        |    1 |
+| executionpolicyservice         |  225 |
+| messagetracer                  |    1 |
+| any                            |    3 |
+| override                       |    3 |
+| reminderkit                    |   30 |
+| fud                            |   12 |
+| tsm                            |    3 |
+| addressbooklegacy              |    1 |
+| on                             | 2013 |
+| dylib                          |    6 |
+| sent                           | 4236 |
+| enabling                       |    3 |
+| malloc                         |    6 |
+| privateframeworks              |  523 |
+| please                         |    1 |
+| bdbc                           |    1 |
+| database                       |   12 |
+| or                             |   13 |
+| abd                            |   30 |
+| power                          |    1 |
+| by                             | 4333 |
+| process                        |    8 |
+| eventmonitor                   |    1 |
+| textinputmenuagent             |    3 |
+| set                            |  216 |
+| mkb                            |    5 |
+| mds                            | 4236 |
+| objc                           |  272 |
+| coalesced                      | 1797 |
+| in                             |  516 |
+| libnotify                      | 1797 |
+| seconds                        |  188 |
+| already                        |    3 |
+| cc                             |    1 |
+| cache                          |    7 |
+| is                             |  544 |
+| ce                             |    2 |
+| it                             | 6876 |
+| appear                         |   12 |
+| for                            |  100 |
+| only                           |   94 |
+| code                           | 1797 |
+| one                            |  544 |
+| notify                         | 1797 |
+| from                           |    3 |
+| syslogd                        |  116 |
+| vtdecoderxpcservice            |  216 |
+| osqueryd                       |    1 |
+| containermanagerd              |   64 |
+| registration                   | 1797 |
+| dc                             |    1 |
+| mail                           |    1 |
+
+
+** Scripts
+*** Shell
+#+begin_src shell
+#!/bin/sh
+# Linux users have to change $8 to $9
+awk '
+BEGIN { for (i=1; i<=10; i++) print "El cuadrado de ", i, "es",i*i;}
+'
+#+end_src
+*** awk
+#+begin_src shell
+ awk -f cuadrado.awk
+#+end_src
+
+#+RESULTS:
+| El | cuadrado | de |  1 | es |   1 |
+| El | cuadrado | de |  2 | es |   4 |
+| El | cuadrado | de |  3 | es |   9 |
+| El | cuadrado | de |  4 | es |  16 |
+| El | cuadrado | de |  5 | es |  25 |
+| El | cuadrado | de |  6 | es |  36 |
+| El | cuadrado | de |  7 | es |  49 |
+| El | cuadrado | de |  8 | es |  64 |
+| El | cuadrado | de |  9 | es |  81 |
+| El | cuadrado | de | 10 | es | 100 |
