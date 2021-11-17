@@ -204,7 +204,6 @@ select distinct month from flights order by month;
 
 **
 
-
 ** concat
 Nos ayuda a juntar varias columnas en una sola.
 #+begin_src sql
@@ -265,3 +264,351 @@ Nos ayuda a castear algún tipo en otro tipo, para mayor referencia de los tipos
 | 2013 |
 | 2013 |
 | 2013 |
+
+** group by
+agrupamos y hacemos una función sobre cada uno de los grupos.
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month;
+#+end_src
+*** multiples columnas:
+Cada columna debe tener su propio agrupador
+#+begin_src sql
+  select month, day, count(*) as num_flights
+    from flights
+   group by month;
+#+end_src
+
+#+RESULTS:
+|---|
+*** Filtros ¿?
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month
+   where month=1;
+#+end_src
+
+#+RESULTS:
+|---|
+
+** having
+en lugar de usar where cuando tenemos grupos, usamos having.
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month
+   having month=1;
+#+end_src
+
+#+RESULTS:
+| month | num_flights |
+|-------+-------------|
+|     1 |       27004 |
+
+** Case
+Se usa a manera de ifelse
+#+begin_src sql
+  select case
+         when month = 1 then 'Enero'
+         when month = 2 then 'Febrero'
+         end as mes
+    from flights
+   where month=2 limit 10;
+#+end_src
+
+#+RESULTS:
+| mes     |
+|---------|
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+| Febrero |
+
+* Insert
+#+begin_src sql
+  drop table meses;
+  create table meses (mes integer, n integer);
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+#+end_src
+
+#+RESULTS:
+|   DROP TABLE |       |
+|--------------+-------|
+| CREATE TABLE |       |
+|  INSERT 0 12 |       |
+|          mes |     n |
+|           12 | 28135 |
+|            3 | 28834 |
+|           11 | 27268 |
+|            8 | 29327 |
+|           10 | 28889 |
+|            9 | 27574 |
+|            7 | 29425 |
+|            1 | 27004 |
+|            5 | 28796 |
+|            4 | 28330 |
+|            2 | 24951 |
+|            6 | 28243 |
+
+#+begin_src sql
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+
+#+end_src
+
+#+RESULTS:
+| INSERT 0 12 |       |
+|-------------+-------|
+|         mes |     n |
+|          12 | 28135 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           1 | 27004 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+|          12 | 28135 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           1 | 27004 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+|          12 | 28135 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           1 | 27004 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+#+begin_src sql
+  delete from meses where mes = 12 or mes=1;
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+
+#+end_src
+
+#+RESULTS:
+|    DELETE 4 |       |
+|-------------+-------|
+| INSERT 0 12 |       |
+|         mes |     n |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+|          12 | 28135 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           1 | 27004 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+#+begin_src sql
+  delete from meses;
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+#+end_src
+
+#+RESULTS:
+|   DELETE 42 |       |
+|-------------+-------|
+| INSERT 0 12 |       |
+|         mes |     n |
+|          12 | 28135 |
+|           3 | 28834 |
+|          11 | 27268 |
+|           8 | 29327 |
+|          10 | 28889 |
+|           9 | 27574 |
+|           7 | 29425 |
+|           1 | 27004 |
+|           5 | 28796 |
+|           4 | 28330 |
+|           2 | 24951 |
+|           6 | 28243 |
+
+* Joins
+ [[https://en.wikipedia.org/wiki/Join_(SQL)][Fuente del ejemplo]].
+
+#+begin_src sql
+  drop table employee;
+  drop table department;
+
+
+  CREATE TABLE department(
+      DepartmentID INT PRIMARY KEY NOT NULL,
+      DepartmentName VARCHAR(20)
+  );
+
+  CREATE TABLE employee (
+      LastName VARCHAR(20),
+      DepartmentID INT REFERENCES department(DepartmentID)
+  );
+
+  INSERT INTO department
+  VALUES (31, 'Sales'),
+         (33, 'Engineering'),
+         (34, 'Clerical'),
+         (35, 'Marketing');
+
+  INSERT INTO employee
+  VALUES ('Rafferty', 31),
+         ('Jones', 33),
+         ('Heisenberg', 33),
+         ('Robinson', 34),
+         ('Smith', 34),
+         ('Williams', NULL);
+#+end_src
+
+#+RESULTS:
+| DROP TABLE   |
+|--------------|
+| DROP TABLE   |
+| CREATE TABLE |
+| CREATE TABLE |
+| INSERT 0 4   |
+| INSERT 0 6   |
+
+** Inner Join
+
+#+begin_src sql
+SELECT employee.LastName, employee.DepartmentID, department.DepartmentName
+FROM employee
+INNER JOIN department ON
+employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentname |
+|------------+--------------+----------------|
+| Rafferty   |           31 | Sales          |
+| Jones      |           33 | Engineering    |
+| Heisenberg |           33 | Engineering    |
+| Robinson   |           34 | Clerical       |
+| Smith      |           34 | Clerical       |
+
+
+** Left Join
+
+[[file:img/SQL_Join_-_01_A_Left_Join_B.svg.png]]
+
+#+begin_src sql
+SELECT *
+FROM employee
+LEFT JOIN department ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+| Williams   |              |              |                |
+
+** Right Join
+[[file:img/SQL_Join_-_03_A_Right_Join_B.svg.png]]
+#+begin_src sql
+SELECT *
+FROM employee RIGHT JOIN department
+  ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+|            |              |           35 | Marketing      |
+
+** Full Join
+[[file:img/SQL_Join_-_05b_A_Full_Join_B.svg.png]]
+#+begin_src sql
+SELECT *
+FROM employee FULL JOIN department
+  ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+| Williams   |              |              |                |
+|            |              |           35 | Marketing      |
