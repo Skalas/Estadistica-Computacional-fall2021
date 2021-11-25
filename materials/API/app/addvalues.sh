@@ -12,3 +12,6 @@ curl -X POST -H "Content-Type: application/json"\
      -d '[{"name":"Pedro", "lastname":"Pérez", "age":33},
      	  {"name":"Lucía", "lastname":"Juarez", "age":23}]'\
      0.0.0.0:5000/users
+
+
+curl '0.0.0.0:8080/mesdia?mes=12&dia=12' > la_guadalupana.json
