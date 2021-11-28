@@ -14,12 +14,18 @@
 Para las pruebas necesitamos un ambiente de docker que pueda ser reemplazable. Para ello genero un nuevo contenedor con datos persistidos en la carpeta data dentro de sql.
 
 #+begin_src shell
-      docker run -p 5432:5432 \
-             -v /home/skalas/github/Estadistica-Computacional-fall2021/materials/sql/data:/var/lib/postgresql/data \
-             -e POSTGRES_PASSWORD=postgres \
-             -d postgres
+  export DATA_DIR=`pwd`/data
+  echo $DATA_DIR
+  mkdir -p $DATA_DIR
+  docker run -p 5432:5432 \
+         -v $DATA_DIR:/var/lib/postgresql/data \
+         -e POSTGRES_PASSWORD=postgres \
+         -d postgres
 #+end_src
 
+#+RESULTS:
+| /home/skalas/github/Estadistica-Computacional-fall2021/materials/sql/data |
+| 5673c0fbf9a0fb666747e415a8b0d71f353fa706f7181ca40094c23f6d2947e9          |
 
 Ahora pondré datos dummies en la base de datos con el script que ya teníamos de la clase de R
 

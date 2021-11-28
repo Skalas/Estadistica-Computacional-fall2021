@@ -1,0 +1,214 @@
+#+TITLE: Python
+#+AUTHOR: Miguel Angel Escalante Serrato
+#+EMAIL:  miguel.escalante@itam.mx
+#+DATE: 9-Nov-21
+#+LANGUAGE:  es
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_THEME: moon
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_TRANS: cube
+#+REVEAL_SLIDE_NUMBER: t
+#+REVEAL_HEAD_PREAMBLE: <meta name="description" content="Estadística Computacional">
+#+PROPERTY: header-args:sql :engine postgres :dbhost 0.0.0.0 :port 5432 :dbuser postgres :dbpassword postgres :database postgres
+#+PROPERTY: header-args:python :session py :results output
+
+* Intro
+
+Python es un lenguaje de programación interpretado que se enfoca mucho en que su código sea legible.
+** Hello world
+El ya clásico hello world.
+#+begin_src python
+print('holiss')
+#+end_src
+
+#+RESULTS:
+: holiss
+** Definición de funciones
+
+Definimos con la palabra =def= el inicio de una función
+#+begin_src python
+  def mifun():
+      return('holiiis')
+  print(mifun())
+#+end_src
+
+#+RESULTS:
+: holiiis
+*** Parámetros de función
+#+begin_src python
+  def mifun(a,b):
+      return a+b
+  print(mifun(2,1))
+  print(mifun('1','2'))
+#+end_src
+
+#+RESULTS:
+: 3
+: 12
+
+*** Parametros predeterminados
+#+begin_src python
+  def mifun(a,b=1):
+      return a+b
+  print(mifun(2))
+  print(mifun(100,2))
+#+end_src
+
+#+RESULTS:
+: 3
+: 102
+
+*** Lambdas
+es una funcion más sencilla anónima, puede tomar varios argumentos, pero sólo una expresión.
+
+#+begin_src python
+  x = lambda y: y**2
+  print(x(3))
+#+end_src
+
+#+RESULTS:
+: 9
+#+begin_src python
+  fun = lambda x, y, z,w: x+y+z+w
+  print(fun(1,2,3,4))
+#+end_src
+
+#+RESULTS:
+: 10
+
+*** Autogeneración de funciones
+
+Peeeeero podemos usarlas para cosas bien interesantes:
+
+#+begin_src python
+  def nificador(n):
+      return lambda x : x**n
+
+  cubo = nificador(3)
+  print(cubo(2))
+  tera = nificador(4)
+  print(tera(2))
+#+end_src
+
+#+RESULTS:
+: 8
+: 16
+
+Y será el pan de todos los días para trabajar con pandas.
+
+** Objetos y Clases
+Estructura de un objeto en python:
+#+begin_src python
+  class miclase():
+      def __init__(self,name,lastname, edad):
+          self.name = name
+          self.lastname = lastname
+          self.edad = edad
+      def __str__(self):
+          return self.name+' '+self.lastname
+
+      def duplica(self):
+          return 2*self.edad
+  yo = miclase('miguel', 'escalante', 32)
+  print(yo)
+  print(yo.duplica())
+  print(yo.edad)
+
+#+end_src
+
+#+RESULTS:
+: miguel escalante
+: 64
+: 32
+** Herencia
+#+begin_src python
+  class clasemi(miclase):
+      def __str__(self):
+          return self.lastname+' '+self.name
+
+
+  yo = clasemi('miguel', 'escalante', 32)
+  print(yo)
+  print(yo.duplica())
+  
+#+end_src
+
+#+RESULTS:
+: escalante miguel
+: 64
+
+** Interacción con el objeto
+#+begin_src python
+  yo.name='Miguel'
+  print(yo)
+#+end_src
+
+#+RESULTS:
+: escalante Miguel
+
+** Módulos
+#+begin_src python
+  import mimodulo
+  print(mimodulo.funcion_util(2))
+#+end_src
+
+#+RESULTS:
+: 8
+
+#+begin_src python
+  import mimodulo as mim
+  print(mim.funcion_util(2))
+#+end_src
+
+#+RESULTS:
+: 8
+
+
+#+begin_src python
+  from mimodulo import funcion_util
+  print(funcion_util(2))
+#+end_src
+
+#+RESULTS:
+: 8
+#+begin_src python
+  import mimodulo as mi
+  print(mi.miguel['pais'])
+#+end_src
+
+#+RESULTS:
+: México
+
+** Operador morza :3
+#+begin_src python :results value
+  a = 3
+  a
+#+end_src
+
+#+RESULTS:
+: 3
+#+begin_src python
+a := 3
+#+end_src
+
+#+RESULTS:
+#+begin_src python :results value
+  (a:=3)
+#+end_src
+
+#+RESULTS:
+: 3
+#+begin_src python
+print(a)
+#+end_src
+
+#+RESULTS:
+: 3
+cosas divertidas
+#+begin_src python
+  f = lambda x : (m := x+1) + (m**2)
+  print(f(10))
+#+end_src
+
+#+RESULTS:
+: 132
