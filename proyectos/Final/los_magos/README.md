@@ -210,3 +210,21 @@ Por ahora, estamos felices con las cosas que presentamos en términos de back en
 * https://towardsdatascience.com/the-right-way-to-build-an-api-with-python-cd08ab285f8f
 
 * https://www.techwithtim.net/tutorials/flask/adding-bootstrap/
+
+* https://www.cienciadedatos.net/documentos/py08_random_forest_python.html
+
+* https://medium.com/@hannah15198/convert-csv-to-json-with-python-b8899c722f6d
+
+* https://stackoverflow.com/questions/54584193/convert-csv-file-to-json-with-no-quotes-around-float-values
+
+* https://runnable.com/docker/python/dockerize-your-python-application
+
+* https://shapeshed.com/jq-json/
+
+* https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+
+* https://docs.docker.com/eng
+
+* https://forums.docker.com/t/not-able-to-run-sh-file-from-windows-docker-container-bash-is-present-but-not-taking-any-effect/51821
+
+* https://git-scm.com/book/en/v2/Customizing-Git-Git-Attributes
