@@ -1,0 +1,1441 @@
+#+TITLE: SQL
+#+AUTHOR: Miguel Angel Escalante Serrato
+#+EMAIL:  miguel.escalante@itam.mx
+#+DATE: 9-Nov-21
+#+LANGUAGE:  es
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_THEME: moon
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_TRANS: cube
+#+REVEAL_SLIDE_NUMBER: t
+#+REVEAL_HEAD_PREAMBLE: <meta name="description" content="Estadística Computacional">
+#+PROPERTY: header-args:sql :engine postgres :dbhost 0.0.0.0 :port 5432 :dbuser postgres :dbpassword postgres :database postgres
+* Intro
+SQL (al parecer se le llama sequel) significa en su base: **Structured Query Language**
+* Basics Query Language
+** Select
+Select nos ayuda a filtrar las columnas que vamos a pedir de nuestra base de datos
+*** Una Columna
+#+begin_src sql
+  select  year from flights limit 5;
+#+end_src
+
+#+RESULTS:
+| year |
+|------|
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+
+***  Varias columnas
+#+begin_src sql
+select year, month from flights limit 5;
+#+end_src
+
+#+RESULTS:
+| year | month |
+|------+-------|
+| 2013 |     1 |
+| 2013 |     1 |
+| 2013 |     1 |
+| 2013 |     1 |
+| 2013 |     1 |
+
+*** renombrar variables
+#+begin_src sql
+select year as agno, month as mes, day as dia from flights limit 10;
+#+end_src
+
+#+RESULTS:
+| agno | mes | dia |
+|------+-----+-----|
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+| 2013 |   1 |   1 |
+
+*** Seleccionar todas las variables
+#+begin_src sql
+select * from flights limit 5;
+#+end_src
+
+#+RESULTS:
+| year | month | day | dep_time | sched_dep_time | dep_delay | arr_time | sched_arr_time | arr_delay | carrier | flight | tailnum | origin | dest | air_time | distance | hour | minute | time_hour              |
+|------+-------+-----+----------+----------------+-----------+----------+----------------+-----------+---------+--------+---------+--------+------+----------+----------+------+--------+------------------------|
+| 2013 |     1 |   1 |      517 |            515 |         2 |      830 |            819 |        11 | UA      |   1545 | N14228  | EWR    | IAH  |      227 |     1400 |    5 |     15 | 2013-01-01 05:00:00+00 |
+| 2013 |     1 |   1 |      533 |            529 |         4 |      850 |            830 |        20 | UA      |   1714 | N24211  | LGA    | IAH  |      227 |     1416 |    5 |     29 | 2013-01-01 05:00:00+00 |
+| 2013 |     1 |   1 |      542 |            540 |         2 |      923 |            850 |        33 | AA      |   1141 | N619AA  | JFK    | MIA  |      160 |     1089 |    5 |     40 | 2013-01-01 05:00:00+00 |
+| 2013 |     1 |   1 |      544 |            545 |        -1 |     1004 |           1022 |       -18 | B6      |    725 | N804JB  | JFK    | BQN  |      183 |     1576 |    5 |     45 | 2013-01-01 05:00:00+00 |
+| 2013 |     1 |   1 |      554 |            600 |        -6 |      812 |            837 |       -25 | DL      |    461 | N668DN  | LGA    | ATL  |      116 |      762 |    6 |      0 | 2013-01-01 06:00:00+00 |
+
+** where
+Where es el verbo que nos ayuda a filtrar renglones dentro del lenguaje:
+#+begin_src sql
+  select month, day from flights
+   where month = 12 limit 10;
+#+end_src
+
+#+RESULTS:
+| month | day |
+|-------+-----|
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+|    12 |   1 |
+
+#+begin_src sql
+  select month, day from flights
+   where month = 12 and day=12 limit 10;
+#+end_src
+
+#+RESULTS:
+| month | day |
+|-------+-----|
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+|    12 |  12 |
+
+** Count
+Nos ayuda a contar los renglones que tenemos
+#+begin_src sql
+  select count(*) from flights;
+#+end_src
+
+#+RESULTS:
+|  count |
+|--------|
+| 336776 |
+
+** distinct
+Nos ayuda a encontrar los valores únicos en las tablas.
+#+begin_src sql
+  select distinct month, day  from flights;
+#+end_src
+
+#+RESULTS:
+| month | day |
+|-------+-----|
+|     5 |  19 |
+|     5 |  13 |
+|     1 |   8 |
+|     7 |   8 |
+|     2 |  13 |
+|     8 |  24 |
+|     7 |  14 |
+|     3 |  15 |
+|     8 |  20 |
+|     9 |   7 |
+|     1 |   1 |
+|     3 |  13 |
+|     6 |   2 |
+|    12 |  30 |
+|     1 |  23 |
+|     6 |  26 |
+|     6 |   9 |
+|     3 |  22 |
+|     9 |   4 |
+|     1 |  28 |
+|     5 |  22 |
+|     6 |  23 |
+|     4 |  13 |
+|     1 |  29 |
+|     1 |  11 |
+|    10 |  20 |
+|     1 |   9 |
+|     5 |  25 |
+|     3 |  23 |
+|     6 |  27 |
+|     6 |  12 |
+|     9 |  23 |
+|     1 |   5 |
+|     9 |  15 |
+|     7 |   7 |
+|     6 |  22 |
+|     8 |  21 |
+|    10 |   8 |
+|     9 |  11 |
+|     7 |   1 |
+|     6 |  30 |
+|     4 |   2 |
+|     2 |   2 |
+|    10 |   2 |
+|     3 |   1 |
+|    11 |  18 |
+|     9 |   3 |
+|     5 |  12 |
+|     7 |   4 |
+|     5 |  11 |
+|     6 |   5 |
+|    11 |  26 |
+|     9 |  22 |
+|     7 |  17 |
+|    12 |   2 |
+|    11 |   8 |
+|    11 |   6 |
+|     4 |   5 |
+|    11 |   9 |
+|     7 |  11 |
+|     4 |  24 |
+|     4 |  21 |
+|    12 |  12 |
+|     2 |  28 |
+|     7 |  30 |
+|     1 |  13 |
+|     1 |  26 |
+|     3 |  11 |
+|     8 |  26 |
+|    12 |  25 |
+|     8 |  13 |
+|     4 |  10 |
+|     8 |  25 |
+|     7 |  22 |
+|     7 |  27 |
+|     3 |   4 |
+|     2 |  22 |
+|    11 |   5 |
+|     9 |  27 |
+|     5 |  14 |
+|     7 |  20 |
+|    11 |  11 |
+|     2 |  12 |
+|     8 |   6 |
+|    12 |  21 |
+|    10 |  30 |
+|     4 |  12 |
+|    12 |   3 |
+|    10 |  17 |
+|     4 |  29 |
+|     1 |  15 |
+|     9 |   2 |
+|     1 |  27 |
+|    12 |  27 |
+|    11 |  16 |
+|    10 |  21 |
+|     3 |  14 |
+|     8 |  19 |
+|     3 |  31 |
+|     2 |  18 |
+|    12 |  23 |
+|     2 |   9 |
+|     8 |   3 |
+|    12 |  18 |
+|     4 |  14 |
+|     3 |  30 |
+|     3 |  29 |
+|    10 |   4 |
+|     6 |  11 |
+|     2 |  14 |
+|     1 |   6 |
+|     5 |  27 |
+|    10 |  27 |
+|    10 |  25 |
+|     6 |   6 |
+|     8 |  28 |
+|    12 |  24 |
+|    10 |  12 |
+|     8 |  22 |
+|    10 |  29 |
+|     7 |   3 |
+|     4 |   3 |
+|     7 |  31 |
+|     9 |  14 |
+|     6 |  13 |
+|     7 |  12 |
+|    12 |  13 |
+|     5 |   8 |
+|    11 |  13 |
+|     1 |  19 |
+|     5 |   2 |
+|     7 |  15 |
+|     5 |   6 |
+|     8 |   4 |
+|     1 |  30 |
+|    10 |   1 |
+|     5 |  10 |
+|     2 |  26 |
+|    12 |  14 |
+|     8 |  11 |
+|    11 |  25 |
+|     9 |  13 |
+|     9 |  26 |
+|     1 |  12 |
+|     3 |  28 |
+|     5 |   3 |
+|     1 |   7 |
+|    10 |  22 |
+|    11 |   2 |
+|     4 |  15 |
+|     2 |  10 |
+|    10 |  14 |
+|     5 |  29 |
+|    10 |   6 |
+|     9 |  30 |
+|     6 |  29 |
+|     1 |  31 |
+|    11 |  23 |
+|     8 |  16 |
+|     2 |  11 |
+|    12 |   7 |
+|     3 |  18 |
+|     9 |  28 |
+|    10 |   5 |
+|     3 |   6 |
+|     3 |   7 |
+|     1 |  20 |
+|     8 |  10 |
+|     6 |   4 |
+|     1 |  18 |
+|     4 |  26 |
+|    10 |  11 |
+|     9 |  24 |
+|     8 |  30 |
+|     7 |  18 |
+|     3 |  10 |
+|     2 |  27 |
+|     2 |  24 |
+|     6 |  25 |
+|    11 |  19 |
+|     7 |  13 |
+|     7 |  10 |
+|     9 |  19 |
+|     2 |   5 |
+|     1 |  14 |
+|     6 |  14 |
+|     8 |   1 |
+|     2 |   7 |
+|     4 |  27 |
+|     5 |  28 |
+|     4 |  20 |
+|     6 |  18 |
+|    11 |  22 |
+|     3 |  12 |
+|     4 |   8 |
+|    11 |  21 |
+|     7 |   2 |
+|     5 |   4 |
+|    12 |  19 |
+|     3 |  24 |
+|     6 |  15 |
+|     2 |  17 |
+|     2 |   3 |
+|     3 |   3 |
+|     9 |  17 |
+|     8 |  29 |
+|     4 |   1 |
+|    10 |  24 |
+|     6 |  16 |
+|     8 |  12 |
+|     5 |  15 |
+|    12 |  31 |
+|    12 |   6 |
+|     1 |  24 |
+|     1 |   3 |
+|    12 |  15 |
+|     3 |   9 |
+|     3 |  17 |
+|     6 |   3 |
+|    11 |  14 |
+|     5 |  31 |
+|     5 |  20 |
+|     7 |  26 |
+|     5 |  16 |
+|     6 |  19 |
+|     9 |   5 |
+|     7 |   6 |
+|     2 |  23 |
+|     2 |  21 |
+|    12 |  20 |
+|     4 |   9 |
+|     4 |   7 |
+|     8 |  23 |
+|     9 |  16 |
+|    11 |  28 |
+|     8 |   8 |
+|     1 |  25 |
+|     9 |  10 |
+|     3 |  25 |
+|     1 |  21 |
+|     5 |   9 |
+|    12 |  22 |
+|     3 |  27 |
+|    11 |  12 |
+|     3 |  26 |
+|     6 |  21 |
+|     8 |  31 |
+|     8 |   2 |
+|     7 |  21 |
+|     5 |   5 |
+|     9 |   6 |
+|     6 |  10 |
+|     7 |  24 |
+|    12 |   1 |
+|     9 |  18 |
+|     4 |  17 |
+|     7 |  25 |
+|     6 |   7 |
+|     7 |  23 |
+|    12 |  29 |
+|    10 |  16 |
+|     5 |  26 |
+|    10 |   7 |
+|     8 |   5 |
+|     8 |  14 |
+|     5 |  30 |
+|     4 |  18 |
+|    11 |  17 |
+|    10 |  13 |
+|     4 |  23 |
+|     1 |   4 |
+|     9 |  20 |
+|    11 |  27 |
+|     3 |  21 |
+|    12 |  16 |
+|    11 |  15 |
+|     9 |  29 |
+|     9 |   9 |
+|     4 |   6 |
+|    11 |  24 |
+|     8 |   9 |
+|    10 |   3 |
+|     8 |  15 |
+|    10 |  26 |
+|    10 |  15 |
+|     1 |  10 |
+|     4 |   4 |
+|     8 |  18 |
+|     9 |   1 |
+|     2 |  19 |
+|     2 |   6 |
+|     4 |  19 |
+|    11 |   1 |
+|    10 |  10 |
+|     5 |   1 |
+|    12 |   5 |
+|     4 |  25 |
+|     3 |   2 |
+|    11 |  20 |
+|    12 |  17 |
+|     2 |   4 |
+|     2 |   8 |
+|     1 |  17 |
+|     6 |   8 |
+|     1 |   2 |
+|    12 |  28 |
+|     6 |  24 |
+|     4 |  30 |
+|    11 |  29 |
+|    12 |   9 |
+|     8 |   7 |
+|     4 |  16 |
+|     3 |   5 |
+|    10 |  18 |
+|     1 |  16 |
+|    12 |  11 |
+|     4 |  11 |
+|    11 |  30 |
+|    11 |   3 |
+|    10 |  23 |
+|     9 |  21 |
+|    12 |  26 |
+|     5 |  24 |
+|     3 |  16 |
+|     9 |  12 |
+|     7 |   5 |
+|     2 |  16 |
+|     2 |  25 |
+|     6 |  17 |
+|     5 |  23 |
+|     1 |  22 |
+|    11 |   4 |
+|     4 |  28 |
+|     8 |  27 |
+|    11 |   7 |
+|     2 |  20 |
+|     3 |  20 |
+|    10 |  19 |
+|     7 |  28 |
+|    12 |  10 |
+|     7 |  29 |
+|     2 |   1 |
+|    11 |  10 |
+|    10 |  31 |
+|    10 |   9 |
+|     5 |  21 |
+|     6 |  28 |
+|     6 |   1 |
+|     3 |  19 |
+|     7 |  19 |
+|     7 |   9 |
+|     5 |   7 |
+|     4 |  22 |
+|     5 |  18 |
+|     2 |  15 |
+|     9 |   8 |
+|    12 |   8 |
+|     5 |  17 |
+|     6 |  20 |
+|     3 |   8 |
+|     9 |  25 |
+|     8 |  17 |
+|     7 |  16 |
+|    12 |   4 |
+|    10 |  28 |
+
+** Subqueries
+
+#+begin_src sql
+  select count(*) from (select distinct month, day from flights) md;
+#+end_src
+
+#+RESULTS:
+| count |
+|-------|
+|   365 |
+
+** CTE's
+
+Common Table expressions es una especie de tabla temporal que construímos para hacer más sencillo el query que necesitemos hacer.
+#+begin_src sql
+  with md as (select distinct month, day from flights),
+    mdy as (select distinct year, month, day from flights)
+  select mdy.year from mdy limit 10;
+#+end_src
+
+#+RESULTS:
+| year |
+|------|
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+
+** Order by
+Ordena los resultados dada alguna regla establecida.
+#+begin_src sql
+select distinct month, day from flights order by month, day;
+#+end_src
+
+#+RESULTS:
+| month | day |
+|-------+-----|
+|     1 |   1 |
+|     1 |   2 |
+|     1 |   3 |
+|     1 |   4 |
+|     1 |   5 |
+|     1 |   6 |
+|     1 |   7 |
+|     1 |   8 |
+|     1 |   9 |
+|     1 |  10 |
+|     1 |  11 |
+|     1 |  12 |
+|     1 |  13 |
+|     1 |  14 |
+|     1 |  15 |
+|     1 |  16 |
+|     1 |  17 |
+|     1 |  18 |
+|     1 |  19 |
+|     1 |  20 |
+|     1 |  21 |
+|     1 |  22 |
+|     1 |  23 |
+|     1 |  24 |
+|     1 |  25 |
+|     1 |  26 |
+|     1 |  27 |
+|     1 |  28 |
+|     1 |  29 |
+|     1 |  30 |
+|     1 |  31 |
+|     2 |   1 |
+|     2 |   2 |
+|     2 |   3 |
+|     2 |   4 |
+|     2 |   5 |
+|     2 |   6 |
+|     2 |   7 |
+|     2 |   8 |
+|     2 |   9 |
+|     2 |  10 |
+|     2 |  11 |
+|     2 |  12 |
+|     2 |  13 |
+|     2 |  14 |
+|     2 |  15 |
+|     2 |  16 |
+|     2 |  17 |
+|     2 |  18 |
+|     2 |  19 |
+|     2 |  20 |
+|     2 |  21 |
+|     2 |  22 |
+|     2 |  23 |
+|     2 |  24 |
+|     2 |  25 |
+|     2 |  26 |
+|     2 |  27 |
+|     2 |  28 |
+|     3 |   1 |
+|     3 |   2 |
+|     3 |   3 |
+|     3 |   4 |
+|     3 |   5 |
+|     3 |   6 |
+|     3 |   7 |
+|     3 |   8 |
+|     3 |   9 |
+|     3 |  10 |
+|     3 |  11 |
+|     3 |  12 |
+|     3 |  13 |
+|     3 |  14 |
+|     3 |  15 |
+|     3 |  16 |
+|     3 |  17 |
+|     3 |  18 |
+|     3 |  19 |
+|     3 |  20 |
+|     3 |  21 |
+|     3 |  22 |
+|     3 |  23 |
+|     3 |  24 |
+|     3 |  25 |
+|     3 |  26 |
+|     3 |  27 |
+|     3 |  28 |
+|     3 |  29 |
+|     3 |  30 |
+|     3 |  31 |
+|     4 |   1 |
+|     4 |   2 |
+|     4 |   3 |
+|     4 |   4 |
+|     4 |   5 |
+|     4 |   6 |
+|     4 |   7 |
+|     4 |   8 |
+|     4 |   9 |
+|     4 |  10 |
+|     4 |  11 |
+|     4 |  12 |
+|     4 |  13 |
+|     4 |  14 |
+|     4 |  15 |
+|     4 |  16 |
+|     4 |  17 |
+|     4 |  18 |
+|     4 |  19 |
+|     4 |  20 |
+|     4 |  21 |
+|     4 |  22 |
+|     4 |  23 |
+|     4 |  24 |
+|     4 |  25 |
+|     4 |  26 |
+|     4 |  27 |
+|     4 |  28 |
+|     4 |  29 |
+|     4 |  30 |
+|     5 |   1 |
+|     5 |   2 |
+|     5 |   3 |
+|     5 |   4 |
+|     5 |   5 |
+|     5 |   6 |
+|     5 |   7 |
+|     5 |   8 |
+|     5 |   9 |
+|     5 |  10 |
+|     5 |  11 |
+|     5 |  12 |
+|     5 |  13 |
+|     5 |  14 |
+|     5 |  15 |
+|     5 |  16 |
+|     5 |  17 |
+|     5 |  18 |
+|     5 |  19 |
+|     5 |  20 |
+|     5 |  21 |
+|     5 |  22 |
+|     5 |  23 |
+|     5 |  24 |
+|     5 |  25 |
+|     5 |  26 |
+|     5 |  27 |
+|     5 |  28 |
+|     5 |  29 |
+|     5 |  30 |
+|     5 |  31 |
+|     6 |   1 |
+|     6 |   2 |
+|     6 |   3 |
+|     6 |   4 |
+|     6 |   5 |
+|     6 |   6 |
+|     6 |   7 |
+|     6 |   8 |
+|     6 |   9 |
+|     6 |  10 |
+|     6 |  11 |
+|     6 |  12 |
+|     6 |  13 |
+|     6 |  14 |
+|     6 |  15 |
+|     6 |  16 |
+|     6 |  17 |
+|     6 |  18 |
+|     6 |  19 |
+|     6 |  20 |
+|     6 |  21 |
+|     6 |  22 |
+|     6 |  23 |
+|     6 |  24 |
+|     6 |  25 |
+|     6 |  26 |
+|     6 |  27 |
+|     6 |  28 |
+|     6 |  29 |
+|     6 |  30 |
+|     7 |   1 |
+|     7 |   2 |
+|     7 |   3 |
+|     7 |   4 |
+|     7 |   5 |
+|     7 |   6 |
+|     7 |   7 |
+|     7 |   8 |
+|     7 |   9 |
+|     7 |  10 |
+|     7 |  11 |
+|     7 |  12 |
+|     7 |  13 |
+|     7 |  14 |
+|     7 |  15 |
+|     7 |  16 |
+|     7 |  17 |
+|     7 |  18 |
+|     7 |  19 |
+|     7 |  20 |
+|     7 |  21 |
+|     7 |  22 |
+|     7 |  23 |
+|     7 |  24 |
+|     7 |  25 |
+|     7 |  26 |
+|     7 |  27 |
+|     7 |  28 |
+|     7 |  29 |
+|     7 |  30 |
+|     7 |  31 |
+|     8 |   1 |
+|     8 |   2 |
+|     8 |   3 |
+|     8 |   4 |
+|     8 |   5 |
+|     8 |   6 |
+|     8 |   7 |
+|     8 |   8 |
+|     8 |   9 |
+|     8 |  10 |
+|     8 |  11 |
+|     8 |  12 |
+|     8 |  13 |
+|     8 |  14 |
+|     8 |  15 |
+|     8 |  16 |
+|     8 |  17 |
+|     8 |  18 |
+|     8 |  19 |
+|     8 |  20 |
+|     8 |  21 |
+|     8 |  22 |
+|     8 |  23 |
+|     8 |  24 |
+|     8 |  25 |
+|     8 |  26 |
+|     8 |  27 |
+|     8 |  28 |
+|     8 |  29 |
+|     8 |  30 |
+|     8 |  31 |
+|     9 |   1 |
+|     9 |   2 |
+|     9 |   3 |
+|     9 |   4 |
+|     9 |   5 |
+|     9 |   6 |
+|     9 |   7 |
+|     9 |   8 |
+|     9 |   9 |
+|     9 |  10 |
+|     9 |  11 |
+|     9 |  12 |
+|     9 |  13 |
+|     9 |  14 |
+|     9 |  15 |
+|     9 |  16 |
+|     9 |  17 |
+|     9 |  18 |
+|     9 |  19 |
+|     9 |  20 |
+|     9 |  21 |
+|     9 |  22 |
+|     9 |  23 |
+|     9 |  24 |
+|     9 |  25 |
+|     9 |  26 |
+|     9 |  27 |
+|     9 |  28 |
+|     9 |  29 |
+|     9 |  30 |
+|    10 |   1 |
+|    10 |   2 |
+|    10 |   3 |
+|    10 |   4 |
+|    10 |   5 |
+|    10 |   6 |
+|    10 |   7 |
+|    10 |   8 |
+|    10 |   9 |
+|    10 |  10 |
+|    10 |  11 |
+|    10 |  12 |
+|    10 |  13 |
+|    10 |  14 |
+|    10 |  15 |
+|    10 |  16 |
+|    10 |  17 |
+|    10 |  18 |
+|    10 |  19 |
+|    10 |  20 |
+|    10 |  21 |
+|    10 |  22 |
+|    10 |  23 |
+|    10 |  24 |
+|    10 |  25 |
+|    10 |  26 |
+|    10 |  27 |
+|    10 |  28 |
+|    10 |  29 |
+|    10 |  30 |
+|    10 |  31 |
+|    11 |   1 |
+|    11 |   2 |
+|    11 |   3 |
+|    11 |   4 |
+|    11 |   5 |
+|    11 |   6 |
+|    11 |   7 |
+|    11 |   8 |
+|    11 |   9 |
+|    11 |  10 |
+|    11 |  11 |
+|    11 |  12 |
+|    11 |  13 |
+|    11 |  14 |
+|    11 |  15 |
+|    11 |  16 |
+|    11 |  17 |
+|    11 |  18 |
+|    11 |  19 |
+|    11 |  20 |
+|    11 |  21 |
+|    11 |  22 |
+|    11 |  23 |
+|    11 |  24 |
+|    11 |  25 |
+|    11 |  26 |
+|    11 |  27 |
+|    11 |  28 |
+|    11 |  29 |
+|    11 |  30 |
+|    12 |   1 |
+|    12 |   2 |
+|    12 |   3 |
+|    12 |   4 |
+|    12 |   5 |
+|    12 |   6 |
+|    12 |   7 |
+|    12 |   8 |
+|    12 |   9 |
+|    12 |  10 |
+|    12 |  11 |
+|    12 |  12 |
+|    12 |  13 |
+|    12 |  14 |
+|    12 |  15 |
+|    12 |  16 |
+|    12 |  17 |
+|    12 |  18 |
+|    12 |  19 |
+|    12 |  20 |
+|    12 |  21 |
+|    12 |  22 |
+|    12 |  23 |
+|    12 |  24 |
+|    12 |  25 |
+|    12 |  26 |
+|    12 |  27 |
+|    12 |  28 |
+|    12 |  29 |
+|    12 |  30 |
+|    12 |  31 |
+
+
+** concat
+Nos ayuda a juntar varias columnas en una sola.
+#+begin_src sql
+select concat(month,'-',day,'-',year) from flights limit 10;
+#+end_src
+
+#+RESULTS:
+|   concat |
+|----------|
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+| 1-1-2013 |
+
+** Parseo
+
+Nos ayuda a castear algún tipo en otro tipo, para mayor referencia de los tipos de datos en pg [[https://www.postgresql.org/docs/current/datatype.html][ver acá]].
+
+#+begin_src sql
+  select concat(month,'-',day,'-',year)::date from flights limit 10;
+#+end_src
+
+#+RESULTS:
+|     concat |
+|------------|
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+| 2013-01-01 |
+
+** split
+#+begin_src sql
+  with tabla as (select concat(month,'-',day,'-',year) as fecha from flights)
+  select split_part(fecha,'-',3) as lol  from tabla limit 10;
+#+end_src
+
+#+RESULTS:
+|  lol |
+|------|
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+| 2013 |
+
+** group by
+agrupamos y hacemos una función sobre cada uno de los grupos.
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month;
+#+end_src
+
+#+RESULTS:
+| month | num_flights |
+|-------+-------------|
+|     1 |       27004 |
+|     2 |       24951 |
+|     3 |       28834 |
+|     4 |       28330 |
+|     5 |       28796 |
+|     6 |       28243 |
+|     7 |       29425 |
+|     8 |       29327 |
+|     9 |       27574 |
+|    10 |       28889 |
+|    11 |       27268 |
+|    12 |       28135 |
+
+*** multiples columnas:
+Cada columna debe tener su propio agrupador
+#+begin_src sql
+  SELECT month,   count(distinct day) as days_month,  count(distinct dest),count(*) as num_flights
+    FROM flights
+   GROUP BY month;
+#+end_src
+
+#+RESULTS:
+| month | days_month | count | num_flights |
+|-------+------------+-------+-------------|
+|     1 |         31 |    94 |       27004 |
+|     2 |         28 |    92 |       24951 |
+|     3 |         31 |    95 |       28834 |
+|     4 |         30 |    93 |       28330 |
+|     5 |         31 |    90 |       28796 |
+|     6 |         30 |    93 |       28243 |
+|     7 |         31 |    94 |       29425 |
+|     8 |         31 |    93 |       29327 |
+|     9 |         30 |    92 |       27574 |
+|    10 |         31 |    91 |       28889 |
+|    11 |         30 |    90 |       27268 |
+|    12 |         31 |    96 |       28135 |
+
+*** Filtros ¿?
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month
+   where num_flights>20000;
+#+end_src
+
+#+RESULTS:
+|---|
+
+** having
+en lugar de usar where cuando tenemos grupos, usamos having.
+#+begin_src sql
+  select month, count(*) as num_flights
+    from flights
+   group by month
+   having count(*) > 28000;
+#+end_src
+
+#+RESULTS:
+| month | num_flights |
+|-------+-------------|
+|     3 |       28834 |
+|     4 |       28330 |
+|     5 |       28796 |
+|     6 |       28243 |
+|     7 |       29425 |
+|     8 |       29327 |
+|    10 |       28889 |
+|    12 |       28135 |
+
+** Case
+Se usa a manera de ifelse
+#+begin_src sql
+  select month , case
+                 when month < 4  then 'Q1'
+                 when month < 7  then 'Q2'
+                 when month < 10 then 'Q3'
+                 when month < 13 then 'Q4'
+                 end as mes
+    from flights
+   where month=9 limit 10;
+#+end_src
+
+#+RESULTS:
+| month | mes |
+|-------+-----|
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+|     9 | Q3  |
+
+* Insert
+#+begin_src sql
+  truncate meses;
+  drop table meses;
+
+  create table meses (mes integer, n integer, days_month integer);
+
+  insert into meses
+   select month, count(*), count(distinct day)
+    from flights
+   group by month;
+  select * from meses;
+#+end_src
+
+#+RESULTS:
+|   DROP TABLE |       |            |
+|--------------+-------+------------|
+| CREATE TABLE |       |            |
+|  INSERT 0 12 |       |            |
+|          mes |     n | days_month |
+|            1 | 27004 |         31 |
+|            2 | 24951 |         28 |
+|            3 | 28834 |         31 |
+|            4 | 28330 |         30 |
+|            5 | 28796 |         31 |
+|            6 | 28243 |         30 |
+|            7 | 29425 |         31 |
+|            8 | 29327 |         31 |
+|            9 | 27574 |         30 |
+|           10 | 28889 |         31 |
+|           11 | 27268 |         30 |
+|           12 | 28135 |         31 |
+
+#+begin_src sql
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+ explain analyze select * from meses;
+
+#+end_src
+
+#+RESULTS:
+| INSERT 0 12                                                                                       |
+|---------------------------------------------------------------------------------------------------|
+| QUERY PLAN                                                                                        |
+| Seq Scan on meses  (cost=0.00..1.72 rows=72 width=12) (actual time=0.005..0.012 rows=132 loops=1) |
+| Planning Time: 0.048 ms                                                                           |
+| Execution Time: 0.045 ms                                                                          |
+
+| INSERT 0 12                                                                                       |
+|---------------------------------------------------------------------------------------------------|
+| QUERY PLAN                                                                                        |
+| Seq Scan on meses  (cost=0.00..3.04 rows=204 width=12) (actual time=0.006..0.009 rows=72 loops=1) |
+| Planning Time: 0.054 ms                                                                           |
+| Execution Time: 0.021 ms                                                                          |
+#+begin_src sql
+  delete from meses where mes = 12 or mes=1;
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+
+#+end_src
+
+#+RESULTS:
+|   DELETE 10 |       |            |
+|-------------+-------+------------|
+| INSERT 0 12 |       |            |
+|         mes |     n | days_month |
+|           2 | 24951 |         28 |
+|           3 | 28834 |         31 |
+|           4 | 28330 |         30 |
+|           5 | 28796 |         31 |
+|           6 | 28243 |         30 |
+|           7 | 29425 |         31 |
+|           8 | 29327 |         31 |
+|           9 | 27574 |         30 |
+|          10 | 28889 |         31 |
+|          11 | 27268 |         30 |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+|          12 | 28135 |            |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           1 | 27004 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+#+begin_src sql
+  delete from meses;
+  insert into meses
+   select month, count(*) as num_flights
+    from flights
+   group by month;
+  select * from meses;
+#+end_src
+
+#+RESULTS:
+|   DELETE 62 |       |            |
+|-------------+-------+------------|
+| INSERT 0 12 |       |            |
+|         mes |     n | days_month |
+|          12 | 28135 |            |
+|           3 | 28834 |            |
+|          11 | 27268 |            |
+|           8 | 29327 |            |
+|          10 | 28889 |            |
+|           9 | 27574 |            |
+|           7 | 29425 |            |
+|           1 | 27004 |            |
+|           5 | 28796 |            |
+|           4 | 28330 |            |
+|           2 | 24951 |            |
+|           6 | 28243 |            |
+
+#+begin_src sql
+  truncate meses;
+  select * from meses;
+#+end_src
+
+#+RESULTS:
+| TRUNCATE TABLE |   |            |
+|----------------+---+------------|
+| mes            | n | days_month |
+
+* Explain analyze
+#+begin_src sql
+  explain analyze select month, day from flights where month =1;
+#+end_src
+
+#+RESULTS:
+| QUERY PLAN                                                                                                                                     |
+|------------------------------------------------------------------------------------------------------------------------------------------------|
+| Index Only Scan using flights_year_month_day on flights  (cost=0.42..4029.79 rows=27155 width=8) (actual time=0.036..3.072 rows=27004 loops=1) |
+| Index Cond: (month = 1)                                                                                                                        |
+| Heap Fetches: 0                                                                                                                                |
+| Planning Time: 0.443 ms                                                                                                                        |
+| Execution Time: 3.955 ms                                                                                                                       |
+#+begin_src sql
+explain analyze  select * from meses where mes=1;
+#+end_src
+
+#+RESULTS:
+| QUERY PLAN                                                                                       |
+|--------------------------------------------------------------------------------------------------|
+| Seq Scan on meses  (cost=0.00..2.65 rows=11 width=12) (actual time=0.006..0.015 rows=11 loops=1) |
+| Filter: (mes = 1)                                                                                |
+| Rows Removed by Filter: 121                                                                      |
+| Planning Time: 0.226 ms                                                                          |
+| Execution Time: 0.033 ms                                                                         |
+
+
+
+
+** indices
+#+begin_src sql
+create index on meses ((mes));
+#+end_src
+
+#+RESULTS:
+| CREATE INDEX |
+|              |
+|--------------|
+#+begin_src sql
+\d flights
+#+end_src
+
+#+RESULTS:
+| Table "public.flights"                            |                          |           |          |         |
+|---------------------------------------------------+--------------------------+-----------+----------+---------|
+| Column                                            | Type                     | Collation | Nullable | Default |
+| year                                              | integer                  |           |          |         |
+| month                                             | integer                  |           |          |         |
+| day                                               | integer                  |           |          |         |
+| dep_time                                          | integer                  |           |          |         |
+| sched_dep_time                                    | integer                  |           |          |         |
+| dep_delay                                         | double precision         |           |          |         |
+| arr_time                                          | integer                  |           |          |         |
+| sched_arr_time                                    | integer                  |           |          |         |
+| arr_delay                                         | double precision         |           |          |         |
+| carrier                                           | text                     |           |          |         |
+| flight                                            | integer                  |           |          |         |
+| tailnum                                           | text                     |           |          |         |
+| origin                                            | text                     |           |          |         |
+| dest                                              | text                     |           |          |         |
+| air_time                                          | double precision         |           |          |         |
+| distance                                          | double precision         |           |          |         |
+| hour                                              | double precision         |           |          |         |
+| minute                                            | double precision         |           |          |         |
+| time_hour                                         | timestamp with time zone |           |          |         |
+| Indexes:                                          |                          |           |          |         |
+| "flights_carrier" btree (carrier)                 |                          |           |          |         |
+| "flights_dest" btree (dest)                       |                          |           |          |         |
+| "flights_tailnum" btree (tailnum)                 |                          |           |          |         |
+| "flights_year_month_day" btree (year, month, day) |                          |           |          |         |
+
+* Joins
+ [[https://en.wikipedia.org/wiki/Join_(SQL)][Fuente del ejemplo]].
+
+#+begin_src sql
+  drop table employee;
+  drop table department;
+
+
+  CREATE TABLE department(
+      DepartmentID INT PRIMARY KEY NOT NULL,
+      DepartmentName VARCHAR(20)
+  );
+
+  CREATE TABLE employee (
+      LastName VARCHAR(20),
+      DepartmentID INT REFERENCES department(DepartmentID)
+  );
+
+  INSERT INTO department
+  VALUES (31, 'Sales'),
+         (33, 'Engineering'),
+         (34, 'Clerical'),
+         (35, 'Marketing');
+
+  INSERT INTO employee
+  VALUES ('Rafferty', 31),
+         ('Jones', 33),
+         ('Heisenberg', 33),
+         ('Robinson', 34),
+         ('Smith', 34),
+         ('Williams', NULL);
+#+end_src
+
+#+RESULTS:
+| DROP TABLE   |
+|--------------|
+| DROP TABLE   |
+| CREATE TABLE |
+| CREATE TABLE |
+| INSERT 0 4   |
+| INSERT 0 6   |
+
+** Inner Join
+
+#+begin_src sql
+SELECT employee.LastName, employee.DepartmentID, department.DepartmentName
+FROM employee
+INNER JOIN department ON
+employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentname |
+|------------+--------------+----------------|
+| Rafferty   |           31 | Sales          |
+| Jones      |           33 | Engineering    |
+| Heisenberg |           33 | Engineering    |
+| Robinson   |           34 | Clerical       |
+| Smith      |           34 | Clerical       |
+
+
+** Left Join
+
+[[file:img/SQL_Join_-_01_A_Left_Join_B.svg.png]]
+
+#+begin_src sql
+SELECT *
+FROM employee
+LEFT JOIN department ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+| Williams   |              |              |                |
+
+** Right Join
+[[file:img/SQL_Join_-_03_A_Right_Join_B.svg.png]]
+#+begin_src sql
+SELECT *
+FROM employee RIGHT JOIN department
+  ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+|            |              |           35 | Marketing      |
+
+** Full Join
+[[file:img/SQL_Join_-_05b_A_Full_Join_B.svg.png]]
+#+begin_src sql
+SELECT *
+FROM employee FULL JOIN department
+  ON employee.DepartmentID = department.DepartmentID;
+#+end_src
+
+#+RESULTS:
+| lastname   | departmentid | departmentid | departmentname |
+|------------+--------------+--------------+----------------|
+| Rafferty   |           31 |           31 | Sales          |
+| Jones      |           33 |           33 | Engineering    |
+| Heisenberg |           33 |           33 | Engineering    |
+| Robinson   |           34 |           34 | Clerical       |
+| Smith      |           34 |           34 | Clerical       |
+| Williams   |              |              |                |
+|            |              |           35 | Marketing      |

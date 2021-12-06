@@ -306,14 +306,13 @@ alenta mucho el flujo de trabajo. Nunca dejen sus credenciales en cualquier
 computadora.
 
 Si no se configuran las credenciales, cada vez que quieras hacer `clone`, 
-`pull` o `push` de un repositorio privado, te pedirá tus credenciales. Dado que
-el repo del diplomado es privado, configuremos.
+`pull` o `push` de un repositorio privado, te pedirá tus credenciales.
 
 ### Rstudio
 
 Por suerte Rstudio tiene una manera bastante sencilla de generar llaves que se pueden usar de aquí en adelante. 
 
-## El repositorio del diplomado
+## El repositorio del repo-clase
 
 El repositorio está en:
 
@@ -402,7 +401,7 @@ Vamos a agregar como `remote` el repositorio
 `Skalas/Estadistica-Computacional-fall2021`:
 
 ```{bash eval=FALSE}
-git remote add diplomado https://github.com/Skalas/Estadistica-Computacional-fall2021.git
+git remote add repo-clase https://github.com/Skalas/Estadistica-Computacional-fall2021.git
 ```
 
 Ejecuta de nuevo `git remote -v`
@@ -411,8 +410,8 @@ Ejecuta de nuevo `git remote -v`
 git remote -v
 origin  https://github.com/<usuario>/Estadistica-Computacional-fall2021.git (fetch)
 origin  https://github.com/<usuario>/Estadistica-Computacional-fall2021.git (push)
-diplomado      https://github.com/Skalas/Estadistica-Computacional-fall2021.git (fetch)
-diplomado      https://github.com/Skalas/Estadistica-Computacional-fall2021.git (push)
+repo-clase      https://github.com/Skalas/Estadistica-Computacional-fall2021.git (fetch)
+repo-clase      https://github.com/Skalas/Estadistica-Computacional-fall2021.git (push)
 ```
 
 Entonces, la respuesta a la primera pregunta (¿cómo entrego mi tarea?) 
@@ -424,7 +423,7 @@ y sigue las instrucciones de la pantalla.
 Una vez **autorizado** el `pull-request` es necesario hacer
 
 ```{bash eval=FALSE}
-git pull diplomado master
+git pull repo-clase master
 git push origin master
 ```
 
@@ -436,7 +435,7 @@ Para responder la segunda pregunta (¿cómo bajo lo que han subido otros al repo
 usamos la misma cadena de comandos:
 
 ```{bash eval=FALSE}
-git pull diplomado master
+git pull repo-clase master
 git push origin master
 ```
 
@@ -452,7 +451,7 @@ y pronto te será muy natural.
 
 > Trabajo en equipo usando git
 
-Una posible forma de utilizar un worklow distribuido en equipos es el [Integration Manager Workflow](http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows#Integration-Manager-Workflow). En particular, este es el flujo que utilizaremos en el diplomado pues
+Una posible forma de utilizar un worklow distribuido en equipos es el [Integration Manager Workflow](http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows#Integration-Manager-Workflow). En particular, este es el flujo que utilizaremos en el repo-clase pues
 ustedes no tienen permisos de escribir en el repositorio de clase de manera directa, es decir,
 siempre deben de pasar por un **pull request** que debe ser autorizado por el 
 profesor.
