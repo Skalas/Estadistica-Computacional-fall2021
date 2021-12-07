@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    container_name: db_miguel_adrian
+
+  web:
+    build: .
+    env_file:
+      - ".env"
+    volumes:
+      - ./modelos:/app/modelos
+    ports:
+      - 8080:8080
+    depends_on:
+      - "db"
+    restart: on-failure:10
+    container_name: web_miguel_adrian
