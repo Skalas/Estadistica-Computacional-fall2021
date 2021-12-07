@@ -1,0 +1,154 @@
+---
+title: "Prac_1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librerías a utilizar
+
+```{r, echo=FALSE}
+library(openxlsx)
+library(purrr)
+library(tidyverse)
+library(geosphere)
+```
+
+
+# Extracción, Transformación y Carga (ETL por sus siglas en inglés)
+
+### Extracción
+
+Declaramos la ruta donde se encuentra ubicado el archivo con los datos de refugios de Nayarit:
+
+```{r}
+Ruta_archivo = "/home/carlos/Documentos/Escuela/Estadistica_computacional/refugios_nayarit.xlsx" # <-- Aquí la ruta del archivo
+```
+
+Obtenemos los nombres de las hojas que están en el archivo (posteriormente se utilizarán para indicar a una función que realice un proceso de lectura con base en estas hojas). Si el archivo llega a tener más hojas estas siempre serán actualizadas cuando se ejecute el código.
+
+```{r}
+hojas = getSheetNames(Ruta_archivo)
+```
+
+Se implementa una función que trabaja sobre todos los elementos de la lista "hojas" y lo que hace es: i)leer el archivo .xlsx ii) posicionarse en la fila 7 de cada una de las hojas que tiene la lista "hojas" y pasa esa información a una lista de Data Frames.
+
+Fuente:
+
+https://es.stackoverflow.com/questions/442168/c%c3%b3mo-crear-un-dataframe-en-r-desde-un-excel-con-varias-hojas
+
+```{r}
+lista_df = map(hojas,function(x){
+  read.xlsx(Ruta_archivo ,sheet = x, startRow = 7, colNames = FALSE)
+  })
+```
+
+Se integran todos los elementos de la lista creada con la función anterior (Data Frames) en uno solo y se les coloca el nombre de las columnas.
+
+```{r}
+df = do.call(rbind,lista_df)
+
+names(df) = c("num","refugio","municipio","direccion","uso_inmueble","servicios","capacidad","lat",
+              "long","altitud","responsable","telefono")
+```
+
+### Transformación
+
+Después de hacer una inspección de la base de datos que se generó nos damos cuenta que existen renglones que se leyeron en cada hoja del archivo que solo contienen los totlales de capacidad de los refugios en cada bloque en que fueron separados pero desconocemos si esta separación es informativa para los interesados. 
+
+```{r}
+df = df[order(df$num,na.last = FALSE),]
+```
+
+Se decide prescindir de esta información por lo que se ordenan los renglones por su número consecutivo en el archivo y se eliminan los registros con los renglones en los que solo se tiene el total de la capacidad de cada grupo de refugios (uno por hoja).
+
+```{r}
+df <- df[!is.na(df$num),]
+```
+
+Haciéndo la inspección de la base de datos nos damos cuenta que las variables "latitud" y "longitud" tienen carácteres diferentes para identificar los grados [ª º °], por ello se normalizan todos al caracter correcto para que después pueda ser leído correctamente por la función: distHaversine(), con la cual se calcula la distancia entre dos puntos.
+
+```{r}
+df$lat = str_replace(df$lat, "[ªº]", "°")
+df$long = str_replace(df$long, "[ªº]", "°")
+```
+
+```{r}
+dummy_lat = data.frame(df$lat) %>% separate(df.lat,c("A","B","C"),sep = "([°'\"])")
+dummy_long = data.frame(df$long) %>% separate(df.long,c("A","B","C"),sep = "([°'\"])")
+```
+
+```{r}
+dummy_lat$A = as.numeric(dummy_lat$A)
+dummy_lat$B = as.numeric(dummy_lat$B)
+dummy_lat$C = as.numeric(dummy_lat$C)
+dummy_lat = dummy_lat %>% mutate(latitud = A + B/60 + C/3600)
+```
+
+```{r}
+dummy_long$A = as.numeric(dummy_long$A)
+dummy_long$B = as.numeric(dummy_long$B)
+dummy_long$C = as.numeric(dummy_lat$C)
+dummy_long = dummy_long %>% mutate(longitud = A + B/60 + C/3600)
+```
+
+```{r}
+df = cbind(df,dummy_lat[4],dummy_long[4])
+```
+
+Calculamos la distancia a cada uno de los refugios desde el punto dado (p_lat, p_long) y retornamos la distancia menor a dicho punto:
+
+```{r}
+distancia <- function(df,longitude,latitude,p1,p2){
+  distan <- c()
+  for (x in 1:nrow(df)){
+  r <- distHaversine(c(p1,p2),c(df$longitud[x],df$latitud[x]))
+  distan[x] <- r
+  }
+  return(min(distan, na.rm = TRUE))
+}
+
+distancia(df,longitude,latitude,p_long,p_lat)
+```
+
+
+```{r}
+p_lat = 22.5
+p_long = 105.3
+
+# Imputamos manualmente
+
+df[434,13] = 22.4
+
+
+df %>% mutate(distancia = map_dbl(latitud, distancia(p_long,p_lat,longitud,latitud)))
+
+r = distHaversine(c(p_long,p_lat),c(df$longitud[100],df$latitud[100]))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
