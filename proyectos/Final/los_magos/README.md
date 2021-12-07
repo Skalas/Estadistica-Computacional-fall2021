@@ -35,7 +35,7 @@ docker exec web_miguel_adrian curl -X POST -H "Content-Type: application/json" -
 
 Esto dejará el docker corriendo con la base entera de datos accesible. Además de esto, el folder de `datos` es persistente, por lo que solamente se tiene que correr la primera vez que se levanta la aplicación este comando de cargar los datos. 
 
-**Otra Nota Importante:** Una de las personas trabajando en este proyecto estaba en Windows, y la otra en MacOS. Vimos comportamientos un poco extraños y no podíamos prender el Docker en Windows, **pero solamente cuando este se bajaba de git.** Empezamos a intercambiar `.zip`'s para lidiar con esto y funcionó. Por lo tanto, subimos aquí un zip también en el caso de que exista este problema. 
+**Otra Nota Importante:** Una de las personas trabajando en este proyecto estaba en Windows, y la otra en MacOS. Vimos comportamientos un poco extraños y no podíamos prender el Docker en Windows, **pero solamente cuando este se bajaba de git.** Esto era por un tema de EOL (Linux vs Windows, [referencia del problema](https://blog.programster.org/fixing-docker-volume-windows-line-endings-on-bash-scripts)), pero lo resolvimos quitando archivos .sh del Dockerfile, y trabajando todo con comandos desde ese archivo. 
 
 ### Base de datos
 
@@ -54,15 +54,32 @@ Además de esto, muchas de las variables eran categóricas de texto, entonces se
 
 ### Procedimiento de limpieza de datos
 
-El archivo inicial de la base es ` app/healthcare-dataset-stroke-data.csv `, y através de el script de `limpieza.sh`, lo trabajamos con `awk`, `cut` y `sed` para tener la base de datos limpia. Después de esto, utilizamos la aplicación de línea de comando `jq` para pasar estos datos de `.csv` a `.txt`, *pero con el formato de json* (esto se hace en la línea 9 del `Dockerfile` ). Esto es importante para la carga de los datos a la base, ya que lo hacemos con `curl` especificando que son *json*. 
+El archivo inicial de la base es ` app/healthcare-dataset-stroke-data.csv `, y en el Dockerfile lo trabajamos con `awk`, `cut` y `sed` para tener la base de datos limpia (líneas 8-20 del Dockerfile). Después de esto, utilizamos un python one-liner en el Dockerfile para pasar estos datos de `.csv` a `.txt`, *pero con el formato de json* (esto se hace en la línea 22 del `Dockerfile` ). Esto es importante para la carga de los datos a la base, ya que lo hacemos con `curl` especificando que son *json*. 
+
+### Modelos
+
+El modelo que usamos para entrenar es Random Forest. Este tiene muchos parámetros latentes, y para el modelo base que se accede solamente pasando `/train_model`, este tiene 120 árboles y 5 de *max features*. 
+
+Se puede hacer ajuste a esto con un `curl`, por ejemplo 
+
+```bash
+# Ejemplo de entrenar modelo pasándole la grid
+curl -X GET -H "Content-Type: application/json"\
+     -d '{"n_estimators": [60, 80], "max_features": [2, 4], "criterion": ["gini", "entropy"]}'\
+     '0.0.0.0:8080/train_model'
+```
+
+Se puede pasar cualquier hiperparámetro de ajuste que se encuentre en [la página de SKLearn de Random Forest Classifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html).
 
 ### Guardada local de modelos
 
-En lo que nos decidimos dedicar y pasar el tiempo fuera de los requisitos base del proyexto fue en implementar un sistema robusto para guardar y accesar los modelos que se entrenan con la base de datos. 
+Implementamos un sistema robusto para guardar y accesar los modelos que se entrenan con la base de datos. Tenemos dos carpetas en las que se guardan datos, `/app/modelos_locales` que son los modelos dentro del Docker, y la carpeta `/app/modelos`, que es un volúmen dentro del Docker que se guarda en la máquina local. Cuando especificamos guardar un modelo, lo pasamos de la carpeta de modelos locales a la de modelos general, y se guarda fuera de la instancia de Docker como un `.joblib`, ya que ese es el módulo de python que utilizamos para guardar los modelos entrenados. Además de esto, se guarda como `.csv` los parámetros del modelo, y una gráfica de importancia. 
 
 ### Puntos de acceso con el API 
 
 Tenemos una lista (no exhaustiva) de cosas que se pueden hacer con nuestra aplicación. 
+
+**Nota:** Por la manera en la que se construyen los modelos, algunos de estos comandos dependen de la hora y fecha el cual se entrenaron. Por lo tanto, si se pegan simplemente como están, no van a correr. Es necesario en estos casos ver primero `/show_local_models` o bien, en `/show_local_results` para poder cambiar la fecha y hora a un modelo que exista en el sistema en ese momento. En ese API call, regresa el modelo de la forma, por ejemplo, `"Diciembre 07, 2021 (20H:57M::16S)": "random_forest_2021_12_07_20_57_16.joblib"`, y se imprime en el formato `modelo_YYYY_MM_DD_HH_MM_SS.joblib`. Estos parámetros son los que se especifican cuando queremos ver datos del modelo o guardarlo en algunos de los siguientes `curl`'s. 
 
 ```bash
 # Ejemplo de entrenar modelo pasándole la grid
@@ -165,6 +182,7 @@ curl -X GET -H "Content-Type: application/json"\
 ```
 
 ```bash
+# Ejemplo de salvar un modelo en especifico (CUIDADO DE CHECAR LA FECHA!)
 curl -X POST -H "Content-Type: application/json"\
      -d '{"year": "2021","month": "12","day": "05","hour": "01","minute": "23","second": "10"}' \
      '0.0.0.0:8080/save_model'
@@ -175,25 +193,30 @@ curl -X POST -H "Content-Type: application/json"\
 curl '0.0.0.0:8080/save_model'
 ```
 
+**Nota**: Esta no es una lista exhaustiva. Se pueden checar los métodos de cada `request` en python para ver otras aplicaciones. 
+
 ### URLs útiles
 
 Además de utilizar curl, muchas de las funciones de la aplicación están en un URL específico: 
 
-* Página de inicio:`http://localhost:8080/#` 
-* JSON de los usuarios: `http://localhost:8080/users`
-* Tabla de los usuarios: `http://localhost:8080/tabla_usuarios`
-* Se entrena un modelo con la base de datos como está: `http://localhost:8080/train_model`
-* Mostrar los modelos entrenados guardados en el Docker: `http://localhost:8080/show_local_models`
-* Guardar modelo más reciente en el folder fuera del Docker de `/app/modelos`: `http://localhost:8080/save_model`
-* Mostrar los modelos en el folder fuera del Docker de `/app/modelos`: `http://localhost:8080/show_models`
-* Mostrar gráfica de importancia para el modelo más nuevo: `http://localhost:8080/plot.png`
-* Guardar el modelo entrenado más reciente en la carpeta de `/app/models`, esta está fuera del docker y se conecta a través de un volumen: `http://localhost:8080/save_model`. 
-* Mostrar resultados de los modelos guardados localmente, es decir, en /app/modelos: `http://localhost:8080/show_results`
+* Página de inicio: http://localhost:8080/#`
+* JSON de los usuarios:  http://localhost:8080/users
+* Tabla de los usuarios:  http://localhost:8080/tabla_usuarios
+* Se entrena un modelo con la base de datos como está:  http://localhost:8080/train_model
+* Mostrar los modelos entrenados guardados en el Docker:  http://localhost:8080/show_local_models
+* Guardar modelo más reciente en el folder fuera del Docker de `/app/modelos`: http://localhost:8080/save_model
+* Mostrar los modelos en el folder fuera del Docker de `/app/modelos`: http://localhost:8080/show_models
+* Mostrar gráfica de importancia para el modelo más nuevo en el Docker: http://localhost:8080/local_importance
+* Mostrar gráfica de importancia del modelo más reciente guardado **fuera** de Docker: http://localhost:8080/importance
+* Guardar el modelo entrenado más reciente en la carpeta de `/app/models`, esta está fuera del docker y se conecta a través de un volumen: http://localhost:8080/save_model. 
+* Mostrar resultados de los modelos guardados localmente, es decir, en /app/modelos: http://localhost:8080/show_results
+* Mostrar resultados de los modelos guardados localmente, es decir, en `/app/modelos_locales`:  http://localhost:8080/show_local_results
 
 ### Problemas a los que nos enfrentamos
 
 * Nunca pudimos hacer la carga inicial de los datos desde el Dockerfile. Esto es ya que se necesita que esté prendida la concección a `http://localhost:8080`, pero, esto solamente sucede cuando ya se corrió el `ENTRYPOINT`. Por lo tanto, decidimos que poner el comando de `docker exec` sería una buena solución a esto. 
-* Por alguna razón, si una persona en Windows bajaba el archivo desde git, no jalaba correctamente el archivo de `limpieza.sh` logramos resolverlo al comprimir el archivo y pasarlo entre nosotros, pero es un comportamiento que no sabemos como corregir. 
+* Por alguna razón, si una persona en Windows bajaba el archivo desde git, no jalaba correctamente el archivo de `limpieza.sh` logramos resolverlo quitando el archivo `.sh` y corriendo los comandos correspondientes en el Dockerfile.
+* El archivo `.jq` daba también problemas parecidos al `.sh`. Eventualmente nos dimos cuenta que [el problema era este](https://stackoverflow.com/questions/39912557/launch-basic-bash-script-on-docker-build-from-windows-system), pero al tratar de resolverlo se rompía el archivo. Optamos entonces mejor hacer esta conversión a json con python, se puede ver en la línea 22 del Dockerfile. 
 
 ### Extensiones de este trabajo
 
@@ -204,6 +227,7 @@ Otra posible extensión es que por el momento, solamente estamos usando modelos 
 Por ahora, estamos felices con las cosas que presentamos en términos de back end, y es completamente reproducible, que es algo que nos gusta mucho de todo. Además, se puede muy fácilmente actualizar para incluir bases de datos distintas o cambiar la estrictura de la que ya se tiene para poder agregar variables o observaciones, por lo tanto estamos también felices con esta flexibilidad. 
 
 ### Referencias
+
 
 * [Base de Datos](https://www.kaggle.com/fedesoriano/stroke-prediction-dataset)
 

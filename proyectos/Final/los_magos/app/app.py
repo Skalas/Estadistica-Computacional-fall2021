@@ -1,3 +1,13 @@
+#####################################################################
+
+### Title: Web App for Stroke Prediction
+### Authors: Adrián Tame Jacobo, Miguel Calvo Valente
+### Github: https://github.com/mig-calval/portafolios_est_comp
+
+#####################################################################
+
+### Importación de módulos
+
 from flask import Flask, request, render_template, session, redirect, Response
 import psycopg2
 import psycopg2.extras
@@ -19,7 +29,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
-import random
 import io
 import os
 from pathlib import Path
@@ -28,13 +37,17 @@ from datetime import datetime
 from joblib import dump
 from joblib import load
 
+### Útil para que la App espere a la DB en la inicialización
 time.sleep(10)
 
+### URI de la DB
 database_uri = "postgresql://postgres:postgres@db:5432/postgres"
 
+### Iniciamos App y nos conectamos a la DB
 app = Flask(__name__)
 conn = psycopg2.connect(database_uri)
 
+### Auxiliares para formato de modelos (podría ir en un script)
 month_dict = {"01" : 'Enero',
               "02" : 'Febrero',
               "03" : 'Marzo',
@@ -58,36 +71,42 @@ def format_file(file):
     return month_dict[month] + ' ' + day + ', ' + year + ' (' + hour + 'H:' + minute + 'M::' + second + 'S)'
 
 
+##### Las siguientes son las rutas de acceso para correr comandos
+##### de la App. El detalle general se encuentra en el README del
+##### repositorio.
 
 @app.route("/")
 def home():
+    ### Página Inicial
     return render_template('index.html')
 
 @app.route("/user", methods=["POST", "GET", "DELETE", "PATCH"])
 def user():
+
+    ### Obtener un usuario dado un id
     if request.method == "GET":
         cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         user_id = request.args.get("id")
         cur.execute(f"select * from users where id={user_id}")
         results = cur.fetchone()
         cur.close()
-
         return json.dumps(results._asdict(), default=str)
 
+    ### Ingresar un usuario dado un conjunto de datos
     if request.method == "POST":
         user = request.json
         cur = conn.cursor()
         cur.execute("insert into users (gender, age, hypertension, heart_disease, ever_married, Residence_type , avg_glucose_level, bmi, smoking_status, stroke) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" ,\
                    (user["gender"], user["age"], user["hypertension"], user["heart_disease"], user["ever_married"], user["Residence_type"], user["avg_glucose_level"], user["bmi"], user["smoking_status"], user["stroke"]),
                    )
-
         conn.commit()
         cur.execute("SELECT LASTVAL()")
         user_id = cur.fetchone()[0]
         cur.close()
         return json.dumps({"new_user": 'Se registro un nuevo usuario'})
 
-    if request.method == "DELETE":
+    ### Eliminar un usuario dado un id
+    if request.method == "DELETE":        
         cur = conn.cursor()
         user_id = request.args.get("id")
         cur.execute(f"delete from users where id={user_id}")
@@ -95,7 +114,8 @@ def user():
         cur.close()
         return json.dumps({"user_id": user_id})
 
-    if request.method == "PATCH":
+    ### Modificar un usuario dado un id y los nuevos datos
+    if request.method == "PATCH":        
         user = request.json
         cur = conn.cursor()
         user_id = request.args.get("id")
@@ -106,8 +126,11 @@ def user():
         cur.close()
         return json.dumps({"user_id": user_id})
 
+
 @app.route("/users", methods=["POST", "GET", "DELETE"])
 def users():
+
+    ### Obtener a todos usuarios
     if request.method == "GET":
         cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         cur.execute("select * from users")
@@ -115,6 +138,7 @@ def users():
         cur.close()
         return json.dumps([x._asdict() for x in results], default=str)
     
+    ### Ingresar múltiples usuarios dado un conjunto de datos
     if request.method == "POST":
         cur = conn.cursor()
         users = request.json
@@ -125,6 +149,8 @@ def users():
         conn.commit()
         cur.close()
         return "Correct!!"
+
+    ### Eliminar múltiples usuarios dado un conjunto de ids
     if request.method == "DELETE":
         users = request.json
         cur = conn.cursor()
@@ -134,6 +160,7 @@ def users():
         cur.close()
         return json.dumps({"mensaje": 'Se borraron correctamente'})
 
+
 @app.route("/train_model")
 def train_model():
 
@@ -142,6 +169,7 @@ def train_model():
     if param_grid is None:
         param_grid = param_grid = {'n_estimators': [120], 'max_features': [5]}
 
+    ### Recuperamos a todos los usuarios y los pasamos a un pd.DataFrame
     cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
     cur.execute("select * from users")
     results = cur.fetchall()    
@@ -151,10 +179,13 @@ def train_model():
             'ever_married', 'Residence_type', 'avg_glucose_level', 'bmi', 'smoking_status', 'stroke'])
     all_data.drop('id', 1, inplace = True)
 
+    ### Separamos en train y test para ajustar los modelos
     X_train, X_test, y_train, y_test = train_test_split(all_data.drop(columns = "stroke"),
                                                         all_data['stroke'],
                                                         random_state = 203129)
 
+    ### Creamos una grid para correr bajo las distintas combinaciones
+    ### determinadas por param_grid
     grid = GridSearchCV(
             estimator  = RandomForestClassifier(random_state = 203129),
             param_grid = param_grid,
@@ -166,7 +197,7 @@ def train_model():
             return_train_score = True
         )
 
-    ### Ajustamos la Grid y recuperamos el mejor modelo
+    ### Ajustamos la grid y recuperamos el mejor modelo
     grid.fit(X = X_train, y = y_train)
     modelo_final = grid.best_estimator_
 
@@ -176,8 +207,10 @@ def train_model():
     ### Guardamos el modelo en carpetas locales dentro de Docker
     dump(modelo_final, filename = f"/app/modelos_locales/random_forest_{id_model}.joblib")    
 
-    ### Resultados
-    ## Gráficas de Importancia por Permutaciones
+    
+    ##### Resultados
+
+    ### Gráficas de Importancia por Permutaciones.
     importancia = permutation_importance(modelo_final, X_train, y_train, n_repeats = 5, scoring = 'neg_log_loss', 
                                          n_jobs = multiprocessing.cpu_count() - 1, random_state = 203129)
 
@@ -196,10 +229,11 @@ def train_model():
 
     ax.set_title('Importancia', fontsize = 16)
     ax.tick_params(labelsize = 12)
-    plt.savefig(f"/app/modelos_locales/random_forest_importancia_{id_model}.png", dpi=200, bbox_inches='tight')
+    plt.savefig(f"/app/modelos_locales/random_forest_importancia_{id_model}.png",
+                dpi=200, bbox_inches='tight')
     plt.close()
 
-    ## Parámetros y Resultados
+    ### Parámetros (hiperparámetros del ajuste) y Resultados (R^2, logloss)
     predicciones_train = modelo_final.predict(X = X_train)
     logloss_train = log_loss(y_true  = y_train, y_pred  = predicciones_train)
 
@@ -216,15 +250,18 @@ def train_model():
 
     return json.dumps({"message": 'El modelo fue entrenado y guardado exitosamente.'})
 
+
 @app.route("/predict")
 def predict():
 
+    ### Obtenemos tanto el usuario a predecir (sin 'stroke') como el modelo a ocupar
     datos = request.json
     new_user = datos['user']
     modelo = datos['model']
     version = modelo['version']
 
-    ### Obtenemos el modelo de acuerdo a lo contenido en el json
+    ##### Obtenemos el modelo de acuerdo a lo contenido en el json
+
     if len(modelo) == 1: ### Caso para usar el último modelo
         if version == 'latest':
             aux = [file for file in os.listdir('/app/modelos') if file[-6:] == 'joblib']
@@ -233,7 +270,7 @@ def predict():
             else:
                 return json.dumps({"message":'Se necesita un modelo. Prueba /train_model, y guárdalo con save_model.'})
 
-        elif version == 'latest_local':
+        elif version == 'latest_local': ### Caso para usar el último modelo local
             aux = [file for file in os.listdir('/app/modelos_locales') if file[-6:] == 'joblib']
             if len(aux) > 0:
                 modelo_actual = load('/app/modelos_locales/' + aux[-1])
@@ -258,6 +295,7 @@ def predict():
         else:
             return json.dumps({"message":'Se necesita un modelo. No hay modelos guardados.'})
 
+    ### Pasamos usuario a pd.Series para manipularlo
     new_user = np.array([pd.Series(new_user)])
         
     ### Predecimos con el modelo seleccionado
@@ -266,8 +304,13 @@ def predict():
     else:
         return json.dumps({"message": 'NO tienes riesgo de sufrir un derrame.'})
 
+
 @app.route("/save_model", methods=["POST", "GET"])
 def save_model():
+    
+    ##### Guardamos los modelos
+
+    ### Caso para especificar el modelo
     if request.method == "POST":
         modelo = request.json
         try:
@@ -281,6 +324,8 @@ def save_model():
             return json.dumps({"message":'El modelo se guardó corectamente.'})
         except FileNotFoundError:
             return json.dumps({"message":'El modelo no existe.'})
+
+    ### Caso para guardar el último modelo local      
     if request.method == "GET":
         aux_job = [path.name for path in sorted(Path('app/modelos_locales/').iterdir(), key = os.path.getmtime) if path.name[-6:] == 'joblib']
         aux_png = [path.name for path in sorted(Path('app/modelos_locales/').iterdir(), key = os.path.getmtime) if path.name[-3:] == 'png']
@@ -293,24 +338,33 @@ def save_model():
         else:
             return json.dumps({"message":'Se necesita un modelo. Prueba /train_model.'})
 
+
 @app.route("/show_models")
 def show_models():
+
+    ### Mostramos todos los modelos guardados fuera de Docker
     aux = [file for file in os.listdir('/app/modelos') if file[-6:] == 'joblib']
     if len(aux) == 0:
         return json.dumps({"message":'No hay modelos guardados'})
     else: 
         return json.dumps({format_file(file):file for file in aux})
 
+
 @app.route("/show_local_models")
 def show_local_models():
+
+    ### Mostramos todos los modelos guardados dentro de Docker
     aux = [file for file in os.listdir('/app/modelos_locales') if file[-6:] == 'joblib']
     if len(aux) == 0:
         return json.dumps({"message":'No hay modelos locales guardados'})
     else: 
         return json.dumps({format_file(file):file for file in aux})
 
+
 @app.route("/show_results")
 def show_results():
+
+    ### Mostramos todos los resultados de los modelos guardados fuera de Docker
     aux = [file for file in os.listdir('/app/modelos') if file[-3:] == 'csv']
     if len(aux) == 0:
         return json.dumps({"message":'No hay modelos guardados'})
@@ -327,8 +381,11 @@ def show_results():
 
         return render_template('simple.html',  tables=[all_results.to_html(classes='data')], titles = all_results.columns.values)
 
+
 @app.route("/show_local_results")
 def show_local_results():
+
+    ### Mostramos todos los resultados de los modelos guardados dentro de Docker
     aux = [file for file in os.listdir('/app/modelos_locales') if file[-3:] == 'csv']
     if len(aux) == 0:
         return json.dumps({"message":'No hay modelos guardados'})
@@ -345,8 +402,12 @@ def show_local_results():
 
         return render_template('simple.html',  tables=[all_results.to_html(classes='data')], titles = all_results.columns.values)
 
+
 @app.route("/tabla_usuarios")
 def render_table():
+    
+    ### Mostramos los usuarios en forma tabular
+    ### Recuperamos los usuarios de la base, pasamos a pd.DataFrame, y rendereamos la tabla
     cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
     cur.execute("select * from users")
     results = cur.fetchall()
@@ -356,48 +417,48 @@ def render_table():
 
     return render_template('simple.html',  tables=[all_data.to_html(classes='data')], titles=all_data.columns.values)
 
+
 @app.route('/importance')
 def importance():
 
+    ### Recuperamos el .png de la gráfica de importancia correspondiente al último modelo fuera de Docker
     aux = [path.name for path in sorted(Path('app/modelos/').iterdir(), key = os.path.getmtime) if path.name[-3:] == 'png']
     if len(aux) == 0:
             return json.dumps({"message":'No hay modelos guardados'})
     else:
 
+        ### Ploteamos el .png
         fig, ax = plt.subplots()
         img = mpimg.imread('/app/modelos/' + aux[-1])
         ax.imshow(img)
         ax.set_axis_off()
 
+        ### Rendereamos en la App
         output = io.BytesIO()
         FigureCanvas(fig).print_png(output)
         return Response(output.getvalue(), mimetype='image/png')
 
+
 @app.route('/local_importance')
 def local_importance():
 
+    ### Recuperamos el .png de la gráfica de importancia correspondiente al último modelo dentro de Docker
     aux = [path.name for path in sorted(Path('app/modelos_locales/').iterdir(), key = os.path.getmtime) if path.name[-3:] == 'png']
     if len(aux) == 0:
             return json.dumps({"message":'No hay modelos guardados'})
     else:
 
+        ### Ploteamos el .png
         fig, ax = plt.subplots()
         img = mpimg.imread('/app/modelos_locales/' + aux[-1])
         ax.imshow(img)
         ax.set_axis_off()
 
+        ### Rendereamos en la App
         output = io.BytesIO()
         FigureCanvas(fig).print_png(output)
         return Response(output.getvalue(), mimetype='image/png')        
 
-### Sirvió para las pruebas de plot
-# def create_figure():
-#     fig = Figure()
-#     axis = fig.add_subplot(1, 1, 1)
-#     xs = range(100)
-#     ys = [random.randint(1, 50) for x in xs]
-#     axis.plot(xs, ys)
-#     return fig
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=8080)
