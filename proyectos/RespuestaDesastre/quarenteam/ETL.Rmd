@@ -1,0 +1,304 @@
+---
+title: "Proyecto Intermedio Estadística Computacional"
+author: "**Quarenteam**: Cecilia Avilés, Luz Hernández, Ita Santiago, Leonardo Ceja"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: no
+    theme: flatly
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    df_print: paged
+  '''''': default
+---
+# ETL Refugios Nayarit
+
+## Comprensión del negocio
+
+#### **Antecedentes**
+
+La Dirección de Protección Civil y Bomberos del estado de Nayarit, concentraron la información 
+de diversos refugios del estado.
+
+#### **Objetivo**
+
+A fin de tener la información disponible revisaremos la base de datos para después presentarla en un
+mapa.
+
+
+```{r Carga librerías a usar, include = F}
+knitr::opts_chunk$set(echo = T, error = F, message = F, warning = F)
+
+rm(list = ls())
+
+instalar <- function(paquete) {
+    if (!suppressPackageStartupMessages(require(paquete,character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE))) {
+        install.packages(as.character(paquete), dependecies = TRUE, repos = "http://cran.us.r-project.org")
+        suppressPackageStartupMessages(library(paquete, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE))
+    }
+}
+
+paquetes <- c('tidyverse', 'readxl', 'ggthemes', 'leaflet', 'rgdal',
+              'parzer', 'geosphere', 'fontawesome')
+lapply(paquetes, instalar)
+```
+
+## Los datos 
+
+Cargamos los datos de todas las hojas del documento y los asignamos a la variable **`data_raw`**:
+
+```{r Carga de datos, echo = FALSE, message = FALSE, warning = FALSE}
+path <- 'data/refugios_nayarit.xlsx'
+
+data_raw <- path %>% 
+  excel_sheets() %>% 
+  purrr::set_names() %>% 
+  map_dfr(read_excel, path=path, skip=3) #No toma en cuenta las primeras 3 filas
+  
+data_raw <- data_raw[!is.na(data_raw$No.),] #Quita filas con valores NA de la col 'no.'
+  
+glimpse(data_raw)
+
+```
+Como se puede observar no solo los títulos están mal, sino que también tenemos datos con `NAs`, a continuación vamos a revisar y en su caso limpiar los valores que podamos limpiar.
+
+A continuación mostramos las primeras filas:
+
+```{r Limpieza , echo = FALSE, message = FALSE, warning = FALSE}
+
+#Hacemos limpieza en el encabezado únicamente
+refugios <- data_raw %>%                           
+  rename_with(~ gsub('[[:punct:]]', '', .x)) %>%   #Quita signos de puntuación en encabezado
+  rename_with(~ chartr('ÁÉÍÓÚ', 'AEIOU', .x)) %>%  #Quita acentos en encabezado
+  rename_with(~ gsub(' ', '_', .x)) %>%            #Cambia espacios por "_" en encabezado
+  rename(LATITUD = COORDENADAS_GEOGRAFICAS,        #Renombra 3 columnas
+        LONGITUD = 9,
+        ALTITUD = 10)
+
+# Quitar redundantes
+refugios <- refugios %>% 
+  mutate(USO_DEL_INMUEBLE  = ifelse(USO_DEL_INMUEBLE %in% c("RELIGIOSO","RELIGIOSOS"),"RELIGIOSO", USO_DEL_INMUEBLE))
+refugios <- refugios %>% 
+  mutate(USO_DEL_INMUEBLE  = ifelse(USO_DEL_INMUEBLE %in% c("GOBIERNO MUNICIPAL","MUNICIPAL"),"MUNICIPAL", USO_DEL_INMUEBLE))
+
+# Distribuimos de mejor manera los teléfonos
+refugios <- refugios %>%
+  mutate(TELEFONOS = gsub("-","", TELEFONO)) %>%
+  mutate(TELEFONOS = gsub("\\*","",TELEFONOS)) %>%
+  separate(TELEFONOS, into = c("col_1","col_2","col_3","col_4","col_5",
+                               "col_6", "col_7","col_8","col_9","col_10"),
+           fill = "right") %>%
+  mutate(col_1 = as.numeric(col_1), col_2 = as.numeric(col_2), 
+         col_3 = as.numeric(col_3), col_4 = as.numeric(col_4), 
+         col_5 = as.numeric(col_5), col_6 = as.numeric(col_6), 
+         col_7 = as.numeric(col_7), col_8 = as.numeric(col_8), 
+         col_9 = as.numeric(col_9), col_10 = as.numeric(col_10)   ) %>%
+  mutate(TELEFONOS = paste(col_1, col_2, col_3, col_4, col_5, col_6, col_7, 
+                           col_8, col_9, col_10, sep=" // ") ) %>%
+  mutate(TELEFONOS = gsub("NA // ","", TELEFONOS)) %>%
+  mutate(TELEFONOS = gsub(" // NA","", TELEFONOS)) %>%
+  mutate(TELEFONOS = gsub("NA","", TELEFONOS)) %>%
+  select(-TELEFONO, -col_1,-col_2,-col_3,-col_4,-col_5,-col_6,-col_7,-col_8,-col_9,-col_10)
+  
+head(refugios)
+```
+## Los datos faltantes
+Vamos también a revisar si los datos `NAs` son relevantes o podemos prescindir de ellos:
+
+```{r visualizando nas, echo = FALSE, message = FALSE, warning = FALSE}
+col_names <- names(refugios)
+#col_names
+
+NAs <- refugios %>% filter(is.na(No) | is.na(REFUGIO)| is.na(MUNICIPIO)| 
+                             is.na(DIRECCION)| is.na(USO_DEL_INMUEBLE)| 
+                             is.na(SERVICIOS)| is.na(CAPACIDAD_DE_PERSONAS)| 
+                             is.na(LATITUD)| is.na(LONGITUD)| 
+                             is.na(ALTITUD)| is.na(RESPONSABLE)| is.na(TELEFONOS))
+
+NAs
+```
+Vemos que de los 11 registros con `NAs`, solamente 4 tienen coordenadas, por lo tanto, las demás las vamos a eliminar.
+
+```{r eliminando nas, echo = FALSE, message = FALSE, warning = FALSE}
+refugios <- refugios %>% 
+  filter(!(is.na(LATITUD)| is.na(LONGITUD)| is.na(ALTITUD))) 
+
+```
+
+Con esto nos quedamos con los datos que sí tienen coordenadas.
+
+## Exploración de coordenadas
+
+Convertimos el tipo de coordenadas y observamos la distribución de Latitud y Longitud:
+
+```{r Exploración coordenadas, echo = FALSE, message = FALSE, warning = FALSE}
+refugios <- refugios %>% filter(!(is.na(LATITUD) | is.na(LONGITUD)))
+
+coords_raw = refugios %>%
+  mutate(LAT = parse_lat(LATITUD),         #Usamos la función "parse_lat" del paquete "parzer"
+         LON = parse_lon(LONGITUD)) %>%    #Usamos la función "parse_lon" del paquete "parzer"
+  select(LAT,LON)
+
+
+ggplot(data = coords_raw, aes(x=LAT)) +
+  geom_boxplot() +
+  ggtitle("Distribución Latitud")
+
+ggplot(data = coords_raw, aes(x=LON)) +
+  geom_boxplot() +
+  ggtitle("Distribución Longitud")
+```
+
+## Imputación de datos
+
+Notamos que hay varios outliers, así que investigamos cada uno e imputamos estos datos atípicos.
+Como son pocos datos, nos permitimos corregir uno a uno y a continuación volvemos a revisar su distribución:
+
+```{r Imputación de datos, echo = FALSE, message = FALSE, warning = FALSE}
+
+refugios <- replace(refugios, refugios=="104ª29'01\"57\"", "104ª29'01.57\"")    #Error en poner " en lugar de .
+refugios <- replace(refugios, refugios=="22°04'13-26\"", "22°04'13.26\"")       #Error en poner - en lugar de .
+refugios <- replace(refugios, refugios=="48'39.95", "21°48'39.95\"")            #Error al faltar unidad de grados
+refugios <- replace(refugios, refugios=="13'24.41\"", "103'24.41\"")            #Error al faltar un 0 en grados
+
+aux1 <- refugios[refugios$No==434,"LATITUD"]     #Error al poner dato "longitud" en columna "latitud" y viceversa
+aux2 <- refugios[refugios$No==434,"LONGITUD"]
+refugios[refugios$No==434,"LATITUD"] <- aux2
+refugios[refugios$No==434,"LONGITUD"] <- aux1 
+
+#Agregamos una W al dato de longitud para que la función "parser_lon" convierta correctamente
+refugios$LONGITUD <- paste(refugios$LONGITUD, "W", sep=" ")     
+
+#Habiendo hecho las modificaciones previas, volvemos a transformar coordenadas, agregándolas al df refugios
+refugios <- refugios %>%
+  mutate(LAT = parse_lat(LATITUD),
+         LON = parse_lon(LONGITUD))
+#View(refugios)
+
+#Observamos nueva distribución de Latitud y Longitud y vemos que es hermosa
+ggplot(data = refugios, aes(x=LAT)) +
+  geom_boxplot() +
+  ggtitle("Distribución corregida Latitud")
+
+ggplot(data = refugios, aes(x=LON)) +
+  geom_boxplot() +
+  ggtitle("Distribución corregida Longitud")
+```
+
+## Categorizando refugios
+
+Creamos 5 categorías de rango de capacidad de personas del refugio que se usarán en mapa:
+
+```{r Creación rangos de capacidad, echo = FALSE, message = FALSE, warning = FALSE}
+
+refugios <- refugios %>%
+  mutate(Rango_Capacidad = case_when(CAPACIDAD_DE_PERSONAS <= 100 ~ 'Máximo 100',
+                                     CAPACIDAD_DE_PERSONAS > 100 & CAPACIDAD_DE_PERSONAS <= 300 ~ '101 a 300',
+                                     CAPACIDAD_DE_PERSONAS > 300 & CAPACIDAD_DE_PERSONAS <= 500 ~ '301 a 500',
+                                     CAPACIDAD_DE_PERSONAS > 500 & CAPACIDAD_DE_PERSONAS <= 1000 ~ '501 a 1,000',
+                                     CAPACIDAD_DE_PERSONAS > 1000 ~ 'Más de 1,000'))
+
+```
+
+```{r Mapa de refugios, echo = FALSE, message = FALSE, warning = FALSE}
+
+refugios$Rango_Capacidad <- factor(refugios$Rango_Capacidad)
+
+#Colores a usar en los markers
+rango_colores <- c("green", "blue", "purple", "darkred", "cadetblue")[refugios$Rango_Capacidad]
+
+#Creamos íconos con base en los colores a usar
+iconos <- awesomeIcons(
+  icon = 'ios-close',
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = rango_colores
+)
+
+#Ploteamos el mapa usando leaflet
+map_refugios <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addTiles() %>%  
+  addAwesomeMarkers(lng = refugios$LON, 
+                    lat = refugios$LAT, 
+                    icon = iconos,
+                    popup = paste(
+                      paste('<b>','Refugio:','</b>',refugios$REFUGIO),
+                      paste('<b>','Capacidad de personas:','</b>',refugios$CAPACIDAD_DE_PERSONAS),
+                      paste('<b>','Teléfono:','</b>',refugios$TELEFONO),
+                      sep = '<br/>'),
+                    label = refugios$REFUGIO) %>%
+  addLegend("bottomright", 
+            colors = c("#006666", "#669900", "deepskyblue", "#FF66FF", "darkred"), 
+            labels = c("Máximo 100", "101 a 300", "301 a 500", "501 a 1,000", "Más de 1,000"), 
+            title = "Capacidad de Personas", 
+            opacity = 1)
+map_refugios
+```
+
+## Mapa de refugio más cercano
+Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario:
+
+```{r Mapa de refugio más cercano, echo = FALSE, message = FALSE, warning = FALSE}
+
+#Probamos con un punto cualquiera en el mapa, suponiendo que es donde se encontrará el usuario
+user_point <- c(-105.262575, 21.811933)
+
+#Calculamos distancias contra todos los refugios usando la función "distHaversine" del paquete "geosphere"
+refugios <- mutate(refugios, 
+       Distancia = distHaversine(cbind(LON,LAT), user_point))
+
+#Seleccionamos el registro con la menos distancia
+refugio_mas_cercano <- refugios %>%
+  slice(which.min(Distancia))
+
+#Creamos íconos fifí para usar en el mapa final
+userIcons <- awesomeIconList(
+  "Persona" = makeAwesomeIcon(
+    icon = "user",
+    markerColor = "blue",
+    iconColor = "black",
+    library = "fa"
+  ),
+  "Cercano" = makeAwesomeIcon(
+    icon = "arrow-down",
+    markerColor = "red",
+    iconColor = "black",
+    library = "fa"
+  )
+)
+
+#Ploteamos el mapa con la ubicación del usuario y el refugio más cercano
+map_refugio_cercano <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addTiles() %>%  
+  addAwesomeMarkers(lng = refugio_mas_cercano$LON, 
+                    lat = refugio_mas_cercano$LAT, 
+                    icon = userIcons["Cercano"],
+                    popup = paste(
+                      paste('<b>','Refugio:','</b>',refugio_mas_cercano$REFUGIO),
+                      paste('<b>','Capacidad de personas:','</b>',refugio_mas_cercano$CAPACIDAD_DE_PERSONAS),
+                      paste('<b>','Teléfono:','</b>',refugio_mas_cercano$TELEFONO),
+                      sep = '<br/>'),
+                    label = "Refugio más cercano") %>%  
+  addAwesomeMarkers(lng = user_point[1],  
+                    lat = user_point[2], 
+                    icon = userIcons["Persona"],
+                    label = "Usted se encuentra aquí",
+                    popup = paste(
+                      paste('<b>','Longitud:','</b>', user_point[1]),
+                      paste('<b>','Latitud:','</b>', user_point[2]),
+                      sep = '<br/>')) 
+map_refugio_cercano
+```
+
+
+Guardando la base de datos para el **`Shiny`**:
+```{r creando archivo RDS}
+
+saveRDS(object = refugios, file = "data/refugios.rds")
+
+```
