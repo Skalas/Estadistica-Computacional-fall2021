@@ -8,6 +8,8 @@ import pickle as pkl
 import sklearn
 import numpy as np
 import pandas as pd
+from src.utils import utils
+
 database_uri = "postgresql://postgres:postgres@db:5432/postgres"
 app = Flask(__name__)
 conn = psycopg2.connect(database_uri)
@@ -18,32 +20,27 @@ def home():
     results = cur.fetchall()
     cur.close()
     return json.dumps([x._asdict() for x in results], default=str)
-@app.route("/user", methods=["POST", "GET"])
-def user():
+@app.route("/feeddata", methods=["POST","GET"])
+def feeddata():
     if request.method == "GET":
-        cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
-        user_id = request.args.get("id")
-        cur.execute(f"select * from users where id={user_id}")
-        results = cur.fetchone()
-        cur.close()
-        return json.dumps(results._asdict(), default=str)
+        return "dummy"
     if request.method == "POST":
-        user = request.json
+        inputs = request.json
+        actualiza = inputs["actualiza"]
         cur = conn.cursor()
         cur.execute(
-            "insert into users (name, lastname, age) values (%s, %s, %s)",
-            (user["name"], user["lastname"], user["age"]),
-        )
+            "INSERT INTO public.variables (mopllaag , mink123m , ppersaut , pwaoreg , pbrand , aplezier , afiets , caravan) values (%s, %s, %s, %s, %s, %s, %s, %s)",
+            ([[actualiza["mopllaag"], actualiza["mink123m"], actualiza["ppersaut"], actualiza["pwaoreg"], actualiza["pbrand"], actualiza["aplezier"], actualiza["afiets"], actualiza["caravan"]]],))
         conn.commit()
         cur.execute("SELECT LASTVAL()")
         user_id = cur.fetchone()[0]
         cur.close()
-        return json.dumps({"user_id": user_id})
+    return json.dumps({"carga exitosa": user_id})
 @app.route("/users", methods=["POST", "GET"])
 def users():
     if request.method == "GET":
         modelo, precision, recall = utils.modelado(1)
-        return "El modelo se ha reentrenado adecuadamente"
+        return json.dumps({"Modelo entrenado correctamente": modelo.astype(str), "precisión": precision.astype(str), "recall": recall.astype(str)})
     if request.method == "POST":
         inputs = request.json
         predecir = inputs["predecir"]

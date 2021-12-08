@@ -17,6 +17,9 @@
 | Uriel Abraham Rangel Díaz       | 193921   | urangeld@itam.mx | [urieluard](https://github.com/urieluard)     |
 | José Luis Roberto Zárate Cortés | 183347   | jzaratec@itam.mx | [jlrzarcor](https://github.com/jlrzarcor)     |
 
+# Liga a nuestro repositorio original de trabajo en Github:
+  >[repo_pro_final](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct)
+
 ---
 ## :chart_with_upwards_trend:   Estadísticas del repositorio   :chart_with_downwards_trend:
 
@@ -36,7 +39,6 @@
     - 4.1 [Problema que resuelve](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#problema-que-resuelve--grey_question)
     - 4.2 [Especificaciones](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#especificaciones--clipboard)
     - 4.3 [Funcionamiento](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#funcionamiento--video_game)
-    - 4.4 [Resultados](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#resultados--bar_chart)
 5. [¿Cómo correr el proyecto?](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#c%C3%B3mo-correr-el-proyecto)
 
 ---
@@ -124,22 +126,6 @@ Por separado, existirá otra API (también creada en _Flask_) que se utilizará 
 
 [Regresar](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#tabla-de-contenido--bookmark_tabs)	
 
-### Resultados  :bar_chart:
-
-Lo que esperamos observar cuando se logre ejecutar este proyecto es lo siguiente:
-
-+ API para el modelo _On Demand_
-
-<p align = "center">
-    <img src="images/API_1.png" width="300" height="110" />
-
-+ API para el proceso de ingesta consecutiva y reentrenamieto:
-
-<p align = "center">
-    <img src="images/API_2.png" width="300" height="110" />
-
-[Regresar](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#tabla-de-contenido--bookmark_tabs)
-	
 ## ¿Cómo correr el proyecto? 
 
 ### Prerrequisitos  :computer:
@@ -151,19 +137,26 @@ Se necesita un equipo de computo con acceso a internet, un sistema operativo Lin
 	3. Ejecutar comando: <docker-compose up --build> con lo que se construye nuestra imagen de Docker
 	4. Ejecutar comando: <docker exec -it web_ramis bash> con lo que se accede al contenedor
 	5. En la terminal que ya es del contenedor abierto posicionarse en la carpeta con el siguiente nombre: jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct
-	6. Activar el ambiente virtual de conda: _conda activate est_comp_
+	6. Activar el ambiente virtual de conda: <conda activate est_comp>
 	7. Exportar la variable de ambiente: <export PYTHONPATH=$PWD>
 	8. Correr el comando de Bash: <bash data_process.sh> con lo que se descarga la base de datos de Caravanas y se hace la limpieza. La salida se persiste en un volumen creado en local al que se puede acceder desde el contenedor
 	9. Ejecutar el script de python: <python src/utils/pdDF_to_SQL.py> que hace la lectura del archivo procesado por Bash y lo coloca en una tabla de PostgreSQL
-	Nota: Para verivicar la creación de esta tabla, ejecutar: <psql -U postgres -h db -d postgres> para ingresar al servidor de psql y dentro de este explorar la tabla creada ("variables")
-	10. Abrir una terminal de python y ejecutar: <from src.utils import utils> y <modelo, precision, recall = modelado()> con esto se hace el primer modelo que corresponde a la ingesta inicial y con el cual ya se pueden hacer predicciones desde la API. El modelo se guarda en un archivo binario (.pkl)
+	Nota: Para verivicar la creación de esta tabla, abrir el contenedor con la base de datos con: <docker excec -it db_ramis bash> y ejecutar: <psql -U postgres -h db -d postgres> para ingresar al servidor de psql y dentro de este explorar la tabla creada ("variables")
+	10. Abrir una terminal de python y ejecutar: <from src.utils import utils> y <modelo, precision, recall = utils.modelado(0)> con esto se hace el primer modelo que corresponde a la ingesta inicial y con el cual ya se pueden hacer predicciones desde la API. El modelo se guarda en un archivo binario (.pkl)
 	11. Colocarse en un navegador y accesar a la dirección: <http://0.0.0.0:8080/> Esto desplegará los primeros 10 registros de la base de datos (informativo)
 	
 	Para realizar una predicción:
-	Colocarse en una terminal CLI de su máquina local y ejecutar un comando de _curl_ como el siguiente ejemplo:
+	Colocarse en una terminal CLI de su máquina local y ejecutar un comando de <curl> como el siguiente ejemplo:
 	
 	curl -X POST -H "Content-Type: application/json" -d '{"predecir":{"mopllaag":1, "mink123m":2, "ppersaut":3, "pwaoreg":4,"pbrand":5,"aplezier":6,"afiets":7}}' 0.0.0.0:8080/users
 	
 	Nota: Los valores de cada llave corresponden a los valores que tendría una nueva observación de la cual queremos hacer su predicción
+	
+	Para reentrenar el modelo:
+	Colocarse en un <localhost> y poner la siguiente dirección:
+	
+	http://0.0.0.0:8080/users
+	
+	Esto nos devolverá un mensaje con el modelo que se utilizó (Regresión Logística) y las métricas que fueron de interés: Precisión y Recall
 
 [Regresar](https://github.com/jlrzarcor/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct#tabla-de-contenido--bookmark_tabs)

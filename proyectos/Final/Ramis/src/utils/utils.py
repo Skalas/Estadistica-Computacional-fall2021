@@ -45,7 +45,7 @@ def modelado(a=0):
     #df_train_test = pd.read_csv("../../ticdata2000_wh.txt", sep = "|")
     
     # Selección de variables de acuerdo al artículo
-    feature_cols = ['mopllaag', 'mink123m', 'ppersaut', 'pwaoreg','pbrand','aplezier','afiets','caravan']
+    feature_cols = ['mopllaag', 'mink123m', 'ppersaut', 'pwaoreg','pbrand','aplezier','afiets']
 
     
     # Separación del conjunto en entrenamiento y prueba (75% de los datos para entrenar el modelo)
