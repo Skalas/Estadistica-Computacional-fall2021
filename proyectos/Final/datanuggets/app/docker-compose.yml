@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/csvs:/var/lib/postgresql/csvs
+      #- ./init.sql:/docker-entrypoint-initdb.d/init_fill_table.sh
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  web:
+    build: .
+    env_file:
+      - ".env"
+    ports:
+      - 4000:4000
+    depends_on:
+      - "db"

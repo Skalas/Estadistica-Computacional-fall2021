@@ -1,0 +1,1 @@
+Correr cod/train_gbr.ipynb para crear el modelo gbr.pkl.
