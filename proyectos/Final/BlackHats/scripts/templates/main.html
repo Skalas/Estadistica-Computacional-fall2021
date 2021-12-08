@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<style>
+form {
+    margin: auto;
+    width: 35%;
+}
+
+.result {
+    margin: auto;
+    width: 35%;
+    border: 1px solid #ccc;
+}
+
+.result2 {
+    margin: auto;
+    width: 35%;
+    border: 1px solid #ccc;
+}
+</style>
+
+<head>
+    <title>Predicción Calificación Instrumento Financiero</title>
+</head>
+<form action="{{ url_for('main') }}" method="POST">
+    <fieldset>
+        <legend>Registra los datos para predecir</legend>
+        Número de serie (0-19):
+        <input name="serie" type="number" required>
+        <br>
+        <br> Importe en pesos (585k - 612M):
+        <input name="importe" type="number" required>
+        <br>
+        <br> Porcentaje en el portafolio (0-60%):
+        <input name="porcentaje" type="number" required>
+        <br>
+        <br>
+        <br>Quieres reentrenar (si/no):
+        <input name="reentrenar" type="text" required>
+        <br>
+        <br>Calificación de la serie (0-3):
+        <input name="calificacion" type="number">
+        <br>
+        <br>
+        <input type="submit">
+    </fieldset>
+</form>
+<br>
+
+<div class="result" align="center">
+    {% if result %}
+        <br> Calificación asignada:
+        <p style="font-size:50px">{{ result }}</p>
+    {% endif %}
+</div>
+
+<br>
+<div class="result2" align="center">
+    {% if result2 %}
+        <br> Reentrenamiento:
+        <p style="font-size:20px">{{ result2 }}</p>
+    {% endif %}
+</div>
+</html>
