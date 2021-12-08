@@ -1,7 +1,5 @@
 # Equipo: Black Hats
 
-## **Título del proyecto**: Algoritmo BFGS para regresión logística. 
-
 ### Integrantes
 
 |       User        |              Nombre               | Clave única |
