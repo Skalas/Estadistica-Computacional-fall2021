@@ -1,0 +1,4 @@
+FROM python:3
+RUN mkdir -p /proyecto_pokemon
+COPY requirements.txt /proyecto_pokemon/requirements.txt
+RUN pip3 install -r /proyecto_pokemon/requirements.txt

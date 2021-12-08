@@ -1,0 +1,6 @@
+FROM urielmtzsa/pokemon_app
+COPY modulos/app.py /proyecto_pokemon/app.py
+COPY modulos/utils.py /proyecto_pokemon/utils.py
+#COPY modulos/cleaning.sh /proyecto_pokemon/cleaning.sh  
+#RUN sh /proyecto_pokemon/cleaning.sh
+CMD ["python3","/proyecto_pokemon/app.py"]

@@ -1,0 +1,8 @@
+FROM postgres
+#VOLUME /var/lib/postgresql/data/
+COPY modulos/cleaning.sh /var/lib/postgresql/data1/cleaning.sh  
+COPY data/pokemon.csv /var/lib/postgresql/data1/pokemon.csv 
+# RUN cd /var/lib/postgresql/data1/
+RUN sh /var/lib/postgresql/data1/cleaning.sh
+# RUN sh /var/lib/postgresql/data/cleaning.sh 
+#CMD ["python3","/proyecto_pokemon/app.py"]
