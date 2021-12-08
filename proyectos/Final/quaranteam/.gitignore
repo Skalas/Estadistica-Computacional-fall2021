@@ -14,7 +14,6 @@ src/utils/migrations/**
 src/utils/*.yaml
 .idea/
 .idea/**
-src/Rodent_Inspection.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
