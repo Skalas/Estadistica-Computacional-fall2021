@@ -21,7 +21,7 @@ El modelo consiste en una clasificación binaria con las siguientes etiquetas:
 - `Etiqueta 1:`  La propiedad **NO** pasará la inspección de ratas (sí se encontrarán ratas en la propiedad.)
 
 # Comprensión del negocio
-Consulte el documento [00_comprension_negocio.md](https://github.com/cecyar/rodent_inspection/blob/main/00_comprension_negocio.md)
+Consulte el documento [00_comprension_negocio.md](https://github.com/cecyar/Estadistica-Computacional-fall2021/blob/main/proyectos/Final/quaranteam/00_comprension_negocio.md)
 
 # Base de datos
 La base de datos que se analizará en este trabajo será la de [Rodent inspection](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) obtenida de [NYC Open Data](https://opendata.cityofnewyork.us/).
@@ -86,16 +86,16 @@ Para ejecutar este producto de datos se necesita lo siguiente:
 4. Para salir de este producto de datos, hay que cerrar las pestañas del explorador y ejecutar `Ctrl+C` en la terminal donde se está corriendo la imagen de Docker.
 
 **Re-Entrenamiento del modelo:**
-1. Para re-entrenar el modelo es necesario ejecutar el notebook [Model_rodent.ipynb](https://github.com/cecyar/rodent_inspection/blob/main/notebooks/Model_rodent.ipynb) que se encuentra en la carpeta `notebooks` del repositorio.  Para ello, será necesario exportar la table `all_info` actualizada como archivo `*.csv` a través de `pgAdmin` y colocarla en la carpeta `data` del repositorio.
+1. Para re-entrenar el modelo es necesario ejecutar el notebook [Model_rodent.ipynb](https://github.com/cecyar/Estadistica-Computacional-fall2021/blob/main/proyectos/Final/quaranteam/notebooks/Model_rodent.ipynb) que se encuentra en la carpeta `notebooks` del repositorio.  Para ello, será necesario exportar la table `all_info` actualizada como archivo `*.csv` a través de `pgAdmin` y colocarla en la carpeta `data` del repositorio.
 2. Los modelos que se generan en formato `pickle` al ejecutar el notebook, deben colocarse en la carpeta `data` del repositorio.  **Nota:**  Para ejecutar el notebook, es necesario utilizar algún ambiente virtual adicional que contenga `jupyter notebook`.  La imagen de Docker de este producto de datos no contiene `jupyter notebook`.
 
 # EDA
-Se puede consultar el análisis exploratorio de datos en la siguiente carpeta:  [EDA](https://github.com/cecyar/rodent_inspection/tree/main/notebooks/eda)
+Se puede consultar el análisis exploratorio de datos en la siguiente carpeta:  [EDA](https://github.com/cecyar/Estadistica-Computacional-fall2021/tree/main/proyectos/Final/quaranteam/notebooks/eda)
 
 **Nota:**  Este análisis exploratorio se realizó con el dataset original con los registros al 16 de Noviembre de 2021.  El dataset original cuenta con más de 2 millones de registros.  
 
 Para facilitar la creación de este producto de datos, se utilizó un dataset reducido de aproximadamente 200,000 registros, disponible en el [**Drive**](https://drive.google.com/file/d/1JCXlYAfIUP7xOGPAxS-MUKE1sNXJMWKl/view?usp=sharing) mencionado anteriormente.
 
 # Entrenamiento
-Se puede consultar los detalles del entrenamiento del modelo de predicción en el notebook: [Model_rodent.ipynb](https://github.com/cecyar/rodent_inspection/blob/main/notebooks/Model_rodent.ipynb).
+Se puede consultar los detalles del entrenamiento del modelo de predicción en el notebook: [Model_rodent.ipynb](https://github.com/cecyar/Estadistica-Computacional-fall2021/blob/main/proyectos/Final/quaranteam/notebooks/Model_rodent.ipynb).
 
