@@ -1,0 +1,21 @@
+name: est_comp
+channels:
+  - defaults
+dependencies:
+  - pip
+  - python=3.8
+  - autopep8
+  - flake8
+  - jedi
+  - pandas
+  - pylint
+  - scikit-learn
+  - flask
+  - psycopg2
+  - sqlalchemy
+  - flask-sqlalchemy
+  - PyYAML
+  - sqlalchemy-utils
+  - pip:
+      - flask-restplus
+      - Werkzeug==0.16.1
