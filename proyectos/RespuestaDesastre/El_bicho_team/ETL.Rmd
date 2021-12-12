@@ -1,0 +1,155 @@
+---
+title: "ETL_Estadistica Comp"
+output: html_document
+---
+
+```{r}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(readxl, tidyverse, measurements, tidyr, stringr)
+```
+
+```{r}
+# Nombres de las cada hoja del excel 
+hojas <- excel_sheets('data/refugios_nayarit.xlsx')
+
+# Lista con cada uno de los refugios 
+lista_refugios <- lapply(hojas, function(x)
+  read_excel('data/refugios_nayarit.xlsx', sheet = x, skip = 5))
+
+# Dataframe a utilizar
+refugios <- do.call('rbind' ,lista_refugios)
+colnames(refugios) <- c('No', 'Refugio', 'Municipio', 'Direccion', 'Uso del Inmueble', 'Servicios', 'Capacidad de personas', 'Latitud', 'Longitud', 'Altitud', 'Responsable', 'Telefono')
+
+# Se eliminan las filas con NAN en la columna Refugio
+refugios <- refugios %>% drop_na(Refugio)
+
+# Se eliminan los refugios que no tenemos ubicación
+refugios_ubicacion <- refugios %>% drop_na(Latitud)
+```
+
+```{r}
+# Se limpian las cordenadas de los caracteres que no necesitamos
+lat <- refugios_ubicacion$Latitud 
+lat <- gsub("°|'", ' ', lat)
+lat <- gsub("º|ª", ' ', lat)
+lat <- gsub('"|  ', ' ', lat)
+lat <- gsub('-', '.', lat)
+lat<- gsub('\\|', ' ', lat)
+lat<- gsub('`', ' ', lat)
+
+# Se dejan las coordenadas limpias
+refugios_ubicacion$Latitud <- lat
+
+# Se parten las coordenadas en 4 para poder dejar en el formato adecuado
+cd<- refugios_ubicacion %>% 
+  separate(Latitud, c('l1', 'l2', 'l3', 'l4'),)
+
+# Se regresan las coordenadas en el formato adecuado
+refugios_ubicacion$Latitud <- str_c(cd$l1, ' ', cd$l2, ' ', cd$l3, '.', cd$l4)
+
+# Se limpian las cordenadas de los caracteres que no necesitamos
+lon <- refugios_ubicacion$Longitud 
+lon <- gsub("°|'", ' ', lon)
+lon <- gsub("º|ª", ' ', lon)
+lon<- gsub('"|  ', ' ', lon)
+lon <- gsub('-', '.', lon)
+lon<- gsub('\\|', ' ', lon)
+lon<- gsub('`', ' ', lon)
+
+# Se dejan las coordenadas limpias
+refugios_ubicacion$Longitud <- lon
+
+# Se parten las coordenadas en 4 para poder dejar en el formato adecuado
+c<- refugios_ubicacion %>% 
+  separate(Longitud, c('l1', 'l2', 'l3', 'l4'),)
+
+# Se regresan las coordenadas en el formato adecuado
+refugios_ubicacion$Longitud <- str_c(c$l1, ' ', c$l2, ' ', c$l3, '.', c$l4)
+
+# Se eliminan las coordenadas que se convirtieron en NA por tener datos faltantes
+refugios_ubicacion <- refugios_ubicacion %>% drop_na(Latitud)
+refugios_ubicacion <- refugios_ubicacion %>% drop_na(Longitud)
+```
+
+```{r}
+# Se eliminan las coordenadas que son incorrectas por tener un dato faltante
+row=1
+for (i in refugios_ubicacion$Longitud){
+  if (str_length(i)<10){
+    refugios_ubicacion <- refugios_ubicacion[-c(row), ]
+  }
+  row=row+1
+}
+
+row = 1
+for (i in refugios_ubicacion$Latitud){
+  if (str_length(i)<10){
+    refugios_ubicacion <- refugios_ubicacion[-c(row), ]
+  }
+  row=row+1
+}
+
+```
+
+```{r}
+# Se realiza la conversión de las coordenadas para poder manipularlas facilmente
+refugios_ubicacion$Latitud <- conv_unit(refugios_ubicacion$Latitud, 'deg_min_sec', 'dec_deg')
+refugios_ubicacion$Longitud <- conv_unit(refugios_ubicacion$Longitud, 'deg_min_sec', 'dec_deg')
+```
+
+
+```{r}
+a <- length(refugios_ubicacion$No)
+# For para cambiar las coordenadas que esten en la columna adecuada
+for (i in 1:a){
+  if (as.numeric(refugios_ubicacion$Longitud[i]) < as.numeric(refugios_ubicacion$Latitud[i])){
+    real_lat = refugios_ubicacion$Longitud[i]
+    real_long = refugios_ubicacion$Latitud[i]
+    refugios_ubicacion$Latitud[i] = real_lat
+    refugios_ubicacion$Longitud[i] = real_long
+  }
+}
+
+refugios_ubicacion$Longitud <- -as.numeric(refugios_ubicacion$Longitud)
+refugios_ubicacion$Latitud <- as.numeric(refugios_ubicacion$Latitud)
+
+refugios_ubicacion <- refugios_ubicacion %>% 
+  mutate(popup_text =paste("<h3 style ='color: blue'>", refugios_ubicacion$No, refugios_ubicacion$Refugio, '</h3>',
+                            '<b>Dirección:</b>', refugios_ubicacion$Direccion, '<br>',
+                            '<b>Capacidad:</b>', refugios_ubicacion$`Capacidad de personas`, '<br>', 
+                            '<b>Contacto:</b>', refugios_ubicacion$Responsable, refugios_ubicacion$Telefono))
+```
+
+
+```{r}
+library(leaflet)
+
+mexico <- leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng=refugios_ubicacion$Longitud,
+             lat=refugios_ubicacion$Latitud, 
+             popup = refugios_ubicacion$popup_text, 
+             label = refugios_ubicacion$Municipio, 
+             group = 'Refugios',
+             icon = makeIcon('refugio.png', 20, 20)) %>% 
+  addLayersControl(overlayGroups = 'Refugios',
+                   options = layersControlOptions(collapsed = FALSE))
+
+mexico
+```
+
+```{r}
+library(geosphere)
+
+# el usuario proporciona las coordenadas de su ubicación 
+
+ubicacion = c(-105.360352777778, 22.4989055555556)
+
+# calculamos la distancia de su ubicación a cada uno de los centros e imprimimos los cinco más cercanos
+refugios_ubicacion %>%
+  rowwise() %>%
+  mutate(distance = distHaversine(c(Longitud, Latitud),ubicacion)) %>%
+  arrange(distance) %>%
+  head(5) 
+```
+

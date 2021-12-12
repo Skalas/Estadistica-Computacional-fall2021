@@ -1,0 +1,45 @@
+---
+title: "Refugios"
+author: "Adrian Tame"
+date: "10/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+```
+
+# Lectura de Datos
+
+```{r}
+hojas <- length( excel_sheets( "Datos/refugios_nayarit.xlsx" ) )
+```
+
+
+```{r}
+pagina1 <- read_excel("Datos/refugios_nayarit.xlsx", skip = 6, col_names = c("No.", "Refugio", "Municipio", "Direccion", "Uso del Inmueble", "Servicios", "Capacidad de Personas", "Latitud", "Longitud", "Altitud", "Responsable", "Telefono"), na = "na")
+pagina1 <- pagina1[-dim(pagina1)[1],]
+
+
+
+for(i in 2:hojas){
+  pagina2 <- read_excel("Datos/refugios_nayarit.xlsx", skip = 6, col_names = c("No.", "Refugio", "Municipio", "Direccion", "Uso del Inmueble", "Servicios", "Capacidad de Personas", "Latitud", "Longitud", "Altitud", "Responsable", "Telefono"), sheet = i)
+  pagina2 <- pagina2[-dim(pagina2)[1],]
+  pagina1 <- rbind(pagina1,pagina2)
+}
+
+```
+
+
+
+```{r}
+library(leaflet)
+m = leaflet() |>
+      addTiles()
+m
+```
+
+
+

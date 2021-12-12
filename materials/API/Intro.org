@@ -1,0 +1,32 @@
+#+TITLE: API
+#+AUTHOR: Miguel Angel Escalante Serrato
+#+EMAIL:  miguel.escalante@itam.mx
+#+DATE: 9-Nov-21
+#+LANGUAGE:  es
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_THEME: moon
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_TRANS: cube
+#+REVEAL_SLIDE_NUMBER: t
+#+REVEAL_HEAD_PREAMBLE: <meta name="description" content="Estadística Computacional">
+#+PROPERTY: header-args:sql :engine postgres :dbhost 0.0.0.0 :port 5432 :dbuser postgres :dbpassword postgres :database postgres
+
+* API Introducción
+
+API: Interfaz de programación de aplicaciones, es un conjunto de definiciones y protocolos para interactuar con software en las aplicaciones. Nos ayudan a:
+- Interactuar con partes internas de aplicaciones
+- Interactuar con componentes externos a nuestras aplicaciones
+- Interactuar con páginas web de manera programática
+
+* Verbos más comunes:
+** GET
+Obtiene información
+** POST
+Sube información
+** DELETE
+Borra Información
+** PATCH
+Actualiza información
+* Pregunta ¿Cómo funciona el internet?
+
+respuesta: como una conversación normal!!

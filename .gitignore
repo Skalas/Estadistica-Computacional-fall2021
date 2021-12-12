@@ -149,3 +149,5 @@ dmypy.json
 *.xlsx
 *.xls
 
+refugios_nayarit.xlsx
+data/
