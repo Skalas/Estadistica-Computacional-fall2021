@@ -5,7 +5,7 @@
 
 ###########################################
 ### En esta parte se debe ingresar el token de la API de Google para 
-TOKEN<-"TOKEN"
+TOKEN<-"AIzaSyC4CWHxehmC8_z-solHZ8YqKIGdNn6Bh3g"
 ###########################################
 
 
@@ -150,7 +150,7 @@ coord_to_float<-function(data){
   trouble_subset<- data %>% filter(id %in% c)
   
   #Parte II: CONVERSION DE GRADO A NUMERICO
-  
+  print('lool')
   good_subset$coordN <- substr(good_subset$coordN,1,nchar(good_subset$coordN)-1)
   good_subset$coordW <- substr(good_subset$coordW,1,nchar(good_subset$coordW)-1)
   
