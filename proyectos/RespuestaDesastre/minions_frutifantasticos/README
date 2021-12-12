@@ -1,0 +1,53 @@
+* Proyecto Respuesta Desastres
+
+** Intergantes del equipo
+
+| Nombre                         | CU     | Mail                             | Usuario Gh   |
+|--------------------------------+--------+----------------------------------+--------------|
+| Karina Lizette Gamboa Puente   | 197850 | lizzygamboap@gmail.com           | KaLizzyGam   |
+| Mariana Lugo Ibarra            | 118626 | lugo.mariana.i@gmail.com         | codeMariana  |
+| Oscar Arturo Bringas López	 | 197814 | act.arturo.b@ciencias.unam.mx    | Acturio      |
+| Víctor Erasto Rivera González  | 97105  | victor.rivera.gonzalez@gmail.com | vviiccttoorr |
+|-------------------------------------------------------------------------------------------|
+
+
+** Explicación breve de lo que se hizo
+- Utilizando una base de datos con los refugios temporales en el estado de Nayarit, realizamos un dashboard que permite a un ciudadano ingresar su localización para poder identificar los refugios más cercanos. 
+- Además, el usuario podrá elegir la forma en la que llegará al refugio (auto, caminando, transporte público o bicicleta) e identificar la disponibilidad que hay en los refugios.
+
+** Dificultades
+
+*** Limpieza de los datos
+- Hacer el código para limpiar los datos, considerando que, el archivo con la información de los refugios podría cambiar en un futuro. 
+- Encontrar que la latitud y longitud no estaban en el formato que se necesitaba y que había datos de coordenadas que estaban invertidos entre latitud y longitud. 
+
+*** Información geográfica
+- Cargar los datos de municipios y de las localidades para poder realizar el join espacial con los refugios georeferenciados.
+- Calcular las distancias y ordenarlas para que el usuario pudiera ver los refugios más cercanos.  
+- Identificar los municipios colindantes.
+
+*** Dashboard
+- Entender la dinámica en la que interactúan los elementos de global, ui y server para poder generar el dashboard.
+- Generar las interacciones adecuadas para lograr una buena experiencia de usuario.
+- Manejar adecuadamente los inputs en el dashboard para que genere los outputs adecuados. Ej. Cuando el usuario introduce la dirección, las coordenadas o usa el GPS.
+- El diseño estético del dashboard.
+
+** Conclusiones
+
+- El entendimiento del problema es esencial para determinar los alcances y la complejidad del dashboard que se quiere diseñar.
+- Es necesario adoptar buenas prácticas para que el proyecto se pueda entregar y lo puedan desplegar los clientes.
+- Es necesario un código ordenado, limpio y claro para que todos los involucrados en el proyecto puedan entenderlo y colaborar fluidamente.
+- Realizar el ambiente (enviroment) con la paquetería adecuada para que se pueda correr en otra computadora.
+- Shiny es un paquete complicado dado que combina lenguaje R, html y java.
+
+** Consideraciones
+
+- Solo debe de haber un archivo .xlsx con los datos dentro de la carpeta "data".
+- No se debe cambiar el orden de las columnas en el archivo con los datos de entrada.
+- Se debe incluir una api-key-yaml para acceder a la API de Google Directions y deberá estar en la carpeta "auth" con el nombre de "api_key.yaml" (lo enviaremos por discord).
+- Para poder visualizar el dashboard es necesario instalar las paqueterías gdal-bin, proj-bin, libgdal-dev, libproj-dev, libudunits2-dev, libjq-dev, build-essential.
+- Para hacer uso de las librerías se deberá abrir el proyecto de R con terminación .rproj y correr en la consola de RStudio renv::restore()
+
+
+
+

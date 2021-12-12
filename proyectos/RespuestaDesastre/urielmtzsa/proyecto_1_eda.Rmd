@@ -1,0 +1,364 @@
+---
+title: "Refugios Nayarit"
+author: "Uriel Martínez Sánchez"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+    toc_float: true
+    theme: spacelab
+---
+
+## Objetivo
+
+El presente trabajo tiene como objetivo realizar un análisis exploratorio sobre la información disponible de los refugios en Nayarit en caso de algún desastre natural. Además, se pretende crear una herramienta para que los usuarios de las zonas afectadas puedan encontrar información de los refugios más cercanos a su ubicación.
+
+## Ambiente de trabajo
+
+Antes de comenzar el proyecto, lo primero es cargar todas las librerías necesarias para trabajar y para hacer reproducibles los resultados en cualquier otro ambiente de trabajo. Si se detecta que alguna librería no se encuentra instalada entonces se descarga. Además, se establece el directorio de trabajo como el lugar donde se encuentre guardado este archivo Rmd.
+
+#### Librerías y directorio de trabajo
+
+```{r cache=FALSE, include=FALSE}
+
+#Código para instalar y cargar todas las librerías necesarias para trabajar el proyecto
+pack_u<-c("rstudioapi","readxl","dplyr","knitr","kableExtra","ggplot2","tidyr","leaflet","rgdal","shiny","osrm","rdist")
+pack_u_installed<-pack_u %in% installed.packages()
+pack_u_uninstalled<-pack_u[pack_u_installed==FALSE]
+install.packages(pack_u_uninstalled)
+lapply(pack_u, require, character.only = TRUE)
+
+```
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+cat(c("Las librerías a utilizar son:\n",pack_u))
+
+#Línea para establecer el workdirectory igual al path donde se encuentre este archivo .Rmd
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+cat(paste("El directorio de trabajo será:\n",getwd(),sep=""))
+
+
+```
+
+#### Variables
+
+A continuación se enlistan todas las variables definidas para el proceso ETL de creación del Data Frame. Si algún elemento cambia, se debería cambiar en esta sección.
+
+```{r cache=FALSE, echo=FALSE, comment="",results='asis'}
+
+dir.archivo<-paste(getwd(),"/","refugios_nayarit.xlsx",sep="")
+row.skip<-6
+col.names<-c("no","refugio","municipio","direccion","uso_inmueble","servicios","capacidad_personas","latitud","longitud","altitud","responsable","telefono")
+
+cat(paste("**1) Path del excel a leer y nombre del archivo:**"," \n\n",
+          "**Nombre variable: **", "*dir.archivo*"," \n\n",
+          "**Valor actual : **",dir.archivo," \n\n",
+          "**Comentario: ** Se asume que el excel a leer se encuentra en el directorio de trabajo, pero si no se encuentra aquí, sólo hay que cambiar esta variable. También se asume que el archivo se llama refugios_nayarit.xlsx, pero si también cambia, sólo hay que cambiar esta variable."," \n\n",sep=""))
+
+cat(paste("**2) Número de renglones que no se considerarán de cada hora del excel:**"," \n\n",
+          "**Nombre variable: **", "*row.skip*"," \n\n",
+          "**Valor actual : **",row.skip," \n\n",
+          "**Comentario: ** Se asume que cada pestaña del excel a leer comienza después de 6 renglones sin información. Si este asumption cambia, sólo hay que cambiar el valor de esta variable en esta sección."," \n\n",sep=""))
+
+cat(c("**3) Nombre y número de columnas:**"," \n\n",
+          "**Nombre variable: **", "*col.names*"," \n\n",
+          "**Valor actual : **"," \n\n"))
+cat(paste("- `", col.names, "`"), sep = "\n")
+cat(c("\n\n","**Comentario: **Se asume que el Data Frame cuenta con 12 columnas ordenadas como el vector por default. Si algo cambia en el nombre, orden, o número de columnas se debe cambiar este vector. **Nota:** El excel se lee sin los nombres de campo que tiene por default"," \n\n"))
+```
+
+## Extracción de la información
+
+Con la definición del ambiente de trabajo y las variables que podrían cambiar, a continuación se procedió a leer el excel a procesar para convertirlo en un Data Frame más fácil de trabajar, limpiar y procesar.
+
+Para la carga de todas las hojas del excel, se asumen los valores de variable considerados en la sección anterior. Además, se leen todas las hojas que el excel pudiera llegar a tener.
+
+```{r cache=FALSE, include=FALSE}
+sheets<-excel_sheets(dir.archivo)
+
+for(i in 1:length(sheets))
+{
+  base<-read_excel(dir.archivo,sheet=sheets[i],skip=row.skip,col_names = FALSE)
+  if(i==1){df<-base} else{df<-rbind(df,base)}
+}
+
+names(df)<-col.names
+
+
+```
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+cat("El resultado es un Data Frame como el siguiente: \n")
+
+print(df)
+
+```
+## EDA
+
+A continuación se realizará el análisis exploratorio de la base.
+
+#### Registros inválidos
+
+Lo primero que se detectó es que al final de cada hoja del libro de cálculo existía un renglón con la suma de la capacidad de personas en los refugios de las hojas. Se eliminarán los registros con dicha característica.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+cat("Ejemplos de registros a eliminar: \n")
+df %>% filter(rowSums(is.na(df))==ncol(df)-1)
+df<-df %>% filter(rowSums(is.na(df))!=ncol(df)-1)
+
+```
+
+#### Completitud
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+completitud<-colSums(is.na(df))
+completitud<-data.frame(Columna=names(completitud),
+                        Missings=unname(completitud),
+                        Missings_p=paste(round(100*unname(completitud)/nrow(df),2),"%",sep="")
+                        )
+completitud<-completitud %>% arrange(desc(Missings))
+completitud %>% 
+  kable() %>% 
+  kable_classic_2(full_width = F, html_font = "Cambria")  %>%
+  row_spec(0, bold = T,color="white", background = "cadetblue")
+
+```
+
+#### Coordenadas geográficas
+
+Se eliminarán los registros que no tengan latitud o longitud, o que no tengan un valor válido, ya que son datos importantes para la ubicación del refugio más cercano. Además, la información proporcionada viene con formato de grados, minutos y segundos, por lo que las coordenadas geográficas se tranformarán a números decimales.
+
+Finalmente, cabe comentar que se encontró que el refugio 434 tiene las coordenadas de latitud y longitud invertidas, por lo que el ETL invierte las coordenadas sólo para este refugio.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+cat("Ejemplos de registros sin latitud o longitud: \n")
+df %>% filter(is.na(latitud) | is.na(longitud)) %>%
+kable() %>%
+kable_paper() %>%
+scroll_box(width = "800px", height = "300px")
+
+cat("\n")
+
+cat("Registro del refugio 434 (coordenadas invertidas): \n")
+df %>% filter(no==434) %>%
+kable() %>%
+kable_paper() %>%
+scroll_box(width = "800px", height = "200px")
+
+df<-df %>% 
+  
+  filter(!(is.na(latitud) | is.na(longitud))) %>%
+  
+  separate(latitud,into=c("A","B","C","D"),remove=FALSE,extra="drop",fill="right") %>%
+  mutate(D=ifelse(D=="",NA,D)) %>%
+  mutate(latitud_val=as.numeric(A)+as.numeric(B)/60+(as.numeric(C)+as.numeric(paste("0",D,sep=".")))/3600) %>%
+  select(-A,-B,-C,-D) %>%
+  
+  separate(longitud,into=c("A","B","C","D"),remove=FALSE,extra="drop",fill="right") %>%
+  mutate(D=ifelse(D=="",NA,D)) %>%
+  mutate(longitud_val=as.numeric(A)+as.numeric(B)/60+(as.numeric(C)+as.numeric(paste("0",D,sep=".")))/3600) %>%
+  select(-A,-B,-C,-D) %>%
+  
+  mutate(latitud1=latitud_val,
+         latitud_val=ifelse(no %in% c(434),longitud_val,latitud_val),
+         longitud_val=ifelse(no %in% c(434),latitud1,longitud_val)) %>%
+  select(-latitud1) %>%
+  
+  filter(!(is.na(latitud_val) | is.na(longitud_val)))
+
+  
+```
+
+
+#### Municipios
+
+Los municipios con más refugios son Bahía de Banderas, Rosamorada, San Blas y Ahuacatlán.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+df %>%
+group_by(municipio) %>%
+summarise(municipios=n()) %>%
+arrange(desc(municipios)) %>%
+ggplot(data = .,  aes(y=reorder(municipio,(municipios)), x=municipios)) + 
+geom_bar(stat="identity",fill="aquamarine") +
+labs(title="Distribución de refugios por municipio",y="Municipio", x = "# Refugios")+
+theme_classic()
+
+```
+
+#### Uso inmueble
+
+La mayoría de los inmuebles utilizados como refugios son escuelas como primarias y secundarias.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+df<-df %>% mutate(uso_inmueble=ifelse(uso_inmueble %in% c("RELIGIOSO","RELIGIOSOS"),"RELIGIOSO",uso_inmueble))
+df<-df %>% mutate(uso_inmueble=ifelse(uso_inmueble %in% c("GOBIERNO MUNICIPAL","MUNICIPAL"),"MUNICIPAL",uso_inmueble))
+
+df %>%
+group_by(uso_inmueble) %>%
+summarise(usos=n()) %>%
+arrange(desc(usos)) %>%
+ggplot(data = .,  aes(y=reorder(uso_inmueble,(usos)), x=usos)) + 
+geom_bar(stat="identity",fill="aquamarine") +
+labs(title="Distribución por tipo de inmueble",y="Uso inmueble", x = "# Refugios")+
+theme_classic()
+
+```
+
+#### Servicios
+
+Casi todos los refugios cuentan con agua, sanitarios y luz eléctrica, excepto por uno al que le faltan sanitarios.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+df %>%
+group_by(Servicios=servicios) %>%
+summarise(Refugios=n()) %>%
+arrange(desc(Refugios)) %>%  
+kable() %>% 
+kable_classic_2(full_width = F, html_font = "Cambria")  %>%
+row_spec(0, bold = T,color="white", background = "cadetblue")
+
+```
+
+#### Capacidad de personas
+
+```{r cache=FALSE, echo=FALSE, message=FALSE, comment=""}
+
+df %>%
+ggplot(data = .,  aes(capacidad_personas)) + 
+geom_histogram(fill="aquamarine") +
+labs(title="Distribución por capacidad de personas",y="Refugios", x = "Capacidad de personas")+
+theme_classic()
+
+```
+
+#### Teléfonos de contacto
+
+Debido a que se detectó que había muchas formas de introducir los teléfonos de contacto, se decidió homologar el campo de la siguiente manera:
+
+teléfono_1 // teléfono_2 // ... // teléfono_n
+
+```{r cache=FALSE, echo=FALSE, message=FALSE, warning=FALSE,comment=""}
+
+df<-df %>%
+  mutate(tel=gsub("-","",telefono)) %>%
+  mutate(tel=gsub("\\*","",tel)) %>%
+  separate(tel,into=c("A","B","C","D","E","FF","G","H","I","J"),fill="right") %>%
+  mutate(A=as.numeric(A),B=as.numeric(B),C=as.numeric(C),D=as.numeric(D),E=as.numeric(E)
+         ,FF=as.numeric(FF),G=as.numeric(G),H=as.numeric(H),I=as.numeric(I),J=as.numeric(J)   ) %>%
+  mutate(telefonos=paste(A,B,C,D,E,FF,G,H,I,J,sep=" // ") ) %>%
+  mutate(telefonos=gsub("NA // ","",telefonos)) %>%
+  mutate(telefonos=gsub(" // NA","",telefonos)) %>%
+  mutate(telefonos=gsub("NA","",telefonos)) %>%
+  select(-A,-B,-C,-D,-E,-FF,-G,-H,-I,-J)
+
+
+```
+
+## Data frame final
+
+A continuación se muestra el data frame después de todos los tratamientos realizados.
+
+```{r cache=FALSE, echo=FALSE, comment=""}
+
+df$no[is.na(df$no)]<-0
+df$refugio[is.na(df$refugio)]<-""
+df$municipio[is.na(df$municipio)]<-""
+df$direccion[is.na(df$direccion)]<-""
+df$uso_inmueble[is.na(df$uso_inmueble)]<-""
+df$servicios[is.na(df$servicios)]<-""
+df$capacidad_personas[is.na(df$capacidad_personas)]<-0
+df$latitud[is.na(df$latitud)]<-""
+df$longitud[is.na(df$longitud)]<-""
+df$altitud[is.na(df$altitud)]<-0
+df$responsable[is.na(df$responsable)]<-""
+df$telefono[is.na(df$telefono)]<-""
+df$latitud_val[is.na(df$latitud_val)]<-0
+df$longitud_val[is.na(df$longitud_val)]<-0
+df$telefonos[is.na(df$telefonos)]<-""
+
+df %>% 
+kable() %>%
+kable_paper() %>%
+scroll_box(width = "800px", height = "300px")
+
+cat("\n\n")
+
+completitud<-colSums(is.na(df))
+completitud<-data.frame(Columna=names(completitud),
+                        Missings=unname(completitud),
+                        Missings_p=paste(round(100*unname(completitud)/nrow(df),2),"%",sep="")
+                        )
+completitud<-completitud %>% arrange(desc(Missings))
+completitud %>% 
+  kable() %>% 
+  kable_classic_2(full_width = F, html_font = "Cambria")  %>%
+  row_spec(0, bold = T,color="white", background = "cadetblue")
+
+  
+```
+
+## Mapa de la ubicación de los refugios
+
+A continuación se marcan los puntos que son refugios en el estado de Nayarit. Mientras más intenso es el color, mayor es la capacidad de personas que puede albergar el refugio.
+
+```{bash cache=TRUE,include=FALSE}
+
+curl -o estados.zip https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marc_geo/702825292812_s.zip
+unzip estados.zip
+unzip mge2010v5_0.zip
+rm *.zip
+mkdir estados
+mv Entidades* estados
+cd estados
+ogr2ogr states.shp Entidades_2010_5.shp -t_srs "+proj=longlat +ellps=WGS84 +no_defs +towgs84=0,0,0"
+```
+
+```{r cache=TRUE,include=FALSE}
+
+mexico <- readOGR(dsn = "./estados", layer = "states", encoding = "UTF-8")
+nayarit<-which(mexico@data$NOM_ENT=="Nayarit")
+map <- mexico@polygons[[nayarit]]
+
+```
+
+```{r cache=FALSE,echo=FALSE}
+
+pal <- colorBin("Reds",log(df$capacidad_personas))
+
+refugios_popup <- paste0("<strong>Municipio: </strong>", 
+                      df$municipio, 
+                      "<br><strong>Refugio: </strong>", 
+                      df$refugio,
+                      "<br><strong>Capacidad de personas: </strong>",
+                      df$capacidad_personas)
+
+leaflet(data = map) %>%
+  addTiles() %>%
+  addPolygons(
+    fillOpacity = 0.3, 
+    smoothFactor = 0.5,
+    color = "#BDBDC3", 
+    weight = 5) %>%
+  addCircleMarkers(-df$longitud_val,df$latitud_val,
+                   radius=3,
+                   color=pal(log(df$capacidad_personas)),
+                   popup=refugios_popup)
+
+
+```
+
+
+
+
+
+

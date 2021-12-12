@@ -1,0 +1,18 @@
+name: est_comp
+channels:
+  - defaults
+dependencies:
+  - autopep8
+  - flake8
+  - jedi
+  - numpy
+  - pandas
+  - pip
+  - pylint
+  - scikit-learn
+  - flask
+  - psycopg2
+  - sqlalchemy
+  - flask-sqlalchemy
+  - joblib
+  - matplotlib

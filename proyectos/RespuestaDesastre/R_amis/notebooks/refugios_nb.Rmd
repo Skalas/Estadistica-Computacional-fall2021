@@ -1,0 +1,195 @@
+---
+title: "Prac_1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librerías a utilizar
+
+```{r, echo=FALSE}
+library(openxlsx)
+library(purrr)
+library(tidyverse)
+library(geosphere)
+```
+
+
+# Extracción, Transformación y Carga (ETL por sus siglas en inglés)
+
+### Extracción
+
+Declaramos la ruta donde se encuentra ubicado el archivo con los datos de refugios de Nayarit:
+
+```{r}
+Ruta_archivo = "../data/refugios_nayarit.xlsx" # <-- Aquí la ruta del archivo
+```
+
+Obtenemos los nombres de las hojas que están en el archivo (posteriormente se utilizarán para indicar a una función que realice un proceso de lectura con base en estas hojas). Si el archivo llega a tener más hojas estas siempre serán actualizadas cuando se ejecute el código.
+
+```{r}
+hojas = getSheetNames(Ruta_archivo)
+```
+
+Se implementa una función que trabaja sobre todos los elementos de la lista "hojas" y lo que hace es: i)leer el archivo .xlsx ii) posicionarse en la fila 7 de cada una de las hojas que tiene la lista "hojas" y pasa esa información a una lista de Data Frames.
+
+Fuente:
+
+https://es.stackoverflow.com/questions/442168/c%c3%b3mo-crear-un-dataframe-en-r-desde-un-excel-con-varias-hojas
+
+```{r}
+lista_df = map(hojas,function(x){
+  read.xlsx(Ruta_archivo ,sheet = x, startRow = 7, colNames = FALSE)
+  })
+```
+
+Se integran todos los elementos de la lista creada con la función anterior (Data Frames) en uno solo y se les coloca el nombre de las columnas.
+
+```{r}
+df = do.call(rbind,lista_df)
+names(df) = c("num","refugio","municipio","direccion","uso_inmueble","servicios","capacidad","lat",
+              "long","altitud","responsable","telefono")
+```
+
+### Transformación
+
+Después de hacer una inspección de la base de datos que se generó nos damos cuenta que existen renglones que se leyeron en cada hoja del archivo que solo contienen los totlales de capacidad de los refugios en cada bloque en que fueron separados pero desconocemos si esta separación es informativa para los interesados. 
+
+```{r}
+df = df[order(df$num,na.last = FALSE),]
+```
+
+Se decide prescindir de esta información por lo que se ordenan los renglones por su número consecutivo en el archivo y se eliminan los registros con los renglones en los que solo se tiene el total de la capacidad de cada grupo de refugios (uno por hoja).
+
+```{r}
+df <- df[!is.na(df$num),]
+```
+
+Haciéndo la inspección de la base de datos nos damos cuenta que las variables "latitud" y "longitud" tienen caracteres diferentes para identificar los grados [ª º °], hay espacios en blanco dentro de la cadena y tienen en general diferentes formatos. Por ello se hace una separación todos de la cadena y se extraen los valores que corresponden a un formato estándar:
+
+ ##°##'##.##" para latitudes
+###°##'##.##" para longitudes
+
+```{r}
+split_num <- function(x){
+  vec = unlist(strsplit(x,""))
+  if(length(vec) == 11){
+    cadena = paste(vec[1],vec[2],"-",vec[4],vec[5],"-",vec[7],vec[8],".",vec[10],vec[11], sep = "")
+    return(cadena)
+  } 
+  #else if(length(vec) == 12){
+  #  cadena = paste(vec[1],vec[2],"-",vec[4],vec[5],"-",vec[7],vec[8],vec[9],vec[10],vec[11],vec[12], sep = "")
+  #  return(cadena)
+  #} 
+    else {
+    return(paste("verificar",x))
+  }
+}
+
+split_num2 <- function(x){
+  vec = unlist(strsplit(x,""))
+  if(length(vec) == 12){
+    cadena = paste(vec[1],vec[2],vec[3],"-",vec[5],vec[6],"-",vec[8],vec[9],".",vec[11],vec[12], sep = "")
+    return(cadena)
+  } 
+  #else if(length(vec) == 13){
+  #  cadena = paste(vec[1],vec[2],vec[3],"-",vec[5],vec[6],"-",vec[8],vec[9],vec[10],vec[11],vec[12],vec[13], sep = "")
+  #  return(cadena)
+  #} 
+    else {
+    return(paste("verificar",x))
+  }
+}
+
+
+df$lat = str_replace_all(df$lat," ","")
+df$lat = str_replace_all(df$lat,"[\"]","")
+
+df$long = str_replace_all(df$long," ","")
+df$long = str_replace_all(df$long,"[\"]","")
+
+df$lat = map_chr(df$lat, ~ split_num(.x))
+df$long = map_chr(df$long, ~ split_num2(.x))
+```
+
+Se extraen los registros con información que no cumple con el formato adecuado para latitud y longitud. Estos registros se revisan de forma particular y se imputan cuando es posible. Esta validación se debe realizar con negocio ya que no se pueden asumir valores ni posibles errores en la captura, ya que informaríamos mal a la población sobre un refugio que probablemente no exista o no se encuentre dónde se ha dicho. 
+
+```{r}
+verificar = df %>% filter(str_detect(lat, "^verificar") | str_detect(long, "^verificar"))
+verificar
+```
+
+Para el ejercicio que se presenta se decide eliminar estos registros de la base de datos, debido a que son muy pocos registros (menos del 4%) los que no cumplen con el formato estándar definido, el cual corresponde al de la gran mayoría de las observaciones y el que suponemos es el adecuado.
+
+```{r}
+df = df[!(df$num %in% (verificar$num)), ]
+row.names(df) <- NULL
+```
+
+
+```{r}
+dummy_lat = data.frame(df$lat) %>% separate(df.lat,c("A","B","C"),sep = "([-])")
+dummy_long = data.frame(df$long) %>% separate(df.long,c("A","B","C"),sep = "([-])")
+```
+
+```{r}
+dummy_lat$A = as.numeric(dummy_lat$A)
+dummy_lat$B = as.numeric(dummy_lat$B)
+dummy_lat$C = as.numeric(dummy_lat$C)
+dummy_lat = dummy_lat %>% mutate(latitud = A + B/60 + C/3600)
+```
+
+```{r}
+dummy_long$A = as.numeric(dummy_long$A)
+dummy_long$B = as.numeric(dummy_long$B)
+dummy_long$C = as.numeric(dummy_lat$C)
+dummy_long = dummy_long %>% mutate(longitud = -1*(A + B/60 + C/3600)) # Se cambia a la longitud correcta (W)
+```
+
+```{r}
+df = cbind(df,dummy_lat[4], dummy_long[4])
+```
+
+Calculamos la distancia a cada uno de los refugios desde el punto dado (p_lat, p_long) y retornamos los 7 refugios más cercanos a dicho punto:
+
+```{r}
+distancia <- function(df,longitude,latitude,p1,p2){
+  distan <- c()
+  for (x in 1:nrow(df)){
+  r <- distHaversine(c(p1,p2),c(df$longitud[x],df$latitud[x]))
+  distan[x] <- r
+  }
+  #return(min(distan, na.rm = TRUE))
+  return(distan)
+}
+
+# Posición actual
+p_lat = df[1,13]
+p_long = df[1,14]
+
+df = cbind(df,dist_p = distancia(df,longitude,latitude,p_long,p_lat))
+
+# 7 Refugios más cercanos
+top_7 = head(order(df$dist_p),7)
+df[top_7,]
+```
+
+Comprobamos la función con un mismo punto del data frame para ver que efectivamente encuentre los refugios màs cercanos:
+
+```{r}
+plot(df$latitud, df$longitud, xlim = c(22,22.5), ylim = c(-105.3,-105.4))
+```
+
+```{r}
+plot(df[top_7,]$latitud, df[top_7,]$longitud, xlim = c(22,22.5), ylim = c(-105.3,-105.4))
+```
+
+
+
+
+
+
+
+
