@@ -1,0 +1,8 @@
+FROM rocker/r-base:latest
+
+RUN mkdir -p /proyecto_pokemon
+COPY requirements_R.R /proyecto_pokemon/requirements_R.R
+
+RUN Rscript /proyecto_pokemon/requirements_R.R
+
+

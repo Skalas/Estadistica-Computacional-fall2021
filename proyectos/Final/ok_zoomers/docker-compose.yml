@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  db:
+    #image: "postgres"
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile_db
+    environment:
+      #POSTGRES_HOST_AUTH_METHOD: trust #para no requerir password
+      POSTGRES_PASSWORD: "pokemon"
+    volumes:
+      # - ./data:/var/lib/postgresql/data1/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Línea para insertar una tabla inicial a la BD dada por el init.sql
+    ports:
+      - 5432:5432
+
+  web:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile_app_2
+    #image: "urielmtzsa/pokemon_app"
+    #env_file:
+    #  - ".env"
+    #volumes:
+    #  - /data1:/proyecto_pokemon/data/
+    ports:
+      - 8080:8080
+    depends_on:
+      - "db"
+      
+#  dash:
+#    build:
+#      context: ./dockerfiles
+#      dockerfile: Dockerfile_shiny
+#    #env_file:
+#    #  - ".env"
+#    ports:
+#      - 9999:9999
+#    depends_on:
+#      - "db"
+      
+ 
