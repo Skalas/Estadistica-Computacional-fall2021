@@ -1,0 +1,39 @@
+Instrucciones desde 0
+
+desde ~/proyecto_final/app
+
+sudo docker-compose up --build
+
+Desde otra terminal ~/proyecto_final/app
+
+export PGUSR=postgres
+export PGPASS=postgres
+
+curl -X DELETE 0.0.0.0:8080/carga #OPCIONAL
+
+python3 python/crea_tablas.py
+
+sh Bash/descarga_limpia_datos.sh
+sh Bash/genera_archivo_carga.sh #se crea carga_base.sh
+sh Bash/carga_base.sh
+
+curl -X FIT 0.0.0.0:8080/modela 
+
+## llenar predicciones a mano en predice.csv
+
+sh Bash/genera_archivo_predict.sh
+sh Bash/carga_predict.sh
+
+curl -X GET 0.0.0.0:8080/predice
+curl -X DELETE 0.0.0.0:8080/carga_pred #Borra los X a predecir
+
+#### Para recarga
+
+sh Bash/genera_archivo_recarga.sh
+sh Bash/recarga_datos.sh
+
+#### reentrenar modelo
+
+curl -X FIT 0.0.0.0:8080/modela
+
+curl -X DELETE 0.0.0.0:8080/carga

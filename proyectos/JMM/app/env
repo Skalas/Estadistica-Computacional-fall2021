@@ -1,0 +1,2 @@
+export PGPASS=postgres
+export PGUSR=postgres
