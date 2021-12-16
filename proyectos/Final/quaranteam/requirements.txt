@@ -1,0 +1,12 @@
+Flask==0.12.2
+flask-marshmallow==0.14.0
+Flask-Migrate==3.0.1
+Flask-SQLAlchemy==2.5.1
+numpy==1.19.5
+psycopg2-binary==2.8.6
+python-dateutil==2.8.1
+pytz==2020.5
+PyYAML==5.3.1
+six==1.15.0
+sodapy==2.1.0
+SQLAlchemy==1.4.14
