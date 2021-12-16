@@ -1,0 +1,3 @@
+#+begin_src shell
+sed 'y/äãāáǎàæēéěèëęīíǐìïôōóǒòöøūúǔùüǖǘǚǜñńğřýşçćčšĀÁǍÀĒÉĚÈĪÍǏÌÖŌÓǑÒŪÚǓÙǕǗǙǛÑŠŁ/aaaaaaaeeeeeeiiiiiooooooouuuuuüüüünngryscccsAAAAEEEEIIIIOOOOOUUUUÜÜÜÜNSL/' players_21.csv > players_limpio.csv
+#+end_src
