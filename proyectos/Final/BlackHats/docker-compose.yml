@@ -1,0 +1,31 @@
+version: '3.8'
+
+services: 
+
+  basedatos: 
+    image: 1db83fa80140
+    restart: always
+    environment: 
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=docker 1db83fa80140
+    ports: 
+        - 5432:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "80:80"
+    depends_on: 
+      - basedatos 
+  
+  imagenproyecto:
+    image: 04a2275cada7
+    ports:
+      - "117:117"
+  
+
+    
