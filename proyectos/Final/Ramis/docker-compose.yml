@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    container_name: db_ramis
+
+  web:
+    build: .
+    env_file:
+      - ".env"
+    volumes:
+      - ./:/jlrzarcor-ITAM-ecomp2021-Ramis-finalprjct/
+    ports:
+      - 8080:8080
+    depends_on:
+      - "db"
+    container_name: web_ramis
